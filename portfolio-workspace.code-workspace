@@ -1,0 +1,40 @@
+{
+    "folders": [
+        {
+            "name": "Portfolio Root",
+            "path": "."
+        },
+        {
+            "name": "Backend (Spring Boot)",
+            "path": "./backend"
+        },
+        {
+            "name": "Frontend (React)",
+            "path": "./frontend"
+        },
+        {
+            "name": "Database Scripts",
+            "path": "./database"
+        }
+    ],
+    "settings": {
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "typescript.preferences.importModuleSpecifier": "relative",
+        "cursor.chat.workspaceContext": true,
+        "cursor.chat.includeWorkspaceInstructions": true,
+        "files.exclude": {
+            "**/node_modules": true,
+            "**/target": true,
+            "**/.git": true
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "vscjava.vscode-java-pack",
+            "vmware.vscode-spring-boot",
+            "ms-vscode.vscode-typescript-next",
+            "bradlc.vscode-tailwindcss",
+            "esbenp.prettier-vscode"
+        ]
+    }
+}

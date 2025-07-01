@@ -1,0 +1,38 @@
+{
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.debug.settings.onBuildFailureProceed": true,
+  "spring-boot.ls.problem.application-properties.unknown-property": "ignore",
+  
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  
+  "files.associations": {
+    "*.yml": "yaml",
+    "*.yaml": "yaml"
+  },
+  
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  
+  "cursor.chat.contextFiles": [
+    "README.md",
+    "SETUP.md",
+    "backend/src/main/resources/application.yml",
+    "frontend/package.json",
+    "backend/pom.xml"
+  ],
+  
+  "cursor.chat.workspaceContext": true,
+  "cursor.chat.includeWorkspaceInstructions": true
+} 

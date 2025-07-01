@@ -1,0 +1,86 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: portfolio-backend
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/portfolio_db
+    username: ${DB_USER:portfolio_user}
+    password: ${DB_PASSWORD:portfolio_password}
+    driver-class-name: org.postgresql.Driver
+
+
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+        jdbc:
+          time_zone: UTC
+
+  security:
+    user:
+      name: admin
+      password: admin123
+      roles: ADMIN
+
+# JWT Configuration
+jwt:
+  secret: YourSecretKeyForJWTShouldBeLongerThan256Bits1234567890
+  expiration: 86400000 # 24 hours in milliseconds
+
+# CORS Configuration
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:3001}
+  allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowed-headers:
+    - "*"
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.example.backend: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+    org.apache.tomcat: WARN
+    org.apache.catalina: WARN
+    com.zaxxer.hikari: WARN
+  pattern:
+    console: "%d{HH:mm:ss} %-5level %logger{36} - %msg%n"
+
+# Management endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# OpenAPI Documentation
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+  info:
+    title: Portfolio API
+    description: API для портфолио инженера-программиста
+    version: 1.0.0 

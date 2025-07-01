@@ -1,0 +1,51 @@
+# Проект: Портфолио инженера-программиста Тимура Султанова
+
+## Контекст проекта
+- **Владелец**: Султанов Тимур - инженер-программист из Иннополиса
+- **Специализация**: Микроконтроллеры (STM32, ESP32), ПЛК (Omron, JUMO), SCADA
+- **Опыт работы**: 25+ лет в области промышленной автоматизации
+
+## Архитектура проекта
+- **Backend**: Spring Boot 3.5.3 + PostgreSQL + JPA/Hibernate
+- **Frontend**: React 18 + TypeScript + TailwindCSS
+- **База данных**: PostgreSQL (порт 5432, БД: portfolio_db)
+- **Порты**: Backend :8080/api, Frontend :3000
+
+## Структура данных
+- **Skills**: 16 навыков по категориям (микроконтроллеры, ПЛК, протоколы, программирование)
+- **Projects**: 7 реальных проектов из карьеры
+- **WorkExperience**: 9 мест работы (1997-2023) в хронологическом порядке
+- **Users**: Система аутентификации с JWT
+
+## Настройки Hibernate
+- `ddl-auto: update` - НЕ удалять таблицы при перезапуске
+- DataLoader проверяет существование данных перед загрузкой
+- Данные загружаются автоматически при первом запуске
+
+## Команды запуска
+```bash
+# Backend
+cd backend && mvn spring-boot:run
+
+# Frontend  
+cd frontend && npm start
+```
+
+## API Endpoints
+- GET /api/skills - список навыков
+- GET /api/projects - список проектов  
+- GET /api/work-experience - опыт работы
+- POST /api/auth/login - аутентификация
+
+## Важные файлы конфигурации
+- `backend/src/main/resources/application.yml` - настройки Spring Boot
+- `backend/src/main/java/com/example/backend/DataLoader.java` - загрузка данных
+- `frontend/src/App.tsx` - роутинг React
+- `database/updated-portfolio-data.sql` - SQL данные
+
+## Правила разработки
+- Всегда отвечать на русском языке
+- Использовать реальные данные из резюме Тимура
+- Следовать Spring Boot best practices
+- Использовать TypeScript для frontend
+- Поддерживать хронологический порядок в опыте работы 

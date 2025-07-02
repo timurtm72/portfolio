@@ -95,6 +95,22 @@
             <version>${mapstruct.version}</version>
         </dependency>
 
+        <!-- Добавляем аннотационный процессор MapStruct, чтобы реализации мапперов генерировались при сборке из IDE -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${mapstruct.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Связка для корректной работы Lombok с MapStruct -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok-mapstruct-binding</artifactId>
+            <version>${lombok-mapstruct-binding.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Apache Commons IO -->
         <dependency>
             <groupId>commons-io</groupId>

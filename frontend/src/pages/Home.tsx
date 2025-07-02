@@ -1,5 +1,5 @@
 import React from 'react';
-import { 
+import {
   BriefcaseIcon,
   AcademicCapIcon,
   MapPinIcon,
@@ -51,9 +51,9 @@ const Home: React.FC = () => {
   // Реальные достижения
   const achievements = [
     { number: '25+', label: 'Проектов реализовано' },
-    { number: '8+', label: 'Лет опыта' },
+    { number: '25+', label: 'Лет опыта' },
     { number: '15+', label: 'Технологий освоено' },
-    { number: '100%', label: 'Удовлетворенность клиентов' },
+    { number: '78%', label: 'Удовлетворенность клиентов' },
   ];
 
   return (
@@ -69,7 +69,7 @@ const Home: React.FC = () => {
               className="space-y-8"
             >
               <div className="space-y-4">
-                <motion.h1 
+                <motion.h1
                   className="text-5xl lg:text-7xl font-bold text-primary-900"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -80,8 +80,8 @@ const Home: React.FC = () => {
                     Тимур
                   </span>
                 </motion.h1>
-                
-                <motion.p 
+
+                <motion.p
                   className="text-2xl lg:text-3xl text-secondary-600 font-light"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -89,8 +89,8 @@ const Home: React.FC = () => {
                 >
                   Инженер-программист
                 </motion.p>
-                
-                <motion.p 
+
+                <motion.p
                   className="text-lg text-secondary-500"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -100,7 +100,7 @@ const Home: React.FC = () => {
                 </motion.p>
               </div>
 
-              <motion.div 
+              <motion.div
                 className="flex flex-wrap gap-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -113,7 +113,7 @@ const Home: React.FC = () => {
                   Мои проекты
                   <ArrowRightIcon className="w-5 h-5" />
                 </Link>
-                
+
                 <a
                   href="mailto:timursultanw@yandex.ru"
                   className="border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2"
@@ -124,7 +124,7 @@ const Home: React.FC = () => {
               </motion.div>
 
               {/* Контактная информация */}
-              <motion.div 
+              <motion.div
                 className="space-y-2 pt-6 border-t border-secondary-200"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -195,7 +195,7 @@ const Home: React.FC = () => {
               Моя специализация
             </h2>
             <p className="text-xl text-secondary-600 max-w-3xl mx-auto">
-              Команда разработчиков с многолетним опытом в области промышленной автоматизации, 
+              Команда разработчиков с многолетним опытом в области промышленной автоматизации,
               программирования микроконтроллеров и разработки IoT решений
             </p>
           </motion.div>
@@ -465,7 +465,7 @@ const Home: React.FC = () => {
                 Позвонить: +7 927 244-40-51
               </a>
             </div>
-            
+
             <div className="mt-8 pt-8 border-t border-accent-400">
               <p className="text-accent-100 mb-4">Дополнительные ресурсы:</p>
               <div className="flex flex-wrap justify-center gap-4">

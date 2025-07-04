@@ -35,7 +35,7 @@ const Header: React.FC = () => {
               </div>
               <div className="text-white">
                 <h1 className="font-bold text-lg">Тимур Султанов</h1>
-                <p className="text-sm text-gray-300">Инженер-программист</p>
+                <p className="text-sm text-gray-600">Инженер-программист</p>
               </div>
             </div>
           </Link>
@@ -47,8 +47,8 @@ const Header: React.FC = () => {
                 key={item.name}
                 to={item.href}
                 className={`relative px-3 py-2 text-sm font-medium transition-colors duration-200 ${isActive(item.href)
-                    ? 'text-accent-600'
-                    : 'text-secondary-700 hover:text-accent-600'
+                  ? 'text-accent-600'
+                  : 'text-secondary-700 hover:text-accent-600'
                   }`}
               >
                 {item.name}
@@ -85,15 +85,15 @@ const Header: React.FC = () => {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-slate-800/95 backdrop-blur-sm rounded-lg mt-2">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-secondary-600/90 backdrop-blur-sm rounded-lg mt-2">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
                   onClick={() => setIsMenuOpen(false)}
                   className={`px-3 py-2 text-sm font-medium transition-colors duration-200 rounded-lg ${isActive(item.href)
-                      ? 'text-accent-600 bg-accent-50'
-                      : 'text-secondary-700 hover:text-accent-600 hover:bg-secondary-50'
+                    ? 'text-accent-500 bg-secondary-500/60'
+                    : 'text-secondary-50 hover:text-accent-400 hover:bg-secondary-600/60'
                     }`}
                 >
                   {item.name}

@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Установка Portfolio на Orange Pi Zero 3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .spec-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .spec-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        h3 {
+            color: #764ba2;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: #f8f8f2;
+        }
+
+        .step {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .command-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .command-list li {
+            background: #f8f9fa;
+            margin: 10px 0;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 5px;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #764ba2;
+        }
+
+        footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+            }
+            header {
+                background: #667eea;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Установка Portfolio</h1>
+            <p>на Orange Pi Zero 3 через Docker</p>
+        </header>
+
+        <div class="content">
+            <!-- Характеристики платы -->
+            <div class="spec-box">
+                <h3>⚙️ Характеристики Orange Pi Zero 3</h3>
+                <ul>
+                    <li><strong>CPU:</strong> AllWinner H618 (Quad-core ARM Cortex-A53 @ 1.5GHz)</li>
+                    <li><strong>RAM:</strong> 1GB / 1.5GB / 2GB / 4GB LPDDR4</li>
+                    <li><strong>Архитектура:</strong> ARM64 (aarch64)</li>
+                    <li><strong>ОС:</strong> Debian 11 / Ubuntu</li>
+                    <li><strong>Сеть:</strong> Gigabit Ethernet, WiFi 6</li>
+                </ul>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ Важно:</strong> Для комфортной работы Docker рекомендуется минимум 2GB RAM. Если у вас 1GB версия, обязательно настройте SWAP (показано в инструкции).
+            </div>
+
+            <!-- Преимущества Docker -->
+            <h2>✨ Почему Docker?</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">📦</div>
+                    <h3>Простота</h3>
+                    <p>Не нужно устанавливать Java, Node.js, PostgreSQL вручную</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Изоляция</h3>
+                    <p>Приложение работает в контейнерах, не затрагивая систему</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Обновления</h3>
+                    <p>Легко обновлять и откатывать изменения</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Скорость</h3>
+                    <p>Быстрый запуск и рестарт приложения</p>
+                </div>
+            </div>
+
+            <!-- Шаг 1 -->
+            <div class="step">
+                <h2><span class="step-number">1</span>Подключение к Orange Pi</h2>
+                <p>Подключитесь по SSH с вашего компьютера:</p>
+                <pre><code># Узнайте IP адрес Orange Pi (на самой плате)
+ip addr show
+
+# Подключитесь с компьютера
+ssh orangepi@192.168.1.100
+# или
+ssh root@192.168.1.100</code></pre>
+            </div>
+
+            <!-- Шаг 1.1 -->
+            <div class="step">
+                <h2><span class="step-number">1.1</span>Настройка приоритета WiFi (опционально)</h2>
+
+                <div class="warning">
+                    <strong>⚠️ Важно!</strong> Если у вас подключены и WiFi и Ethernet одновременно, нужно настроить приоритет. Это сохранится после перезагрузки и будет работать с любым роутером.
+                </div>
+
+                <h3>Ситуация: WiFi в приоритете, Ethernet как резерв</h3>
+
+                <p>Это нужно если вы хотите использовать WiFi как основной интернет, а Ethernet как резервный канал.</p>
+
+                <pre><code># 1. Проверить текущие маршруты
+ip route show | grep default
+
+# Вы увидите что-то вроде:
+# default via 192.168.1.1 dev eth0
+# default via 172.16.16.1 dev wlan0 proto dhcp metric 600</code></pre>
+
+                <h3>Настройка приоритета через метрику</h3>
+                <p>Меньше метрика = выше приоритет. WiFi ставим 100, Ethernet 200:</p>
+
+                <pre><code># 2. Изменить приоритет WiFi на высокий (метрика 100)
+sudo nmcli connection modify "ИМЯ_ВАШЕЙ_WIFI" ipv4.route-metric 100
+
+# Например для сети "montanum-2G":
+# sudo nmcli connection modify "montanum-2G" ipv4.route-metric 100
+
+# Перезапустить WiFi соединение
+sudo nmcli connection down "ИМЯ_ВАШЕЙ_WIFI"
+sudo nmcli connection up "ИМЯ_ВАШЕЙ_WIFI"</code></pre>
+
+                <h3>Настройка Ethernet с низким приоритетом (постоянно)</h3>
+                <pre><code># 3. Редактировать конфигурацию Ethernet
+sudo nano /etc/network/interfaces
+
+# Найдите строки про eth0 и добавьте метрику:
+auto eth0
+iface eth0 inet dhcp
+    metric 200
+
+# Сохранить: Ctrl+O, Enter
+# Выйти: Ctrl+X
+
+# 4. Перезагрузить сеть
+sudo systemctl restart networking
+
+# Или перезагрузить плату
+sudo reboot</code></pre>
+
+                <h3>Проверка после перезагрузки</h3>
+                <pre><code># После перезагрузки проверить маршруты
+ip route show | grep default
+
+# Должно быть:
+# default via 172.16.16.1 dev wlan0 proto dhcp metric 100  ← WiFi первый
+# default via 192.168.1.1 dev eth0 metric 200             ← Ethernet резервный
+
+# Проверить интернет
+ping -c 4 8.8.8.8
+ping -c 4 google.com</code></pre>
+
+                <div class="success">
+                    <strong>✅ Готово!</strong> Теперь Orange Pi всегда будет использовать WiFi первым, а Ethernet только если WiFi недоступен. Настройки сохранятся после перезагрузки и будут работать с любым роутером!
+                </div>
+
+                <h3>Смена WiFi сети</h3>
+                <p>Когда подключаетесь к новому роутеру вечером:</p>
+                <pre><code># Посмотреть доступные сети
+nmcli device wifi list
+
+# Подключиться к новой сети
+sudo nmcli device wifi connect "НОВАЯ_СЕТЬ" password "ПАРОЛЬ"
+
+# Установить высокий приоритет для новой сети
+sudo nmcli connection modify "НОВАЯ_СЕТЬ" ipv4.route-metric 100
+
+# Перезапустить соединение
+sudo nmcli connection down "НОВАЯ_СЕТЬ"
+sudo nmcli connection up "НОВАЯ_СЕТЬ"
+
+# Проверить
+ip route show | grep default</code></pre>
+
+                <div class="warning">
+                    <strong>💡 Совет:</strong> Для сервера рекомендуется использовать Ethernet (более стабильное соединение). WiFi лучше как резервный канал. Но если нужен именно WiFi - используйте эти настройки.
+                </div>
+            </div>
+
+            <!-- Шаг 1.2 -->
+            <div class="step">
+                <h2><span class="step-number">1.2</span>Автоподключение к нескольким WiFi сетям</h2>
+
+                <div class="spec-box">
+                    <h3>🎯 Сценарий использования</h3>
+                    <p>Если вы перемещаете Orange Pi между разными местами (дом, работа, дача), настройте автоматическое подключение ко всем вашим WiFi сетям. При загрузке плата автоматически подключится к доступной сети с наивысшим приоритетом.</p>
+                </div>
+
+                <h3>Добавление нескольких WiFi сетей с приоритетами</h3>
+
+                <pre><code># 1. Первая сеть (домашняя) - наивысший приоритет 100
+sudo nmcli connection add type wifi ifname wlan0 \
+  con-name "WiFi-Home" \
+  ssid "montanum-2G" \
+  wifi-sec.key-mgmt wpa-psk \
+  wifi-sec.psk "ВАШ_ПАРОЛЬ"
+
+sudo nmcli connection modify "WiFi-Home" \
+  connection.autoconnect yes \
+  connection.autoconnect-priority 100 \
+  ipv4.route-metric 100
+
+# 2. Вторая сеть (вечером/другое место) - приоритет 90
+sudo nmcli connection add type wifi ifname wlan0 \
+  con-name "WiFi-Evening" \
+  ssid "НАЗВАНИЕ_ВЕЧЕРНЕЙ_СЕТИ" \
+  wifi-sec.key-mgmt wpa-psk \
+  wifi-sec.psk "ПАРОЛЬ_ВЕЧЕРНЕЙ_СЕТИ"
+
+sudo nmcli connection modify "WiFi-Evening" \
+  connection.autoconnect yes \
+  connection.autoconnect-priority 90 \
+  ipv4.route-metric 100
+
+# 3. Третья сеть (работа/дача) - приоритет 80
+sudo nmcli connection add type wifi ifname wlan0 \
+  con-name "WiFi-Work" \
+  ssid "РАБОЧАЯ_СЕТЬ" \
+  wifi-sec.key-mgmt wpa-psk \
+  wifi-sec.psk "ПАРОЛЬ_РАБОТЫ"
+
+sudo nmcli connection modify "WiFi-Work" \
+  connection.autoconnect yes \
+  connection.autoconnect-priority 80 \
+  ipv4.route-metric 100</code></pre>
+
+                <h3>Настройка Ethernet как резервного канала</h3>
+                <pre><code># Редактировать конфигурацию Ethernet
+sudo nano /etc/network/interfaces
+
+# Добавить метрику для eth0:
+auto eth0
+iface eth0 inet dhcp
+    metric 200
+
+# Сохранить: Ctrl+O, Enter
+# Выйти: Ctrl+X</code></pre>
+
+                <h3>Проверка настроек</h3>
+                <pre><code># Посмотреть все сохраненные подключения
+nmcli connection show
+
+# Вы увидите:
+# NAME          UUID                                  TYPE      DEVICE
+# WiFi-Home     xxxx-xxxx-xxxx-xxxx                  wifi      wlan0
+# WiFi-Evening  yyyy-yyyy-yyyy-yyyy                  wifi      --
+# WiFi-Work     zzzz-zzzz-zzzz-zzzz                  wifi      --
+
+# Перезагрузить для проверки автоподключения
+sudo reboot</code></pre>
+
+                <h3>Как это работает после перезагрузки</h3>
+                <div class="success">
+                    <strong>✅ Автоматическое поведение:</strong>
+                    <ol>
+                        <li>Orange Pi сканирует доступные WiFi сети</li>
+                        <li>Подключается к сети с наивысшим приоритетом (100 > 90 > 80)</li>
+                        <li>Если сеть с приоритетом 100 недоступна, подключится к следующей</li>
+                        <li>WiFi всегда используется первым (метрика 100)</li>
+                        <li>Ethernet включается только если WiFi не работает (метрика 200)</li>
+                    </ol>
+                </div>
+
+                <h3>Добавление новой WiFi сети в новом месте</h3>
+                <p>Когда окажетесь в новом месте с другим WiFi:</p>
+
+                <pre><code># 1. Посмотреть доступные сети
+nmcli device wifi list
+
+# 2. Подключиться к новой сети
+sudo nmcli device wifi connect "НОВАЯ_СЕТЬ" password "ПАРОЛЬ"
+
+# 3. Настроить автоподключение и приоритет
+# Приоритет 85 = между домашней (100) и вечерней (90)
+sudo nmcli connection modify "НОВАЯ_СЕТЬ" \
+  connection.autoconnect yes \
+  connection.autoconnect-priority 85 \
+  ipv4.route-metric 100
+
+# 4. Проверить все подключения
+nmcli connection show
+
+# 5. Проверить что интернет работает
+ping -c 4 google.com</code></pre>
+
+                <h3>Удаление ненужной WiFi сети</h3>
+                <pre><code># Посмотреть все сохраненные сети
+nmcli connection show
+
+# Удалить ненужную сеть
+sudo nmcli connection delete "WiFi-Old-Network"</code></pre>
+
+                <h3>Изменение приоритета существующей сети</h3>
+                <pre><code># Повысить приоритет сети (чем больше число, тем выше приоритет)
+sudo nmcli connection modify "WiFi-Work" connection.autoconnect-priority 95
+
+# Понизить приоритет
+sudo nmcli connection modify "WiFi-Home" connection.autoconnect-priority 70</code></pre>
+
+                <div class="warning">
+                    <strong>⚠️ Важно:</strong>
+                    <ul>
+                        <li>Все пароли сохраняются в системе - будьте аккуратны с безопасностью</li>
+                        <li>Приоритет: большее число = выше приоритет (100 > 90 > 80)</li>
+                        <li>Метрика маршрута: меньшее число = выше приоритет (100 < 200)</li>
+                        <li>Настройки сохраняются после перезагрузки автоматически</li>
+                    </ul>
+                </div>
+
+                <h3>Проверка текущего подключения</h3>
+                <pre><code># Узнать к какой сети подключен сейчас
+nmcli connection show --active
+
+# Посмотреть маршруты
+ip route show | grep default
+
+# Проверить интернет
+ping -c 4 8.8.8.8
+ping -c 4 google.com</code></pre>
+
+                <div class="success">
+                    <strong>🎉 Готово!</strong> Теперь Orange Pi автоматически подключится к любой из ваших сохраненных WiFi сетей при загрузке. Берите плату куда угодно - она сама найдет знакомую сеть!
+                </div>
+            </div>
+
+            <!-- Шаг 2 -->
+            <div class="step">
+                <h2><span class="step-number">2</span>Установка Docker</h2>
+
+                <h3>2.1. Установка Docker Engine</h3>
+                <pre><code># Обновление системы
+sudo apt update && sudo apt upgrade -y
+
+# Установка зависимостей
+sudo apt install -y ca-certificates curl gnupg
+
+# Добавление GPG ключа Docker
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | \
+  sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# Добавление репозитория Docker
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/debian \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Установка Docker
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io \
+  docker-buildx-plugin docker-compose-plugin
+
+# Проверка установки
+docker --version
+docker compose version</code></pre>
+
+                <h3>2.2. Настройка прав</h3>
+                <pre><code># Добавить пользователя в группу docker
+sudo usermod -aG docker $USER
+
+# Перезайти по SSH для применения прав
+exit
+
+# Снова подключиться
+ssh orangepi@192.168.1.100
+
+# Проверка (должно работать без sudo)
+docker ps</code></pre>
+            </div>
+
+            <!-- Шаг 3 -->
+            <div class="step">
+                <h2><span class="step-number">3</span>Настройка SWAP (для 1GB RAM)</h2>
+                <div class="warning">
+                    <strong>⚠️ Только для версий с 1GB RAM!</strong> Если у вас 2GB+ RAM, пропустите этот шаг.
+                </div>
+                <pre><code># Создание swap файла 2GB
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# Автозагрузка при перезагрузке
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+# Проверка
+free -h</code></pre>
+            </div>
+
+            <!-- Шаг 4 -->
+            <div class="step">
+                <h2><span class="step-number">4</span>Клонирование проекта</h2>
+                <pre><code># Установка git
+sudo apt install -y git
+
+# Клонирование проекта
+cd ~
+git clone https://github.com/timurtm72/portfolio.git
+cd portfolio
+
+# Проверка файлов
+ls -la</code></pre>
+            </div>
+
+            <!-- Шаг 5 -->
+            <div class="step">
+                <h2><span class="step-number">5</span>Настройка переменных окружения</h2>
+
+                <h3>5.1. Backend</h3>
+                <pre><code># Создать .env файл для backend
+cat > backend/.env << 'EOF'
+DB_HOST=db
+DB_PORT=5432
+DB_USER=portfolio_user
+DB_PASSWORD=SecurePassword123!
+CORS_ALLOWED_ORIGINS=*
+EOF</code></pre>
+
+                <h3>5.2. Frontend</h3>
+                <pre><code># Создать .env файл для frontend
+cat > frontend/.env << 'EOF'
+REACT_APP_API_URL=/api
+EOF</code></pre>
+
+                <h3>5.3. Обновить docker-compose.yml</h3>
+                <pre><code># Открыть файл
+nano docker-compose.yml
+
+# Найти строки с env.example и заменить на .env:
+# - ./backend/env.example  →  - ./backend/.env
+# - ./frontend/env.example  →  - ./frontend/.env
+
+# Сохранить: Ctrl+O, Enter
+# Выйти: Ctrl+X</code></pre>
+            </div>
+
+            <!-- Шаг 6 -->
+            <div class="step">
+                <h2><span class="step-number">6</span>Запуск проекта</h2>
+
+                <h3>6.1. Сборка образов</h3>
+                <div class="warning">
+                    <strong>⏱️ Внимание:</strong> Сборка на Orange Pi Zero 3 займет <strong>30-60 минут</strong>! Это нормально. Можно выпить кофе ☕
+                </div>
+                <pre><code>cd ~/portfolio
+
+# Сборка образов (долгий процесс)
+docker compose build
+
+# Вы увидите прогресс сборки...
+# Дождитесь завершения</code></pre>
+
+                <h3>6.2. Запуск контейнеров</h3>
+                <pre><code># Запуск в фоновом режиме
+docker compose up -d
+
+# Просмотр логов (Ctrl+C для выхода)
+docker compose logs -f
+
+# Проверка статуса
+docker compose ps
+
+# Должно быть:
+# portfolio-db        Up
+# portfolio-backend   Up
+# portfolio-frontend  Up</code></pre>
+
+                <h3>6.3. Проверка работы</h3>
+                <pre><code># Проверить backend API
+curl http://localhost:8080/api/projects
+
+# Должен вернуть JSON с проектами
+
+# Проверить frontend
+curl http://localhost:3000
+
+# Должен вернуть HTML</code></pre>
+
+                <div class="success">
+                    <strong>✅ Отлично!</strong> Приложение запущено локально. Теперь настроим доступ из интернета.
+                </div>
+            </div>
+
+            <!-- Шаг 7 -->
+            <div class="step">
+                <h2><span class="step-number">7</span>Настройка доступа из интернета</h2>
+
+                <h3>7.1. Узнать локальный IP Orange Pi</h3>
+                <pre><code>ip addr show | grep "inet " | grep -v "127.0.0.1"
+
+# Например: 192.168.1.100</code></pre>
+
+                <h3>7.2. Настроить роутер</h3>
+                <p>Зайдите в веб-интерфейс вашего роутера (обычно <code>192.168.1.1</code> или <code>192.168.0.1</code>) и настройте <strong>проброс портов</strong> (Port Forwarding):</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Внешний порт</th>
+                            <th>Внутренний IP</th>
+                            <th>Внутренний порт</th>
+                            <th>Протокол</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Portfolio Web</td>
+                            <td>80</td>
+                            <td>192.168.1.100</td>
+                            <td>3000</td>
+                            <td>TCP</td>
+                        </tr>
+                        <tr>
+                            <td>Portfolio API</td>
+                            <td>8080</td>
+                            <td>192.168.1.100</td>
+                            <td>8080</td>
+                            <td>TCP</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="warning">
+                    <strong>⚠️ Примечание:</strong> Некоторые провайдеры блокируют порт 80. В этом случае используйте другой порт, например 8080 → 3000.
+                </div>
+
+                <h3>7.3. Узнать внешний IP адрес</h3>
+                <pre><code># На Orange Pi
+curl ifconfig.me
+
+# Или на компьютере перейти на сайт:
+# https://whatismyipaddress.com/</code></pre>
+
+                <h3>7.4. Тестирование</h3>
+                <pre><code># С другого устройства в интернете
+curl http://ВАШ_ВНЕШНИЙ_IP
+
+# Или откройте в браузере:
+http://ВАШ_ВНЕШНИЙ_IP</code></pre>
+
+                <div class="success">
+                    <strong>🎉 Готово!</strong> Ваше портфолио доступно из интернета!
+                </div>
+            </div>
+
+            <!-- Управление -->
+            <h2>📊 Управление контейнерами</h2>
+            <div class="command-list">
+                <li>
+                    <strong>Просмотр статуса:</strong>
+                    <pre><code>docker compose ps</code></pre>
+                </li>
+                <li>
+                    <strong>Просмотр логов:</strong>
+                    <pre><code>docker compose logs -f          # Все сервисы
+docker compose logs -f backend  # Только backend
+docker compose logs -f frontend # Только frontend</code></pre>
+                </li>
+                <li>
+                    <strong>Остановка:</strong>
+                    <pre><code>docker compose stop</code></pre>
+                </li>
+                <li>
+                    <strong>Запуск:</strong>
+                    <pre><code>docker compose start</code></pre>
+                </li>
+                <li>
+                    <strong>Рестарт:</strong>
+                    <pre><code>docker compose restart</code></pre>
+                </li>
+                <li>
+                    <strong>Полная остановка и удаление:</strong>
+                    <pre><code>docker compose down</code></pre>
+                </li>
+            </div>
+
+            <!-- Обновление -->
+            <h2>🔄 Обновление проекта</h2>
+            <pre><code>cd ~/portfolio
+
+# Остановить контейнеры
+docker compose down
+
+# Получить последние изменения
+git pull
+
+# Пересобрать образы
+docker compose build
+
+# Запустить снова
+docker compose up -d
+
+# Проверить логи
+docker compose logs -f</code></pre>
+
+            <!-- Решение проблем -->
+            <h2>🔧 Решение проблем</h2>
+
+            <h3>Backend не запускается</h3>
+            <pre><code># Посмотреть логи
+docker compose logs backend
+
+# Проверить БД
+docker compose logs db
+
+# Перезапустить
+docker compose restart backend</code></pre>
+
+            <h3>Мало памяти</h3>
+            <pre><code># Посмотреть использование
+free -h
+docker stats
+
+# Увеличить swap (если еще не сделали)
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile</code></pre>
+
+            <h3>Мало места на диске</h3>
+            <pre><code># Посмотреть использование
+df -h
+docker system df
+
+# Очистить неиспользуемые образы
+docker system prune -a
+
+# Очистить логи
+sudo journalctl --vacuum-time=7d</code></pre>
+
+            <!-- Мониторинг -->
+            <h2>📈 Мониторинг ресурсов</h2>
+            <pre><code># CPU и RAM использование контейнерами
+docker stats
+
+# Использование диска
+docker system df
+
+# Системные ресурсы
+htop  # Установить: sudo apt install htop</code></pre>
+
+            <!-- Безопасность -->
+            <h2>🛡️ Безопасность</h2>
+
+            <h3>Настройка Firewall</h3>
+            <pre><code># Установить ufw
+sudo apt install -y ufw
+
+# Разрешить SSH
+sudo ufw allow 22/tcp
+
+# Разрешить HTTP
+sudo ufw allow 3000/tcp
+sudo ufw allow 8080/tcp
+
+# Включить firewall
+sudo ufw enable
+
+# Проверить статус
+sudo ufw status</code></pre>
+
+            <h3>Изменить пароль БД</h3>
+            <pre><code># Остановить контейнеры
+docker compose down
+
+# Удалить volume с данными
+docker volume rm portfolio_db_data
+
+# Изменить пароль в backend/.env
+nano backend/.env
+# DB_PASSWORD=НовыйПароль123!
+
+# Также в docker-compose.yml
+nano docker-compose.yml
+# POSTGRES_PASSWORD: ${DB_PASSWORD:-НовыйПароль123!}
+
+# Запустить заново
+docker compose up -d</code></pre>
+
+            <!-- Полезные ссылки -->
+            <h2>🔗 Полезные ссылки</h2>
+            <ul>
+                <li>GitHub проекта: <a href="https://github.com/timurtm72/portfolio" target="_blank">https://github.com/timurtm72/portfolio</a></li>
+                <li>Документация Docker: <a href="https://docs.docker.com/" target="_blank">https://docs.docker.com/</a></li>
+                <li>Orange Pi Zero 3: <a href="http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/details/Orange-Pi-Zero-3.html" target="_blank">Официальный сайт</a></li>
+            </ul>
+
+            <!-- Контакты -->
+            <div class="spec-box">
+                <h3>📧 Контакты</h3>
+                <ul>
+                    <li>Email: <a href="mailto:timursultanw@yandex.ru">timursultanw@yandex.ru</a></li>
+                    <li>GitHub: <a href="https://github.com/timurtm72" target="_blank">@timurtm72</a></li>
+                    <li>YouTube: <a href="https://youtube.com/channel/UCGnkZF95JhfO7tGaB-oHC6A" target="_blank">Канал</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Тимур Султанов | Инженер-программист</p>
+            <p>Создано с ❤️ для Orange Pi Zero 3</p>
+        </footer>
+    </div>
+</body>
+</html>

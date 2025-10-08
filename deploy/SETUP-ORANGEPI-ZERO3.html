@@ -599,17 +599,94 @@ free -h</code></pre>
 
             <!-- Шаг 4 -->
             <div class="step">
-                <h2><span class="step-number">4</span>Клонирование проекта</h2>
-                <pre><code># Установка git
-sudo apt install -y git
+                <h2><span class="step-number">4</span>Клонирование проекта с GitHub</h2>
 
-# Клонирование проекта
-cd ~
+                <h3>4.1. Установка git</h3>
+                <pre><code>sudo apt install -y git</code></pre>
+
+                <h3>4.2. Клонирование проекта</h3>
+
+                <div class="spec-box">
+                    <h3>📦 Выбор метода клонирования</h3>
+                    <p>GitHub требует аутентификацию. Есть два способа:</p>
+                </div>
+
+                <h4>Способ 1: Публичный репозиторий (самый простой)</h4>
+                <p>Если репозиторий публичный, просто клонируйте:</p>
+                <pre><code>cd ~
 git clone https://github.com/timurtm72/portfolio.git
 cd portfolio
+ls -la</code></pre>
+
+                <div class="warning">
+                    <strong>⚠️ Если появляется ошибка "Authentication failed"</strong>, значит репозиторий приватный. Используйте Способ 2.
+                </div>
+
+                <h4>Способ 2: Приватный репозиторий (через Personal Access Token)</h4>
+
+                <p><strong>Шаг 1:</strong> Создайте токен на GitHub (на вашем компьютере):</p>
+                <ol>
+                    <li>Откройте: <a href="https://github.com/settings/tokens" target="_blank">https://github.com/settings/tokens</a></li>
+                    <li>Нажмите <strong>"Generate new token"</strong> → <strong>"Generate new token (classic)"</strong></li>
+                    <li>Дайте имя: <code>Orange Pi Deploy</code></li>
+                    <li>Выберите срок: <code>90 days</code> или <code>No expiration</code></li>
+                    <li>Отметьте галочки:
+                        <ul>
+                            <li>✅ <strong>repo</strong> (все подпункты!)</li>
+                        </ul>
+                    </li>
+                    <li>Нажмите <strong>"Generate token"</strong></li>
+                    <li><strong>ВАЖНО:</strong> Скопируйте токен (выглядит как <code>ghp_xxxxxxxxxxxx</code>)</li>
+                </ol>
+
+                <p><strong>Шаг 2:</strong> Клонируйте на Orange Pi с токеном:</p>
+                <pre><code>cd ~
+git clone https://ВАШ_ТОКЕН@github.com/timurtm72/portfolio.git
+cd portfolio
+
+# Сохранить токен для будущих git pull
+git config --global credential.helper store
 
 # Проверка файлов
 ls -la</code></pre>
+
+                <div class="warning">
+                    <strong>🔐 ВАЖНО - Безопасность токена:</strong>
+                    <ul>
+                        <li>НИКОГДА не публикуйте токен в чатах, форумах или публичных местах</li>
+                        <li>Токен дает полный доступ к вашим репозиториям</li>
+                        <li>Если токен скомпрометирован - немедленно удалите его на GitHub</li>
+                        <li>Храните токен в безопасном месте (менеджер паролей)</li>
+                    </ul>
+                </div>
+
+                <h4>Способ 3: Сделать репозиторий публичным</h4>
+                <p>Если репозиторий приватный и вы хотите сделать его публичным:</p>
+                <ol>
+                    <li>Откройте: <code>https://github.com/timurtm72/portfolio/settings</code></li>
+                    <li>Прокрутите вниз до <strong>"Danger Zone"</strong></li>
+                    <li>Нажмите <strong>"Change visibility"</strong> → <strong>"Make public"</strong></li>
+                    <li>Подтвердите</li>
+                </ol>
+
+                <p>После этого используйте Способ 1 (без токена).</p>
+
+                <h3>4.3. Проверка клонирования</h3>
+                <pre><code># Должны увидеть структуру проекта
+ls -la ~/portfolio
+
+# Ожидаемые директории:
+# backend/
+# frontend/
+# database/
+# deploy/
+# docker-compose.yml
+# CLAUDE.md
+# README.md</code></pre>
+
+                <div class="success">
+                    <strong>✅ Готово!</strong> Проект склонирован в <code>/home/timur/portfolio</code>
+                </div>
             </div>
 
             <!-- Шаг 5 -->

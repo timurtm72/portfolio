@@ -247,8 +247,56 @@ docker stats
 - Multi-stage build для оптимизации размера
 - Healthcheck для всех сервисов
 - Автоматическое применение схемы БД
-- Alpine образы для минимального размера
+- Alpine образы для минимального размера (где возможно)
 - Изолированная сеть `portfolio-network`
+
+### ARM64 специфика (Orange Pi, Raspberry Pi)
+
+**Важно:** Стандартные Docker образы могут не работать на ARM64 архитектуре.
+
+#### Backend Dockerfile (ARM64-совместимый)
+```dockerfile
+# Используйте Amazon Corretto вместо Eclipse Temurin
+FROM amazoncorretto:17-alpine AS build
+# ... сборка ...
+FROM amazoncorretto:17-alpine
+# ... runtime ...
+```
+
+**Проблема Eclipse Temurin на ARM64:**
+```
+failed to resolve source metadata for eclipse-temurin:17-jre-alpine:
+no match for platform in manifest: not found
+```
+
+**Решение:** Amazon Corretto имеет полную поддержку ARM64.
+
+#### Frontend Dockerfile (ARM64-совместимый)
+```dockerfile
+# Используйте полный Debian образ вместо Alpine
+FROM node:18 AS build  # НЕ node:18-alpine!
+RUN npm install        # НЕ npm ci --only=production!
+# ... остальное ...
+```
+
+**Проблема Alpine + ARM64:**
+- Alpine использует musl libc вместо glibc
+- Некоторые npm пакеты (включая `react-scripts`) имеют проблемы совместимости
+- `npm ci --only=production` не устанавливает dev-зависимости, необходимые для сборки
+
+**Решение:**
+1. Используйте `node:18` (Debian) для build stage
+2. Используйте `npm install` вместо `npm ci --only=production`
+3. Финальный образ остается `nginx:alpine` (статика не зависит от платформы)
+
+#### Порты в docker-compose.yml
+```yaml
+frontend:
+  ports:
+    - "3000:80"  # Внешний порт 3000, внутренний 80 (nginx)
+```
+
+**Примечание:** Frontend доступен на порту 3000, а не 80!
 
 ## База данных - SQL скрипты
 

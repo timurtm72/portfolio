@@ -1,6 +1,6 @@
 # Multi-stage build для оптимизации размера образа
-# Stage 1: Сборка
-FROM eclipse-temurin:17-jdk-alpine AS build
+# Stage 1: Сборка (с поддержкой ARM64)
+FROM amazoncorretto:17-alpine AS build
 
 WORKDIR /app
 
@@ -21,8 +21,8 @@ COPY src ./src
 # Собираем приложение
 RUN ./mvnw clean package -DskipTests
 
-# Stage 2: Runtime
-FROM eclipse-temurin:17-jre-alpine
+# Stage 2: Runtime (с поддержкой ARM64)
+FROM amazoncorretto:17-alpine
 
 WORKDIR /app
 

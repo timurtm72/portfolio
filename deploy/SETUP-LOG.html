@@ -214,9 +214,77 @@ sudo systemctl restart docker</code></pre>
             </div>
 
             <div class="step">
-                <h3>6. Запуск сборки Docker образов</h3>
-                <p>Запущена команда сборки (в процессе):</p>
-                <pre><code>docker compose build</code></pre>
+                <h3>6. Исправление сетевых проблем</h3>
+                <p><strong>Проблема:</strong> Docker не мог скачать образы из-за проблем с маршрутизацией</p>
+                <pre><code>dial tcp 54.209.164.210:443: connect: no route to host</code></pre>
+
+                <p><strong>Причина:</strong> Два маршрута по умолчанию (eth0 и wlan0), приоритет был у недоступного Ethernet</p>
+                <pre><code>default via 192.168.1.1 dev eth0 onlink
+default via 192.168.3.1 dev wlan0 proto dhcp metric 600</code></pre>
+
+                <p><strong>Решение:</strong> Удалили маршрут через недоступный роутер eth0:</p>
+                <pre><code>sudo ip route del default via 192.168.1.1 dev eth0</code></pre>
+
+                <div class="success">
+                    <strong>✅ Результат:</strong> Интернет работает через WiFi (wlan0), SSH через прямой кабель eth0 сохранен
+                </div>
+
+                <div class="info-box">
+                    <strong>📌 Настройка:</strong>
+                    <ul>
+                        <li>Orange Pi статический IP: 192.168.1.100 (eth0)</li>
+                        <li>Компьютер: 192.168.1.101 (прямое подключение)</li>
+                        <li>Интернет: WiFi HUAWEI-R1FUY4 (192.168.3.25)</li>
+                        <li>Маршрут по умолчанию: wlan0 → 192.168.3.1</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>7. Исправление Dockerfile для ARM64</h3>
+
+                <h4>7.1. Backend Dockerfile</h4>
+                <p><strong>Проблема:</strong> Образ <code>eclipse-temurin:17-jre-alpine</code> не поддерживает ARM64</p>
+                <pre><code>failed to resolve source metadata for docker.io/library/eclipse-temurin:17-jre-alpine:
+no match for platform in manifest: not found</code></pre>
+
+                <p><strong>Решение:</strong> Заменили на Amazon Corretto (поддерживает ARM64)</p>
+                <pre><code># Было:
+FROM eclipse-temurin:17-jdk-alpine AS build
+FROM eclipse-temurin:17-jre-alpine
+
+# Стало:
+FROM amazoncorretto:17-alpine AS build
+FROM amazoncorretto:17-alpine</code></pre>
+
+                <h4>7.2. Frontend Dockerfile</h4>
+                <p><strong>Проблема:</strong> <code>react-scripts</code> не устанавливался в Alpine на ARM64</p>
+                <pre><code>sh: react-scripts: not found</code></pre>
+
+                <p><strong>Причина:</strong> Alpine Linux (musl libc) имеет проблемы совместимости с некоторыми npm пакетами на ARM64</p>
+
+                <p><strong>Решение:</strong> Использовали полный Debian образ для build stage</p>
+                <pre><code># Было:
+FROM node:18-alpine AS build
+RUN npm ci --only=production
+
+# Стало:
+FROM node:18 AS build
+RUN npm install</code></pre>
+
+                <div class="info-box">
+                    <strong>📌 Важно:</strong> Debian образ больше Alpine, но для build stage это не критично - в финальный образ попадает только статика
+                </div>
+
+                <div class="success">
+                    <strong>✅ Результат:</strong> Оба Dockerfile успешно собираются на ARM64
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>8. Запуск сборки Docker образов</h3>
+                <p>Запущена команда сборки с исправленными Dockerfile:</p>
+                <pre><code>docker compose build --no-cache</code></pre>
 
                 <div class="warning">
                     <strong>⏱️ Время сборки:</strong> 30-60 минут на Orange Pi Zero 3
@@ -224,35 +292,52 @@ sudo systemctl restart docker</code></pre>
 
                 <p>Что происходит:</p>
                 <ul>
-                    <li>Скачивание образа PostgreSQL</li>
-                    <li>Скачивание образа Java (eclipse-temurin:17-jdk-alpine)</li>
-                    <li>Скачивание образа Node.js (node:18-alpine)</li>
+                    <li>Скачивание образа PostgreSQL (postgres:15-alpine)</li>
+                    <li>Скачивание образа Amazon Corretto 17 (amazoncorretto:17-alpine)</li>
+                    <li>Скачивание образа Node.js Debian (node:18)</li>
                     <li>Скачивание образа Nginx (nginx:alpine)</li>
                     <li>Компиляция backend (Maven + Spring Boot)</li>
-                    <li>Сборка frontend (npm + React)</li>
+                    <li>Сборка frontend (npm install + React build)</li>
                 </ul>
+
+                <div class="success">
+                    <strong>✅ Результат:</strong> Сборка завершена успешно
+                </div>
             </div>
 
-            <h2>📋 Следующие шаги (после завершения сборки)</h2>
+            <h2>📋 Запуск и проверка</h2>
 
             <div class="step">
-                <h3>7. Запуск контейнеров</h3>
+                <h3>9. Запуск контейнеров</h3>
                 <pre><code>docker compose up -d</code></pre>
+
+                <div class="success">
+                    <strong>✅ Результат:</strong> Все контейнеры запущены
+                </div>
             </div>
 
             <div class="step">
-                <h3>8. Проверка статуса</h3>
+                <h3>10. Проверка статуса</h3>
                 <pre><code>docker compose ps</code></pre>
-                <p>Должны быть запущены:</p>
-                <ul>
-                    <li>portfolio-db (PostgreSQL)</li>
-                    <li>portfolio-backend (Spring Boot)</li>
-                    <li>portfolio-frontend (React + Nginx)</li>
-                </ul>
+
+                <p><strong>Результат:</strong></p>
+                <pre><code>NAME                 IMAGE                COMMAND                  SERVICE    CREATED         STATUS                   PORTS
+portfolio-backend    portfolio-backend    "java -jar app.jar"      backend    3 minutes ago   Up 3 minutes (healthy)   0.0.0.0:8080->8080/tcp
+portfolio-db         postgres:15-alpine   "docker-entrypoint.s…"   db         3 minutes ago   Up 3 minutes (healthy)   5432/tcp
+portfolio-frontend   portfolio-frontend   "/docker-entrypoint.…"   frontend   3 minutes ago   Up 2 minutes             0.0.0.0:3000->80/tcp</code></pre>
+
+                <div class="success">
+                    <strong>✅ Все контейнеры работают:</strong>
+                    <ul>
+                        <li>portfolio-db (PostgreSQL) - healthy</li>
+                        <li>portfolio-backend (Spring Boot) - healthy, порт 8080</li>
+                        <li>portfolio-frontend (Nginx) - running, порт 3000</li>
+                    </ul>
+                </div>
             </div>
 
             <div class="step">
-                <h3>9. Проверка логов</h3>
+                <h3>11. Проверка логов</h3>
                 <pre><code># Все сервисы
 docker compose logs -f
 
@@ -264,12 +349,60 @@ docker compose logs -f frontend</code></pre>
             </div>
 
             <div class="step">
-                <h3>10. Проверка работы приложения</h3>
+                <h3>12. Проверка работы приложения</h3>
                 <pre><code># Проверить backend API
 curl http://localhost:8080/api/projects
 
 # Проверить frontend
 curl http://localhost:3000</code></pre>
+
+                <div class="success">
+                    <strong>✅ Приложение доступно по адресам:</strong>
+                    <ul>
+                        <li><strong>Frontend:</strong> http://192.168.3.25:3000</li>
+                        <li><strong>Backend API:</strong> http://192.168.3.25:8080/api</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2>🎯 Итоги развертывания</h2>
+
+            <div class="step">
+                <h3>Успешно выполнено</h3>
+                <ul>
+                    <li>✅ Клонирован репозиторий с GitHub через Personal Access Token</li>
+                    <li>✅ Исправлена маршрутизация сети (WiFi приоритет над Ethernet)</li>
+                    <li>✅ Адаптированы Dockerfile для ARM64 архитектуры</li>
+                    <li>✅ Успешно собраны Docker образы (backend, frontend, db)</li>
+                    <li>✅ Запущены все контейнеры в режиме production</li>
+                    <li>✅ Приложение работает и доступно по сети</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h3>Ключевые изменения для ARM64</h3>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                    <tr style="background: #f0f0f0;">
+                        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Компонент</th>
+                        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Было</th>
+                        <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Стало</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd;">Backend Java</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">eclipse-temurin:17-alpine</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">amazoncorretto:17-alpine</td>
+                    </tr>
+                    <tr style="background: #f9f9f9;">
+                        <td style="padding: 8px; border: 1px solid #ddd;">Frontend Node.js</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">node:18-alpine</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">node:18 (Debian)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd;">NPM install</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">npm ci --only=production</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">npm install</td>
+                    </tr>
+                </table>
             </div>
 
             <h2>🔧 Полезные команды</h2>

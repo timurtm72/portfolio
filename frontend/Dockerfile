@@ -1,14 +1,14 @@
 # Multi-stage build для оптимизации
-# Stage 1: Сборка React приложения
-FROM node:18-alpine AS build
+# Stage 1: Сборка React приложения (Debian для совместимости с ARM64)
+FROM node:18 AS build
 
 WORKDIR /app
 
 # Копируем package files для кеширования зависимостей
 COPY package*.json ./
 
-# Устанавливаем зависимости
-RUN npm ci --only=production
+# Устанавливаем зависимости (включая dev для сборки)
+RUN npm install
 
 # Копируем исходный код
 COPY . ./

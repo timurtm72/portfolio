@@ -32,21 +32,21 @@ const WebPImage: React.FC<WebPImageProps> = ({
         // Если путь уже содержит webp папку - используем как есть
         if (filename.startsWith('webp/')) {
             if (isWebP) {
-                return `${API_URL}/images/projects/${filename}`;
+                return `/images/projects/${filename}`;
             } else {
                 // Для fallback убираем webp/ и меняем расширение
                 const fallbackFilename = filename.replace(/^webp\//, '').replace(/\.webp$/i, '.jpg');
-                return `${API_URL}/images/projects/${fallbackFilename}`;
+                return `/images/projects/${fallbackFilename}`;
             }
         }
 
         if (isWebP) {
             // Для WebP изображений используем специальный endpoint
             const webpFilename = filename.replace(/\.(jpg|jpeg|png)$/i, '.webp');
-            return `${API_URL}/images/projects/webp/${webpFilename}`;
+            return `/images/projects/webp/${webpFilename}`;
         } else {
             // Для обычных изображений
-            return `${API_URL}/images/projects/${filename}`;
+            return `/images/projects/${filename}`;
         }
     };
 

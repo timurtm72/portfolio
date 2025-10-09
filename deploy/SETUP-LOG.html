@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Памятка: Установка Portfolio на Orange Pi Zero 3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .step {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .step h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: #f8f8f2;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 Памятка: Установка Portfolio</h1>
+            <p>Orange Pi Zero 3 | Docker Setup | 09.10.2025</p>
+        </header>
+
+        <div class="content">
+            <div class="info-box">
+                <strong>📍 Система:</strong> Orange Pi Zero 3<br>
+                <strong>👤 Пользователь:</strong> timur<br>
+                <strong>📂 Путь проекта:</strong> /home/timur/portfolio<br>
+                <strong>🗓️ Дата:</strong> 09 октября 2025
+            </div>
+
+            <h2>✅ Что было сделано</h2>
+
+            <div class="step">
+                <h3>1. Подключение к Orange Pi</h3>
+                <p>Подключились по SSH с локального компьютера (192.168.1.101)</p>
+                <pre><code>ssh timur@192.168.1.100</code></pre>
+            </div>
+
+            <div class="step">
+                <h3>2. Проект уже склонирован</h3>
+                <p>Репозиторий GitHub уже находится в папке:</p>
+                <pre><code>/home/timur/portfolio</code></pre>
+                <p>Структура проекта:</p>
+                <ul>
+                    <li>backend/ - Spring Boot приложение</li>
+                    <li>frontend/ - React приложение</li>
+                    <li>database/ - SQL скрипты</li>
+                    <li>docker-compose.yml - конфигурация Docker</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h3>3. Создание файла backend/.env</h3>
+                <p>Создали файл с настройками базы данных:</p>
+                <pre><code>cat > backend/.env << 'EOF'
+DB_HOST=db
+DB_PORT=5432
+DB_USER=portfolio_user
+DB_PASSWORD=portfolio_password
+CORS_ALLOWED_ORIGINS=*
+EOF</code></pre>
+
+                <div class="warning">
+                    <strong>⚠️ Важно:</strong> Пароль БД: <code>portfolio_password</code>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>4. Создание файла frontend/.env</h3>
+                <p>Создали файл с настройками API:</p>
+                <pre><code>cat > frontend/.env << 'EOF'
+REACT_APP_API_URL=/api
+EOF</code></pre>
+            </div>
+
+            <div class="step">
+                <h3>5. Исправление конфигурации Docker</h3>
+                <p><strong>Проблема:</strong> Docker пытался использовать недоступное китайское зеркало</p>
+                <pre><code>docker.mirrors.ustc.edu.cn - no such host</code></pre>
+
+                <p><strong>Решение:</strong> Удалили неправильное зеркало из конфигурации Docker:</p>
+                <pre><code># Очистили файл
+sudo nano /etc/docker/daemon.json
+
+# Перезапустили Docker
+sudo systemctl restart docker</code></pre>
+
+                <div class="success">
+                    <strong>✅ Результат:</strong> Docker работает корректно, статус <code>active (running)</code>
+                </div>
+            </div>
+
+            <div class="step">
+                <h3>6. Запуск сборки Docker образов</h3>
+                <p>Запущена команда сборки (в процессе):</p>
+                <pre><code>docker compose build</code></pre>
+
+                <div class="warning">
+                    <strong>⏱️ Время сборки:</strong> 30-60 минут на Orange Pi Zero 3
+                </div>
+
+                <p>Что происходит:</p>
+                <ul>
+                    <li>Скачивание образа PostgreSQL</li>
+                    <li>Скачивание образа Java (eclipse-temurin:17-jdk-alpine)</li>
+                    <li>Скачивание образа Node.js (node:18-alpine)</li>
+                    <li>Скачивание образа Nginx (nginx:alpine)</li>
+                    <li>Компиляция backend (Maven + Spring Boot)</li>
+                    <li>Сборка frontend (npm + React)</li>
+                </ul>
+            </div>
+
+            <h2>📋 Следующие шаги (после завершения сборки)</h2>
+
+            <div class="step">
+                <h3>7. Запуск контейнеров</h3>
+                <pre><code>docker compose up -d</code></pre>
+            </div>
+
+            <div class="step">
+                <h3>8. Проверка статуса</h3>
+                <pre><code>docker compose ps</code></pre>
+                <p>Должны быть запущены:</p>
+                <ul>
+                    <li>portfolio-db (PostgreSQL)</li>
+                    <li>portfolio-backend (Spring Boot)</li>
+                    <li>portfolio-frontend (React + Nginx)</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h3>9. Проверка логов</h3>
+                <pre><code># Все сервисы
+docker compose logs -f
+
+# Только backend
+docker compose logs -f backend
+
+# Только frontend
+docker compose logs -f frontend</code></pre>
+            </div>
+
+            <div class="step">
+                <h3>10. Проверка работы приложения</h3>
+                <pre><code># Проверить backend API
+curl http://localhost:8080/api/projects
+
+# Проверить frontend
+curl http://localhost:3000</code></pre>
+            </div>
+
+            <h2>🔧 Полезные команды</h2>
+
+            <div class="step">
+                <h3>Управление контейнерами</h3>
+                <pre><code># Просмотр статуса
+docker compose ps
+
+# Остановка
+docker compose stop
+
+# Запуск
+docker compose start
+
+# Рестарт
+docker compose restart
+
+# Полная остановка и удаление
+docker compose down</code></pre>
+            </div>
+
+            <div class="step">
+                <h3>Обновление проекта</h3>
+                <pre><code>cd ~/portfolio
+docker compose down
+git pull
+docker compose build
+docker compose up -d</code></pre>
+            </div>
+
+            <div class="step">
+                <h3>Мониторинг ресурсов</h3>
+                <pre><code># Использование CPU и RAM
+docker stats
+
+# Использование диска
+docker system df
+
+# Системные ресурсы
+htop</code></pre>
+            </div>
+
+            <h2>📌 Важные заметки</h2>
+
+            <div class="info-box">
+                <strong>Файлы .env созданы:</strong>
+                <ul>
+                    <li>✅ /home/timur/portfolio/backend/.env</li>
+                    <li>✅ /home/timur/portfolio/frontend/.env</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <strong>Настройки базы данных:</strong>
+                <ul>
+                    <li>Хост: db (внутри Docker сети)</li>
+                    <li>Порт: 5432</li>
+                    <li>Пользователь: portfolio_user</li>
+                    <li>Пароль: portfolio_password</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <strong>Порты приложения:</strong>
+                <ul>
+                    <li>Frontend: http://localhost:3000</li>
+                    <li>Backend API: http://localhost:8080/api</li>
+                    <li>PostgreSQL: localhost:5432 (внутри Docker)</li>
+                </ul>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ Проблемы и решения:</strong>
+                <ul>
+                    <li><strong>Проблема:</strong> Docker зеркало не работало (docker.mirrors.ustc.edu.cn)</li>
+                    <li><strong>Решение:</strong> Очистили /etc/docker/daemon.json, перезапустили Docker</li>
+                </ul>
+            </div>
+
+            <h2>🔗 Полезные ссылки</h2>
+
+            <div class="step">
+                <ul>
+                    <li><strong>GitHub проекта:</strong> <a href="https://github.com/timurtm72/portfolio" target="_blank">https://github.com/timurtm72/portfolio</a></li>
+                    <li><strong>Полная инструкция:</strong> deploy/SETUP-ORANGEPI-ZERO3.html</li>
+                    <li><strong>Документация проекта:</strong> CLAUDE.md</li>
+                    <li><strong>Docker документация:</strong> <a href="https://docs.docker.com/" target="_blank">https://docs.docker.com/</a></li>
+                </ul>
+            </div>
+
+            <div class="success">
+                <strong>✅ Статус установки:</strong> Сборка Docker образов запущена и в процессе выполнения (30-60 минут)
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Тимур Султанов | Orange Pi Zero 3 Setup</p>
+            <p>Создано: 09.10.2025</p>
+        </footer>
+    </div>
+</body>
+</html>

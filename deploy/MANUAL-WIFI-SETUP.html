@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ручная установка WiFi автоподключения через SSH</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        h2 {
+            color: #ff6b6b;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-bottom: 3px solid #ff6b6b;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #ee5a6f;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        h4 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        pre code {
+            background: none;
+            color: #f8f8f2;
+            padding: 0;
+        }
+
+        .alert {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border-left: 5px solid;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border-color: #0c5460;
+            color: #0c5460;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border-color: #856404;
+            color: #856404;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border-color: #721c24;
+            color: #721c24;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: #155724;
+            color: #155724;
+        }
+
+        .variant-box {
+            background: #f8f9fa;
+            border: 3px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .variant-number {
+            display: inline-block;
+            background: #ff6b6b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .step-box {
+            background: #ffffff;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .command-box {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            border-left: 4px solid #50fa7b;
+        }
+
+        .command-box::before {
+            content: '$';
+            color: #50fa7b;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .windows-cmd {
+            background: #1e1e1e;
+            color: #cccccc;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            border-left: 4px solid #0078d4;
+        }
+
+        .windows-cmd::before {
+            content: 'C:\\>';
+            color: #0078d4;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .badge-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .badge-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge-recommended {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        footer {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            border: 2px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        .toc h3 {
+            color: #ff6b6b;
+            margin-top: 0;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .toc a {
+            color: #ff6b6b;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .toc a:hover {
+            color: #ee5a6f;
+            padding-left: 10px;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+
+        .summary-box h3 {
+            color: white;
+            border-bottom: 2px solid white;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .summary-box ol {
+            margin-left: 20px;
+        }
+
+        .summary-box li {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .files-location {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .highlight-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔧 Ручная установка WiFi автоподключения</h1>
+            <p>Перенос скрипта на Orange Pi через SSH (без GitHub)</p>
+        </header>
+
+        <div class="content">
+            <div class="alert alert-info">
+                <strong>📌 Важно!</strong><br>
+                Эта инструкция описывает, как перенести скрипт WiFi автоподключения напрямую на Orange Pi через SSH, минуя GitHub.
+            </div>
+
+            <div class="toc">
+                <h3>📋 Содержание</h3>
+                <ul>
+                    <li><a href="#variant1">Вариант 1: Копирование через SCP (рекомендуется)</a></li>
+                    <li><a href="#variant2">Вариант 2: Создание скрипта прямо на Orange Pi</a></li>
+                    <li><a href="#variant3">Вариант 3: Через USB или карту памяти</a></li>
+                    <li><a href="#variant4">Вариант 4: Через временное Ethernet подключение</a></li>
+                    <li><a href="#algorithm">Полный алгоритм действий</a></li>
+                    <li><a href="#verification">Проверка после установки</a></li>
+                    <li><a href="#troubleshooting">Что делать если SCP не работает</a></li>
+                    <li><a href="#summary">Резюме</a></li>
+                </ul>
+            </div>
+
+            <h2 id="variant1">🥇 Вариант 1: Копирование через SCP</h2>
+            <span class="badge badge-recommended">РЕКОМЕНДУЕТСЯ</span>
+
+            <div class="variant-box">
+                <div class="step-box">
+                    <h3><span class="step-number">1</span>Узнайте IP адрес Orange Pi</h3>
+                    <p>На Orange Pi выполните:</p>
+                    <div class="command-box">ip addr show wlan0 | grep "inet "</div>
+                    <p>или</p>
+                    <div class="command-box">hostname -I</div>
+                    <p>Запомните IP адрес (например: <code>192.168.1.100</code>)</p>
+                </div>
+
+                <div class="step-box">
+                    <h3><span class="step-number">2</span>С вашего компьютера скопируйте скрипт на Orange Pi</h3>
+                    <p>Откройте командную строку на Windows (Win+R → <code>cmd</code>):</p>
+                    <div class="windows-cmd">cd C:\Users\timur\Desktop\portfolio</div>
+                    <div class="windows-cmd">scp deploy\setup-dual-wifi.sh root@192.168.1.100:/root/</div>
+
+                    <div class="alert alert-warning">
+                        <strong>⚠️ Замените:</strong><br>
+                        • <code>192.168.1.100</code> - на реальный IP вашего Orange Pi<br>
+                        • <code>root</code> - на вашего пользователя (обычно <code>root</code> или <code>orangepi</code>)
+                    </div>
+                </div>
+
+                <div class="step-box">
+                    <h3><span class="step-number">3</span>Подключитесь к Orange Pi через SSH</h3>
+                    <div class="windows-cmd">ssh root@192.168.1.100</div>
+                    <p>Введите пароль при запросе.</p>
+                </div>
+
+                <div class="step-box">
+                    <h3><span class="step-number">4</span>На Orange Pi выполните установку</h3>
+                    <div class="command-box">chmod +x /root/setup-dual-wifi.sh</div>
+                    <div class="command-box">./setup-dual-wifi.sh</div>
+                    <p>Следуйте инструкциям на экране - введите SSID и пароли обеих WiFi сетей.</p>
+                </div>
+            </div>
+
+            <h2 id="variant2">📝 Вариант 2: Создание скрипта прямо на Orange Pi</h2>
+            <p>Если SCP не работает, можно создать файл напрямую на Orange Pi.</p>
+
+            <div class="variant-box">
+                <div class="step-box">
+                    <h3><span class="step-number">1</span>Подключитесь к Orange Pi через SSH</h3>
+                    <div class="windows-cmd">ssh root@192.168.1.100</div>
+                </div>
+
+                <div class="step-box">
+                    <h3><span class="step-number">2</span>Создайте файл скрипта</h3>
+                    <div class="command-box">nano /root/setup-dual-wifi.sh</div>
+                </div>
+
+                <div class="step-box">
+                    <h3><span class="step-number">3</span>Скопируйте содержимое скрипта</h3>
+                    <p>Откройте файл <code>C:\Users\timur\Desktop\portfolio\deploy\setup-dual-wifi.sh</code> на вашем компьютере, скопируйте весь текст и вставьте в nano:</p>
+                    <ol>
+                        <li>Нажмите <code>Ctrl+Shift+V</code> для вставки</li>
+                        <li>Нажмите <code>Ctrl+X</code> для выхода</li>
+                        <li>Нажмите <code>Y</code> для сохранения</li>
+                        <li>Нажмите <code>Enter</code> для подтверждения</li>
+                    </ol>
+                </div>
+
+                <div class="step-box">
+                    <h3><span class="step-number">4</span>Сделайте скрипт исполняемым и запустите</h3>
+                    <div class="command-box">chmod +x /root/setup-dual-wifi.sh</div>
+                    <div class="command-box">./setup-dual-wifi.sh</div>
+                </div>
+            </div>
+
+            <h2 id="variant3">💾 Вариант 3: Через USB или карту памяти</h2>
+            <p>Если нет сетевого подключения вообще:</p>
+
+            <div class="variant-box">
+                <div class="step-box">
+                    <h3><span class="step-number">1</span>Скопируйте файл на USB флешку</h3>
+                    <p>На вашем компьютере:</p>
+                    <ol>
+                        <li>Скопируйте файл <code>C:\Users\timur\Desktop\portfolio\deploy\setup-dual-wifi.sh</code> на USB флешку</li>
+                        <li>Безопасно извлеките USB</li>
+                    </ol>
+                </div>
+
+                <div class="step-box">
+                    <h3><span class="step-number">2</span>Подключите USB к Orange Pi</h3>
+                    <ol>
+                        <li>Вставьте USB флешку в Orange Pi</li>
+                        <li>Подключитесь к Orange Pi через монитор и клавиатуру (или SSH если есть Ethernet)</li>
+                    </ol>
+                </div>
+
+                <div class="step-box">
+                    <h3><span class="step-number">3</span>Примонтируйте USB</h3>
+                    <pre><code># Найдите устройство USB
+lsblk
+
+# Обычно это /dev/sda1 или /dev/sdb1
+# Создайте точку монтирования
+mkdir -p /mnt/usb
+
+# Примонтируйте USB
+mount /dev/sda1 /mnt/usb
+
+# Проверьте содержимое
+ls -la /mnt/usb</code></pre>
+                </div>
+
+                <div class="step-box">
+                    <h3><span class="step-number">4</span>Скопируйте скрипт и запустите</h3>
+                    <pre><code># Скопируйте скрипт
+cp /mnt/usb/setup-dual-wifi.sh /root/
+
+# Размонтируйте USB
+umount /mnt/usb
+
+# Сделайте скрипт исполняемым
+chmod +x /root/setup-dual-wifi.sh
+
+# Запустите
+./setup-dual-wifi.sh</code></pre>
+                </div>
+            </div>
+
+            <h2 id="variant4">🔌 Вариант 4: Через временное Ethernet подключение</h2>
+            <p>Если на Orange Pi есть Ethernet порт:</p>
+
+            <div class="variant-box">
+                <div class="step-box">
+                    <h3><span class="step-number">1</span>Подключите Orange Pi к роутеру через кабель</h3>
+                    <p>Просто подключите Ethernet кабель от роутера к Orange Pi.</p>
+                </div>
+
+                <div class="step-box">
+                    <h3><span class="step-number">2</span>Узнайте IP адрес</h3>
+                    <p>На роутере посмотрите список подключенных устройств или на Orange Pi:</p>
+                    <div class="command-box">ip addr show eth0 | grep "inet "</div>
+                </div>
+
+                <div class="step-box">
+                    <h3><span class="step-number">3</span>Используйте Вариант 1 (SCP)</h3>
+                    <p>Теперь можно использовать SCP для копирования файла (см. <a href="#variant1">Вариант 1</a> выше).</p>
+                </div>
+            </div>
+
+            <h2 id="algorithm">🎯 Полный алгоритм действий</h2>
+
+            <div class="summary-box">
+                <h3>На вашем компьютере (Windows):</h3>
+                <ol>
+                    <li><strong>Откройте командную строку</strong> (Win+R → <code>cmd</code>)</li>
+                    <li><strong>Перейдите в папку проекта:</strong><br>
+                        <code style="background:#ffffff33; padding:5px; border-radius:3px;">cd C:\Users\timur\Desktop\portfolio</code>
+                    </li>
+                    <li><strong>Узнайте IP Orange Pi</strong> (если не знаете):
+                        <ul>
+                            <li>Посмотрите в настройках роутера список подключенных устройств</li>
+                            <li>Или подключитесь к Orange Pi через монитор и выполните: <code style="background:#ffffff33; padding:5px; border-radius:3px;">hostname -I</code></li>
+                        </ul>
+                    </li>
+                    <li><strong>Скопируйте скрипт на Orange Pi:</strong><br>
+                        <code style="background:#ffffff33; padding:5px; border-radius:3px;">scp deploy\setup-dual-wifi.sh root@192.168.1.100:/root/</code>
+                    </li>
+                    <li><strong>Подключитесь к Orange Pi:</strong><br>
+                        <code style="background:#ffffff33; padding:5px; border-radius:3px;">ssh root@192.168.1.100</code>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="summary-box" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                <h3>На Orange Pi (через SSH):</h3>
+                <ol>
+                    <li><strong>Сделайте скрипт исполняемым:</strong><br>
+                        <code style="background:#ffffff33; padding:5px; border-radius:3px;">chmod +x /root/setup-dual-wifi.sh</code>
+                    </li>
+                    <li><strong>Запустите скрипт:</strong><br>
+                        <code style="background:#ffffff33; padding:5px; border-radius:3px;">sudo ./setup-dual-wifi.sh</code>
+                    </li>
+                    <li><strong>Введите данные WiFi сетей:</strong>
+                        <ul>
+                            <li>SSID первой сети (работа)</li>
+                            <li>Пароль первой сети</li>
+                            <li>SSID второй сети (дом)</li>
+                            <li>Пароль второй сети</li>
+                            <li>Выберите приоритет</li>
+                        </ul>
+                    </li>
+                    <li><strong>Проверьте подключение:</strong><br>
+                        <code style="background:#ffffff33; padding:5px; border-radius:3px;">nmcli device status</code>
+                    </li>
+                    <li><strong>Перезагрузите для проверки автоподключения:</strong><br>
+                        <code style="background:#ffffff33; padding:5px; border-radius:3px;">sudo reboot</code>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>✅ Результат:</strong><br>
+                После перезагрузки Orange Pi должен автоматически подключиться к доступной WiFi сети!
+            </div>
+
+            <h2 id="verification">✔️ Проверка после установки</h2>
+
+            <h3>После выполнения скрипта:</h3>
+            <div class="step-box">
+                <h4>Проверить настроенные подключения:</h4>
+                <div class="command-box">nmcli connection show</div>
+                <p>Должны появиться:</p>
+                <pre><code>WiFi-Location1
+WiFi-Location2</code></pre>
+            </div>
+
+            <div class="step-box">
+                <h4>Проверить статус WiFi:</h4>
+                <div class="command-box">nmcli device status</div>
+                <p>Должно показать:</p>
+                <pre><code>wlan0   wifi   connected   WiFi-Location1</code></pre>
+            </div>
+
+            <div class="step-box">
+                <h4>Проверить IP адрес:</h4>
+                <div class="command-box">ip addr show wlan0 | grep "inet "</div>
+            </div>
+
+            <h3>Тестирование переключения:</h3>
+            <pre><code># Попробуйте переключиться между сетями
+nmcli connection down WiFi-Location1
+nmcli connection up WiFi-Location2
+
+# Проверьте статус
+nmcli device status</code></pre>
+
+            <h2 id="troubleshooting">🔧 Что делать если SCP не работает</h2>
+
+            <div class="highlight-box">
+                <h3>❌ Ошибка: "ssh: connect to host 192.168.1.100 port 22: Connection refused"</h3>
+
+                <h4>Решение 1: Проверьте, установлен ли SSH сервер на Orange Pi</h4>
+                <pre><code>sudo apt-get update
+sudo apt-get install -y openssh-server
+sudo systemctl enable ssh
+sudo systemctl start ssh</code></pre>
+
+                <h4>Решение 2: Проверьте, правильный ли IP адрес</h4>
+                <pre><code>hostname -I
+ip addr show</code></pre>
+
+                <h4>Решение 3: Проверьте firewall</h4>
+                <pre><code>sudo ufw status
+# Если активен:
+sudo ufw allow 22/tcp</code></pre>
+            </div>
+
+            <div class="highlight-box">
+                <h3>❌ Ошибка: "Permission denied"</h3>
+
+                <h4>Решение: Используйте правильное имя пользователя</h4>
+                <div class="windows-cmd">scp deploy\setup-dual-wifi.sh orangepi@192.168.1.100:/home/orangepi/</div>
+                <p>или</p>
+                <div class="windows-cmd">scp deploy\setup-dual-wifi.sh root@192.168.1.100:/root/</div>
+            </div>
+
+            <h2>⚡ Упрощенная команда (все в одном)</h2>
+            <p>После того как скопировали файл на Orange Pi, выполните одной командой:</p>
+            <div class="windows-cmd">ssh root@192.168.1.100 "chmod +x /root/setup-dual-wifi.sh && /root/setup-dual-wifi.sh"</div>
+
+            <p>Это:</p>
+            <ol>
+                <li>Подключится к Orange Pi</li>
+                <li>Сделает скрипт исполняемым</li>
+                <li>Запустит его</li>
+            </ol>
+
+            <h2>💻 Полезные команды для Windows</h2>
+
+            <h3>Проверка доступности Orange Pi:</h3>
+            <div class="windows-cmd">ping 192.168.1.100</div>
+
+            <h3>Проверка SSH соединения:</h3>
+            <div class="windows-cmd">ssh -v root@192.168.1.100</div>
+
+            <h3>Копирование с указанием порта (если SSH на нестандартном порту):</h3>
+            <div class="windows-cmd">scp -P 2222 deploy\setup-dual-wifi.sh root@192.168.1.100:/root/</div>
+
+            <h2>🖱️ Альтернатива: WinSCP (графический интерфейс)</h2>
+            <p>Если не хотите использовать командную строку:</p>
+
+            <ol>
+                <li><strong>Скачайте WinSCP:</strong> <a href="https://winscp.net/" target="_blank">https://winscp.net/</a></li>
+                <li><strong>Установите и запустите</strong></li>
+                <li><strong>Подключитесь к Orange Pi:</strong>
+                    <ul>
+                        <li>Protocol: SCP</li>
+                        <li>Host: 192.168.1.100</li>
+                        <li>User: root</li>
+                        <li>Password: (ваш пароль)</li>
+                    </ul>
+                </li>
+                <li><strong>Перетащите файл</strong> <code>setup-dual-wifi.sh</code> в папку <code>/root/</code></li>
+                <li><strong>Подключитесь через SSH</strong> и выполните:
+                    <pre><code>chmod +x /root/setup-dual-wifi.sh
+./setup-dual-wifi.sh</code></pre>
+                </li>
+            </ol>
+
+            <h2 id="summary">📝 Резюме</h2>
+
+            <div class="summary-box">
+                <h3>Самый простой способ:</h3>
+                <ol>
+                    <li>Узнайте IP Orange Pi</li>
+                    <li>Выполните на Windows: <code style="background:#ffffff33; padding:5px; border-radius:3px;">scp deploy\setup-dual-wifi.sh root@IP:/root/</code></li>
+                    <li>Подключитесь через SSH: <code style="background:#ffffff33; padding:5px; border-radius:3px;">ssh root@IP</code></li>
+                    <li>Запустите: <code style="background:#ffffff33; padding:5px; border-radius:3px;">chmod +x /root/setup-dual-wifi.sh && sudo ./setup-dual-wifi.sh</code></li>
+                    <li>Следуйте инструкциям скрипта</li>
+                </ol>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>✅ После настройки:</strong><br>
+                • Orange Pi будет автоматически подключаться к WiFi при загрузке<br>
+                • Можно перевозить между локациями - подключится к доступной сети<br>
+                • Настройки сохраняются после перезагрузки
+            </div>
+
+            <h2>📂 Расположение файлов</h2>
+
+            <div class="files-location">
+                <h3>На вашем компьютере:</h3>
+                <ul style="list-style:none; margin-left:0;">
+                    <li>📄 C:\Users\timur\Desktop\portfolio\deploy\setup-dual-wifi.sh</li>
+                    <li>📄 C:\Users\timur\Desktop\portfolio\deploy\WIFI-AUTO-CONNECT.html</li>
+                    <li>📄 C:\Users\timur\Desktop\portfolio\deploy\MANUAL-WIFI-SETUP.html</li>
+                </ul>
+
+                <h3>На Orange Pi после копирования:</h3>
+                <ul style="list-style:none; margin-left:0;">
+                    <li>📄 /root/setup-dual-wifi.sh - скрипт установки</li>
+                    <li>📄 /etc/NetworkManager/system-connections/WiFi-Location1.nmconnection</li>
+                    <li>📄 /etc/NetworkManager/system-connections/WiFi-Location2.nmconnection</li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 Orange Pi WiFi Manual Setup Guide</p>
+            <p>Инструкция по ручной установке через SSH</p>
+        </footer>
+    </div>
+</body>
+</html>

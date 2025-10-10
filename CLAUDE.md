@@ -349,19 +349,38 @@ docker compose up -d
 
 **Полная инструкция**: [deploy/SETUP-ORANGEPI-ZERO3.html](deploy/SETUP-ORANGEPI-ZERO3.html)
 
+### WiFi настройка с приоритетом над Ethernet
+
+**Критично для Orange Pi**: WiFi должен иметь приоритет над Ethernet для мобильности между локациями.
+
+Скрипт автонастройки: [deploy/SSH-WIFI-SETUP.md](deploy/SSH-WIFI-SETUP.md)
+
+Быстрая команда (через SSH):
+```bash
+cd ~
+# Скопировать скрипт из SSH-WIFI-SETUP.md
+chmod +x wifi-priority-setup.sh
+sudo ./wifi-priority-setup.sh
+```
+
+**Ключевые параметры:**
+- WiFi: `autoconnect-priority=100`, `route-metric=100` (высокий приоритет)
+- Ethernet: `autoconnect-priority=-10`, `route-metric=1000` (низкий приоритет)
+
+**Проверка работы:**
+```bash
+ip route show  # WiFi (metric 100) должен быть первым
+nmcli -f NAME,AUTOCONNECT-PRIORITY connection show
+```
+
+Поддержка двух WiFi сетей (например, дом и работа) с автоматическим переключением.
+
 ### Особенности для Orange Pi
-- **WiFi приоритет**: настройка метрик маршрутизации
+- **WiFi приоритет**: метрики маршрутизации (`route-metric`) критичны
 - **Автоподключение к нескольким WiFi**: поддержка разных локаций
 - **Сохранение настроек**: все конфигурации постоянные
 - **Оптимизация для ARM64**: образы собираются под ARM
 - **Время сборки**: 30-60 минут при первом запуске
-
-Инструкция включает:
-- Установку Docker на Debian 11
-- Настройку WiFi приоритета
-- Клонирование с GitHub (Personal Access Token)
-- Проброс портов на роутере
-- Мониторинг и безопасность
 
 ## Особенности разработки
 

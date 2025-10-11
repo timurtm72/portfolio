@@ -382,6 +382,96 @@ nmcli -f NAME,AUTOCONNECT-PRIORITY connection show
 - **Оптимизация для ARM64**: образы собираются под ARM
 - **Время сборки**: 30-60 минут при первом запуске
 
+### Решение проблем с WiFi на Orange Pi Zero 3
+
+**Важно!** Orange Pi Zero 3 использует чип Unisoc WiFi (ранее Spreadtrum) и имеет специфические проблемы с NetworkManager.
+
+#### Проблема: wlan0 в статусе "unavailable"
+
+**Причина:** Конфликт между NetworkManager и ifupdown скриптами wpa_supplicant.
+
+**Диагностика:**
+```bash
+# Проверить статус WiFi
+nmcli device status
+# wlan0 должен быть "connected", НЕ "unavailable"
+
+# Проверить логи NetworkManager
+sudo journalctl -u NetworkManager --no-pager | grep -i wlan | tail -20
+```
+
+**Решение:**
+
+1. **Удалить wlan0 из /etc/network/interfaces:**
+```bash
+sudo nano /etc/network/interfaces
+```
+Оставить только:
+```
+source /etc/network/interfaces.d/*
+# Network is managed by Network manager
+auto lo
+iface lo inet loopback
+```
+
+2. **Удалить ifupdown скрипты wpa_supplicant:**
+```bash
+sudo rm /etc/network/if-down.d/wpasupplicant
+sudo rm /etc/network/if-up.d/wpasupplicant 2>/dev/null
+sudo rm /etc/network/if-pre-up.d/wpasupplicant 2>/dev/null
+sudo rm /etc/network/if-post-down.d/wpasupplicant 2>/dev/null
+```
+
+3. **Размаскировать wpa_supplicant.service:**
+```bash
+sudo systemctl unmask wpa_supplicant
+sudo systemctl start wpa_supplicant
+```
+
+4. **Переименовать старый конфиг wpa_supplicant:**
+```bash
+sudo mv /etc/wpa_supplicant/wpa_supplicant-wlan0.conf \
+         /etc/wpa_supplicant/wpa_supplicant-wlan0.conf.backup
+```
+
+5. **Перезапустить NetworkManager:**
+```bash
+sudo systemctl restart NetworkManager
+sleep 5
+nmcli device status  # wlan0 должен быть доступен
+```
+
+6. **Подключиться к WiFi:**
+```bash
+nmcli device wifi connect "SSID" password "PASSWORD"
+```
+
+7. **Настроить приоритет WiFi над Ethernet:**
+```bash
+nmcli connection modify <WIFI_NAME> connection.autoconnect-priority 100
+nmcli connection modify <WIFI_NAME> ipv4.route-metric 100
+
+nmcli connection modify eth0 connection.autoconnect-priority -10
+nmcli connection modify eth0 ipv4.route-metric 1000
+
+# Применить изменения
+nmcli connection down eth0 && nmcli connection up eth0
+nmcli connection down <WIFI_NAME> && nmcli connection up <WIFI_NAME>
+```
+
+8. **Проверить маршруты:**
+```bash
+ip route show
+# default via <GATEWAY> dev wlan0 proto dhcp metric 100    ← WiFi (приоритет)
+# default via <GATEWAY> dev eth0 proto static metric 1000  ← Ethernet (резерв)
+```
+
+**Ключевые моменты:**
+- Драйвер `unisoc_wifi` встроен в ядро (не модуль)
+- NetworkManager и /etc/network/interfaces НЕ совместимы для WiFi
+- После изменения /etc/network/interfaces требуется перезагрузка для корректной инициализации драйвера
+- wpa_supplicant должен управляться NetworkManager, а не ifupdown
+
 ## Особенности разработки
 
 ### Backend

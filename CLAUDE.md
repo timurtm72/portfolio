@@ -212,29 +212,32 @@ ssh root@103.106.3.98 'bash /opt/portfolio/run-deploy.sh'
 
 **Архитектура:**
 ```
-Интернет (порт 80/443) → [Caddy] → [Frontend:80] → [Backend:8080] → [PostgreSQL:5432]
-                          ↑ SSL        ↑ внутренний   ↑ внутренний     ↑ внутренний
-                          ↑ Rate Limit
+Интернет (порт 80/443) → [Caddy] → [Frontend:3000] → [Backend:8080] → [PostgreSQL:5432]
+                          ↑ SSL/Rate Limit  ↑ localhost only  ↑ Docker network  ↑ Docker network
                           ↑ Security Headers
 ```
 
+**Важно:** Frontend слушает `127.0.0.1:3000:80` (доступен только для Caddy на localhost), Backend и PostgreSQL закрыты от интернета.
+
 **Что защищено:**
-- ✅ Автоматический HTTPS (Let's Encrypt)
+- ✅ Автоматический HTTPS (Let's Encrypt) - требуется домен
 - ✅ Rate Limiting (100 запросов/минуту)
 - ✅ Security Headers (XSS, Clickjacking защита)
-- ✅ Порты 3000/8080/5432 закрыты от интернета
+- ✅ Порт 3000 доступен только через Caddy (127.0.0.1)
+- ✅ Порты 8080/5432 закрыты от интернета (expose, не ports)
 - ✅ Блокировка ботов и сканеров
 
 **Быстрый деплой через GitHub:**
 ```bash
 # На Orange Pi / сервере
+cd ~/portfolio
 git pull origin main
 bash deploy/caddy-deploy.sh
 ```
 
 **Полные инструкции:**
-- Быстрый старт: [deploy/GITHUB-DEPLOY-CADDY.md](deploy/GITHUB-DEPLOY-CADDY.md)
-- Подробная настройка: [deploy/CADDY-SETUP.md](deploy/CADDY-SETUP.md)
+- Пошаговый гайд для начинающих: [deploy/STEP-BY-STEP-DEPLOY.md](deploy/STEP-BY-STEP-DEPLOY.md)
+- Деплой без домена (только IP): [deploy/DEPLOY-WITHOUT-DOMAIN.md](deploy/DEPLOY-WITHOUT-DOMAIN.md)
 
 ### Быстрый старт (БЕЗ Caddy, только для разработки)
 ```bash
@@ -285,35 +288,22 @@ docker stats
 
 **Файл:** [Caddyfile](Caddyfile)
 
-**ВАЖНО:** Перед деплоем измените в Caddyfile:
-```caddyfile
-# Email для Let's Encrypt уведомлений
-{
-    email ваш-email@example.com  # Замените!
-}
+**Текущая конфигурация:** Настроена для работы по IP `http://103.106.3.98` БЕЗ SSL (нет домена).
 
-# Ваш домен
-portfolio.timurtm72.ru {  # Замените на ваш реальный домен!
-    # ... остальное оставьте как есть
-}
-```
+**Если у вас есть домен:**
+1. Откройте Caddyfile
+2. Закомментируйте секцию `http://103.106.3.98 { ... }`
+3. Раскомментируйте секцию с доменом (строки 103-172)
+4. Измените:
+   - `email ваш-email@example.com` на ваш реальный email
+   - `portfolio.example.com` на ваш реальный домен
+5. Удалите строку `auto_https off` из глобальных настроек
+6. Caddy автоматически получит SSL сертификат
 
-**Опциональная защита админки (IP whitelist):**
-```caddyfile
-# Раскомментируйте и укажите ваш IP:
-handle @admin_paths {
-    @allowed {
-        remote_ip 203.0.113.1  # Ваш реальный IP
-    }
-    handle @allowed {
-        reverse_proxy frontend:80
-    }
-    respond "Forbidden" 403
-}
-```
-
-**Если домена нет (только IP):**
-Раскомментируйте секцию `http://103.106.3.98` в Caddyfile (без автоматического SSL).
+**Важные детали:**
+- Caddy проксирует на `localhost:3000` (не на `frontend:80`)
+- Frontend маппится как `127.0.0.1:3000:80` в docker-compose.yml
+- Backend и DB используют `expose` вместо `ports` (закрыты от интернета)
 
 ### ARM64 специфика (Orange Pi, Raspberry Pi)
 
@@ -354,14 +344,27 @@ RUN npm install        # НЕ npm ci --only=production!
 2. Используйте `npm install` вместо `npm ci --only=production`
 3. Финальный образ остается `nginx:alpine` (статика не зависит от платформы)
 
-#### Порты в docker-compose.yml
+#### Порты в docker-compose.yml (С Caddy защитой)
 ```yaml
+caddy:
+  ports:
+    - "80:80"      # HTTP (открыт в интернет)
+    - "443:443"    # HTTPS (открыт в интернет)
+
 frontend:
   ports:
-    - "3000:80"  # Внешний порт 3000, внутренний 80 (nginx)
+    - "127.0.0.1:3000:80"  # Доступен ТОЛЬКО для localhost (Caddy)
+
+backend:
+  expose:
+    - "8080"  # Доступен только внутри Docker сети
+
+db:
+  expose:
+    - "5432"  # Доступен только внутри Docker сети
 ```
 
-**Примечание:** Frontend доступен на порту 3000, а не 80!
+**Критично:** `127.0.0.1:3000:80` означает что порт 3000 привязан к localhost - недоступен из интернета напрямую!
 
 ## База данных - SQL скрипты
 
@@ -392,27 +395,44 @@ git clone https://TOKEN@github.com/timurtm72/portfolio.git
 
 ## Деплой на Orange Pi Zero 3
 
-Поддерживается развертывание на Orange Pi Zero 3 через Docker.
+Поддерживается развертывание на Orange Pi Zero 3 через Docker с защитой Caddy.
 
 ### Характеристики
 - **CPU**: AllWinner H618 (Quad-core ARM Cortex-A53 @ 1.5GHz)
 - **RAM**: 1GB / 1.5GB / 2GB / 4GB LPDDR4
 - **Архитектура**: ARM64 (aarch64)
 - **Сеть**: Gigabit Ethernet, WiFi 6
+- **IP**: 103.106.3.98
+- **Пользователь**: timur
 
-### Быстрый старт
+### Быстрый старт (автоматический скрипт)
 ```bash
-git clone https://github.com/timurtm72/portfolio.git
-cd portfolio
+ssh timur@103.106.3.98
+cd ~/portfolio
+git pull origin main
 
-cp backend/env.example backend/.env
-cp frontend/env.example frontend/.env
+# Создать .env файлы (ВАЖНО! Они не в Git)
+nano backend/.env  # Заполнить пароли
+nano frontend/.env
 
-docker compose build  # 30-60 минут
-docker compose up -d
+# Запустить автоматический деплой
+bash deploy/caddy-deploy.sh
 ```
 
-**Полная инструкция**: [deploy/SETUP-ORANGEPI-ZERO3.html](deploy/SETUP-ORANGEPI-ZERO3.html)
+**Полная пошаговая инструкция для начинающих:** [deploy/STEP-BY-STEP-DEPLOY.md](deploy/STEP-BY-STEP-DEPLOY.md)
+
+### Важные особенности деплоя на Orange Pi
+
+1. **Время сборки:** 30-60 минут при первой сборке (ARM64 медленнее x86)
+2. **Firewall:** Порты 3000/8080/5432 должны быть закрыты через UFW
+3. **Переменные окружения:** `.env` файлы создаются вручную на сервере (НЕ в Git!)
+4. **Docker проблемы:** При ошибках iptables выполните:
+   ```bash
+   sudo systemctl stop docker
+   sudo iptables -t nat -F && sudo iptables -t filter -F
+   sudo iptables -t nat -X && sudo iptables -t filter -X
+   sudo systemctl start docker
+   ```
 
 ### WiFi настройка с приоритетом над Ethernet
 

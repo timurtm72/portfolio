@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git и GitHub - Полное руководство</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #24243e 0%, #302b63 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+        header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #f093fb;
+        }
+        .section h2 {
+            color: #24243e;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+        .section h3 {
+            color: #302b63;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .command {
+            background: #24243e;
+            color: #00ff00;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            overflow-x: auto;
+            border: 1px solid #302b63;
+            position: relative;
+            padding-right: 100px;
+        }
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #f093fb;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .copy-btn:hover {
+            background: #f5576c;
+            transform: translateY(-50%) scale(1.05);
+        }
+        .copy-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        .copy-btn.copied {
+            background: #28a745;
+        }
+        .description {
+            color: #555;
+            margin: 8px 0;
+            padding-left: 10px;
+        }
+        .note {
+            background: #e8eaf6;
+            border-left: 4px solid #f093fb;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .note strong {
+            color: #302b63;
+        }
+        .warning {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .warning strong {
+            color: #e65100;
+        }
+        .example {
+            background: #fce4ec;
+            border-left: 4px solid #f093fb;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .example strong {
+            color: #24243e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .example pre {
+            background: #24243e;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.4;
+        }
+        ul {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+        ul li {
+            margin: 8px 0;
+        }
+        footer {
+            background: #24243e;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+        .toc {
+            background: #f8f9fa;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 8px;
+            border: 2px solid #f093fb;
+        }
+        .toc h2 {
+            color: #24243e;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8em;
+        }
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .toc-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #f093fb;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #24243e;
+            display: block;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .toc-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(240, 147, 251, 0.3);
+            border-left-color: #f5576c;
+        }
+        .toc-item span {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        .back-to-top {
+            display: inline-block;
+            background: #f093fb;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        .back-to-top:hover {
+            background: #f5576c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        table th {
+            background: #f093fb;
+            color: white;
+            font-weight: bold;
+        }
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        table tr:hover {
+            background: #fce4ec;
+        }
+    </style>
+    <script>
+        function copyCommand(button) {
+            const commandDiv = button.parentElement;
+            const commandText = commandDiv.childNodes[0].textContent.trim();
+            
+            navigator.clipboard.writeText(commandText).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Скопировано!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Ошибка копирования: ', err);
+                button.textContent = 'Ошибка!';
+                setTimeout(() => {
+                    button.textContent = 'Копировать';
+                }, 2000);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔀 Git и GitHub</h1>
+            <p>Полное руководство по командам с примерами</p>
+        </header>
+
+        <div class="content">
+            <div id="toc" class="toc">
+                <h2>📑 Содержание</h2>
+                <div class="toc-grid">
+                    <a href="#setup" class="toc-item">
+                        <span>⚙️</span>
+                        <strong>Установка и настройка</strong>
+                    </a>
+                    <a href="#basics" class="toc-item">
+                        <span>📚</span>
+                        <strong>Основы Git</strong>
+                    </a>
+                    <a href="#commits" class="toc-item">
+                        <span>💾</span>
+                        <strong>Коммиты</strong>
+                    </a>
+                    <a href="#branches" class="toc-item">
+                        <span>🌿</span>
+                        <strong>Ветки</strong>
+                    </a>
+                    <a href="#remote" class="toc-item">
+                        <span>☁️</span>
+                        <strong>Удаленные репозитории</strong>
+                    </a>
+                    <a href="#github" class="toc-item">
+                        <span>🐙</span>
+                        <strong>Работа с GitHub</strong>
+                    </a>
+                    <a href="#collaboration" class="toc-item">
+                        <span>👥</span>
+                        <strong>Совместная работа</strong>
+                    </a>
+                    <a href="#history" class="toc-item">
+                        <span>📜</span>
+                        <strong>История и откат</strong>
+                    </a>
+                    <a href="#advanced" class="toc-item">
+                        <span>🔧</span>
+                        <strong>Продвинутые команды</strong>
+                    </a>
+                    <a href="#github-cli" class="toc-item">
+                        <span>⌨️</span>
+                        <strong>GitHub CLI</strong>
+                    </a>
+                    <a href="#tips" class="toc-item">
+                        <span>💡</span>
+                        <strong>Советы и трюки</strong>
+                    </a>
+                    <a href="#workflows" class="toc-item">
+                        <span>🔄</span>
+                        <strong>Рабочие процессы</strong>
+                    </a>
+                </div>
+            </div>
+
+            <div id="setup" class="section">
+                <h2>⚙️ Установка и настройка</h2>
+                
+                <h3>Установка Git</h3>
+                <div class="command">sudo apt update && sudo apt install git<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает Git в Debian/Ubuntu</div>
+
+                <h3>Проверка версии</h3>
+                <div class="command">git --version<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает установленную версию Git</div>
+
+                <h3>Настройка имени пользователя</h3>
+                <div class="command">git config --global user.name "Ваше Имя"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает имя для коммитов</div>
+
+                <h3>Настройка email</h3>
+                <div class="command">git config --global user.email "your.email@example.com"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает email для коммитов</div>
+
+                <h3>Просмотр конфигурации</h3>
+                <div class="command">git config --list<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все настройки Git</div>
+
+                <h3>Редактор по умолчанию</h3>
+                <div class="command">git config --global core.editor nano<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает nano как редактор по умолчанию</div>
+
+                <h3>Цветной вывод</h3>
+                <div class="command">git config --global color.ui auto<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Включает цветной вывод команд</div>
+
+                <h3>Настройка алиасов</h3>
+                <div class="command">git config --global alias.st status<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт алиас: git st вместо git status</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Полная первоначальная настройка</strong>
+                    <pre># Установка Git
+sudo apt update && sudo apt install git
+
+# Настройка пользователя
+git config --global user.name "Иван Иванов"
+git config --global user.email "ivan@example.com"
+
+# Настройка редактора
+git config --global core.editor nano
+
+# Включение цвета
+git config --global color.ui auto
+
+# Полезные алиасы
+git config --global alias.co checkout
+git config --global alias.br branch
+git config --global alias.ci commit
+git config --global alias.st status
+git config --global alias.unstage 'reset HEAD --'
+git config --global alias.last 'log -1 HEAD'
+
+# Проверка настроек
+git config --list</pre>
+                </div>
+
+                <h3>Настройка SSH ключа для GitHub</h3>
+                <div class="command">ssh-keygen -t ed25519 -C "your.email@example.com"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Генерирует SSH ключ</div>
+
+                <h3>Копирование публичного ключа</h3>
+                <div class="command">cat ~/.ssh/id_ed25519.pub<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает публичный ключ для добавления на GitHub</div>
+
+                <h3>Тест SSH соединения с GitHub</h3>
+                <div class="command">ssh -T git@github.com<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Проверяет подключение к GitHub</div>
+
+                <div class="note">
+                    <strong>💡 Уровни конфигурации Git:</strong>
+                    <ul>
+                        <li><strong>--system</strong> - для всех пользователей системы (/etc/gitconfig)</li>
+                        <li><strong>--global</strong> - для текущего пользователя (~/.gitconfig)</li>
+                        <li><strong>--local</strong> - для конкретного репозитория (.git/config)</li>
+                    </ul>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="basics" class="section">
+                <h2>📚 Основы Git</h2>
+                
+                <h3>Создание нового репозитория</h3>
+                <div class="command">git init<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Инициализирует Git репозиторий в текущей директории</div>
+
+                <h3>Клонирование репозитория</h3>
+                <div class="command">git clone https://github.com/user/repo.git<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Клонирует удаленный репозиторий</div>
+
+                <h3>Клонирование в конкретную папку</h3>
+                <div class="command">git clone https://github.com/user/repo.git my-folder<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Клонирует репозиторий в папку my-folder</div>
+
+                <h3>Статус репозитория</h3>
+                <div class="command">git status<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает состояние файлов (изменены, добавлены, удалены)</div>
+
+                <h3>Краткий статус</h3>
+                <div class="command">git status -s<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает статус в сокращённом виде</div>
+
+                <h3>Добавление файла в staging</h3>
+                <div class="command">git add файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет файл в индекс для коммита</div>
+
+                <h3>Добавление всех файлов</h3>
+                <div class="command">git add .<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет все изменённые файлы</div>
+
+                <h3>Добавление по маске</h3>
+                <div class="command">git add *.js<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет все файлы .js</div>
+
+                <h3>Интерактивное добавление</h3>
+                <div class="command">git add -p<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Позволяет выбрать части файла для добавления</div>
+
+                <h3>Удаление файла</h3>
+                <div class="command">git rm файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет файл и добавляет это изменение в staging</div>
+
+                <h3>Удаление из Git, но не из файловой системы</h3>
+                <div class="command">git rm --cached файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет файл из Git, но оставляет в папке</div>
+
+                <h3>Переименование файла</h3>
+                <div class="command">git mv старое-имя.txt новое-имя.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переименовывает файл в Git</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Создание первого репозитория</strong>
+                    <pre># Создаём директорию проекта
+mkdir my-project
+cd my-project
+
+# Инициализируем Git
+git init
+
+# Создаём файл
+echo "# My Project" > README.md
+
+# Добавляем в staging
+git add README.md
+
+# Создаём первый коммит
+git commit -m "Initial commit"
+
+# Проверяем статус
+git status
+# Должно быть: nothing to commit, working tree clean</pre>
+                </div>
+
+                <h3>Просмотр изменений</h3>
+                <div class="command">git diff<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает изменения в файлах (не в staging)</div>
+
+                <h3>Изменения в staging</h3>
+                <div class="command">git diff --staged<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает изменения, добавленные в staging</div>
+
+                <h3>Игнорирование файлов (.gitignore)</h3>
+                <div class="command">nano .gitignore<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт/редактирует файл .gitignore</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Содержимое .gitignore</strong>
+                    <pre># Логи
+*.log
+logs/
+
+# Зависимости
+node_modules/
+vendor/
+
+# Конфигурационные файлы
+.env
+config.local.js
+
+# Файлы IDE
+.vscode/
+.idea/
+*.swp
+
+# Операционная система
+.DS_Store
+Thumbs.db
+
+# Временные файлы
+*.tmp
+temp/
+
+# Скомпилированные файлы
+*.o
+*.class
+dist/
+build/</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="commits" class="section">
+                <h2>💾 Коммиты</h2>
+                
+                <h3>Создание коммита</h3>
+                <div class="command">git commit -m "Описание изменений"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт коммит с сообщением</div>
+
+                <h3>Многострочное сообщение</h3>
+                <div class="command">git commit<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Открывает редактор для детального сообщения</div>
+
+                <h3>Коммит с добавлением всех изменений</h3>
+                <div class="command">git commit -am "Сообщение"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет все изменённые файлы и создаёт коммит</div>
+
+                <h3>Изменение последнего коммита</h3>
+                <div class="command">git commit --amend -m "Новое сообщение"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Изменяет сообщение последнего коммита</div>
+
+                <h3>Добавление файлов в последний коммит</h3>
+                <div class="command">git add забытый-файл.txt && git commit --amend --no-edit<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет файл в последний коммит без изменения сообщения</div>
+
+                <h3>Просмотр истории коммитов</h3>
+                <div class="command">git log<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает историю коммитов</div>
+
+                <h3>Краткая история</h3>
+                <div class="command">git log --oneline<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает по одному коммиту на строку</div>
+
+                <h3>История с графиком</h3>
+                <div class="command">git log --graph --oneline --all<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает графическое представление веток</div>
+
+                <h3>Последние N коммитов</h3>
+                <div class="command">git log -5<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает последние 5 коммитов</div>
+
+                <h3>История конкретного файла</h3>
+                <div class="command">git log -- файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает коммиты, изменившие файл</div>
+
+                <h3>Поиск в коммитах</h3>
+                <div class="command">git log --grep="исправление"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Ищет коммиты по тексту сообщения</div>
+
+                <h3>Коммиты конкретного автора</h3>
+                <div class="command">git log --author="Имя Автора"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает коммиты определённого автора</div>
+
+                <h3>Изменения в коммите</h3>
+                <div class="command">git show HEAD<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает последний коммит с изменениями</div>
+
+                <h3>Конкретный коммит</h3>
+                <div class="command">git show abc1234<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает коммит по хешу</div>
+
+                <div class="note">
+                    <strong>💡 Правила хороших коммитов:</strong>
+                    <ul>
+                        <li><strong>Используйте повелительное наклонение:</strong> "Добавить функцию", а не "Добавлена функция"</li>
+                        <li><strong>Первая строка до 50 символов:</strong> краткое описание</li>
+                        <li><strong>Пустая строка после первой:</strong> затем детальное описание</li>
+                        <li><strong>Атомарность:</strong> один коммит = одна логическая единица изменений</li>
+                        <li><strong>Осмысленность:</strong> "Исправить баг" → "Исправить ошибку валидации email"</li>
+                    </ul>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Структура хорошего коммита</strong>
+                    <pre># Краткое описание (до 50 символов)
+Добавить валидацию формы регистрации
+
+# Пустая строка
+
+# Детальное описание (при необходимости)
+- Добавлена проверка email
+- Добавлена проверка сложности пароля
+- Минимальная длина пароля 8 символов
+- Обязательное наличие цифр и букв
+
+# Связанные issues (если есть)
+Fixes #123</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="branches" class="section">
+                <h2>🌿 Ветки (Branches)</h2>
+                
+                <h3>Список веток</h3>
+                <div class="command">git branch<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все локальные ветки</div>
+
+                <h3>Все ветки (включая удалённые)</h3>
+                <div class="command">git branch -a<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает локальные и удалённые ветки</div>
+
+                <h3>Создание новой ветки</h3>
+                <div class="command">git branch feature-login<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт новую ветку feature-login</div>
+
+                <h3>Переключение на ветку</h3>
+                <div class="command">git checkout feature-login<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переключается на ветку feature-login</div>
+
+                <h3>Создание и переключение (одной командой)</h3>
+                <div class="command">git checkout -b feature-payment<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт ветку feature-payment и переключается на неё</div>
+
+                <h3>Новый способ (с Git 2.23+)</h3>
+                <div class="command">git switch feature-login<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переключается на ветку (новая команда)</div>
+
+                <h3>Создание и переключение (новый способ)</h3>
+                <div class="command">git switch -c feature-payment<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт и переключается на ветку</div>
+
+                <h3>Переименование ветки</h3>
+                <div class="command">git branch -m старое-имя новое-имя<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переименовывает ветку</div>
+
+                <h3>Переименование текущей ветки</h3>
+                <div class="command">git branch -m новое-имя<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переименовывает текущую ветку</div>
+
+                <h3>Удаление ветки</h3>
+                <div class="command">git branch -d feature-login<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет ветку (безопасно, только если слита)</div>
+
+                <h3>Принудительное удаление</h3>
+                <div class="command">git branch -D feature-login<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет ветку принудительно</div>
+
+                <h3>Слияние ветки</h3>
+                <div class="command">git merge feature-login<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Сливает ветку feature-login в текущую ветку</div>
+
+                <h3>Слияние без fast-forward</h3>
+                <div class="command">git merge --no-ff feature-login<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт merge commit даже при возможности fast-forward</div>
+
+                <h3>Отмена слияния</h3>
+                <div class="command">git merge --abort<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отменяет слияние при конфликтах</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Типичный workflow с ветками</strong>
+                    <pre># Находимся в ветке main
+git checkout main
+
+# Создаём и переключаемся на новую ветку для функции
+git checkout -b feature-user-profile
+
+# Работаем, делаем изменения
+echo "Profile page" > profile.html
+git add profile.html
+git commit -m "Добавить страницу профиля"
+
+# Ещё работаем
+echo "Settings" > settings.html
+git add settings.html
+git commit -m "Добавить страницу настроек"
+
+# Возвращаемся в main
+git checkout main
+
+# Сливаем изменения
+git merge feature-user-profile
+
+# Удаляем ветку (она больше не нужна)
+git branch -d feature-user-profile</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Разрешение конфликтов</strong>
+                    <pre># Пытаемся слить ветку
+git merge feature-branch
+# CONFLICT (content): Merge conflict in file.txt
+
+# Смотрим конфликтующие файлы
+git status
+
+# Редактируем файл, разрешаем конфликт
+# Убираем маркеры <<<<<<< ======= >>>>>>>
+nano file.txt
+
+# Добавляем разрешённые файлы
+git add file.txt
+
+# Завершаем слияние
+git commit -m "Слить feature-branch, разрешить конфликты"
+
+# Или отменяем слияние
+git merge --abort</pre>
+                </div>
+
+                <h3>Rebase (перебазирование)</h3>
+                <div class="command">git rebase main<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Перемещает коммиты текущей ветки на вершину main</div>
+
+                <h3>Интерактивный rebase</h3>
+                <div class="command">git rebase -i HEAD~3<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Позволяет редактировать последние 3 коммита</div>
+
+                <h3>Отмена rebase</h3>
+                <div class="command">git rebase --abort<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отменяет rebase при проблемах</div>
+
+                <div class="warning">
+                    <strong>⚠️ Важно:</strong> Никогда не делайте rebase публичных веток! Rebase переписывает историю, что может создать проблемы для других разработчиков. Используйте rebase только для локальных веток или до push.
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="remote" class="section">
+                <h2>☁️ Удалённые репозитории</h2>
+                
+                <h3>Список удалённых репозиториев</h3>
+                <div class="command">git remote -v<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все удалённые репозитории с URL</div>
+
+                <h3>Добавление удалённого репозитория</h3>
+                <div class="command">git remote add origin https://github.com/user/repo.git<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет удалённый репозиторий с именем origin</div>
+
+                <h3>Изменение URL удалённого репозитория</h3>
+                <div class="command">git remote set-url origin https://github.com/user/new-repo.git<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Изменяет URL удалённого репозитория</div>
+
+                <h3>Удаление удалённого репозитория</h3>
+                <div class="command">git remote remove origin<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет удалённый репозиторий</div>
+
+                <h3>Информация об удалённом репозитории</h3>
+                <div class="command">git remote show origin<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает детальную информацию об origin</div>
+
+                <h3>Получение изменений (fetch)</h3>
+                <div class="command">git fetch origin<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Загружает изменения, но не сливает их</div>
+
+                <h3>Получение и слияние (pull)</h3>
+                <div class="command">git pull origin main<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Загружает и сливает изменения из ветки main</div>
+
+                <h3>Pull с rebase</h3>
+                <div class="command">git pull --rebase origin main<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Загружает изменения и делает rebase вместо merge</div>
+
+                <h3>Отправка изменений (push)</h3>
+                <div class="command">git push origin main<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отправляет коммиты в удалённую ветку main</div>
+
+                <h3>Отправка новой ветки</h3>
+                <div class="command">git push -u origin feature-branch<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отправляет новую ветку и устанавливает отслеживание</div>
+
+                <h3>Принудительная отправка</h3>
+                <div class="command">git push --force origin main<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Принудительно перезаписывает удалённую ветку</div>
+
+                <h3>Безопасная принудительная отправка</h3>
+                <div class="command">git push --force-with-lease origin main<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Безопаснее --force, проверяет изменения других</div>
+
+                <h3>Удаление удалённой ветки</h3>
+                <div class="command">git push origin --delete feature-branch<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет ветку на удалённом сервере</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Связывание локального репозитория с GitHub</strong>
+                    <pre># Создаём локальный репозиторий
+git init
+echo "# My Project" > README.md
+git add README.md
+git commit -m "Initial commit"
+
+# Добавляем удалённый репозиторий
+git remote add origin https://github.com/username/repo.git
+
+# Отправляем изменения
+git push -u origin main
+
+# Проверяем подключение
+git remote -v</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Работа с форком</strong>
+                    <pre># Клонируем свой форк
+git clone https://github.com/your-username/repo.git
+cd repo
+
+# Добавляем оригинальный репозиторий как upstream
+git remote add upstream https://github.com/original-owner/repo.git
+
+# Получаем изменения из upstream
+git fetch upstream
+
+# Сливаем изменения из upstream/main в свой main
+git checkout main
+git merge upstream/main
+
+# Отправляем обновления в свой форк
+git push origin main</pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Разница между fetch и pull:</strong>
+                    <ul>
+                        <li><strong>git fetch</strong> - загружает изменения, но НЕ сливает их. Безопасно для просмотра изменений</li>
+                        <li><strong>git pull</strong> - загружает И сливает изменения. Эквивалентно: git fetch + git merge</li>
+                        <li><strong>git pull --rebase</strong> - загружает и делает rebase. Создаёт более чистую историю</li>
+                    </ul>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="github" class="section">
+                <h2>🐙 Работа с GitHub</h2>
+                
+                <h3>Создание репозитория на GitHub</h3>
+                <div class="description">1. Перейдите на github.com<br>2. Нажмите "New repository"<br>3. Заполните название и описание<br>4. Выберите публичный или приватный<br>5. Нажмите "Create repository"</div>
+
+                <h3>Клонирование через HTTPS</h3>
+                <div class="command">git clone https://github.com/username/repo.git<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Клонирует репозиторий через HTTPS</div>
+
+                <h3>Клонирование через SSH</h3>
+                <div class="command">git clone git@github.com:username/repo.git<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Клонирует через SSH (требуется настроенный ключ)</div>
+
+                <h3>Fork репозитория</h3>
+                <div class="description">1. Откройте репозиторий на GitHub<br>2. Нажмите кнопку "Fork" вверху справа<br>3. Выберите свой аккаунт<br>4. GitHub создаст копию репозитория</div>
+
+                <h3>Создание Pull Request</h3>
+                <div class="description">1. Отправьте изменения в свою ветку: git push origin feature-branch<br>2. На GitHub откройте свой репозиторий<br>3. Нажмите "Compare & pull request"<br>4. Заполните описание изменений<br>5. Нажмите "Create pull request"</div>
+
+                <h3>Синхронизация форка</h3>
+                <div class="command">git fetch upstream && git merge upstream/main<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Обновляет форк из оригинального репозитория</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Вклад в open-source проект</strong>
+                    <pre># 1. Форкаем репозиторий через веб-интерфейс GitHub
+
+# 2. Клонируем свой форк
+git clone https://github.com/your-username/project.git
+cd project
+
+# 3. Добавляем upstream
+git remote add upstream https://github.com/original-owner/project.git
+
+# 4. Создаём ветку для изменений
+git checkout -b fix-typo
+
+# 5. Делаем изменения
+echo "Fixed typo" > file.txt
+git add file.txt
+git commit -m "Исправить опечатку в file.txt"
+
+# 6. Отправляем в свой форк
+git push origin fix-typo
+
+# 7. Создаём Pull Request через веб-интерфейс
+
+# 8. После мерджа синхронизируем форк
+git checkout main
+git fetch upstream
+git merge upstream/main
+git push origin main
+
+# 9. Удаляем ветку
+git branch -d fix-typo
+git push origin --delete fix-typo</pre>
+                </div>
+
+                <h3>GitHub Issues</h3>
+                <div class="description">Issues - это система отслеживания задач на GitHub:<br>
+                - Баги<br>
+                - Новые функции<br>
+                - Вопросы<br>
+                - Обсуждения</div>
+
+                <h3>Связь коммита с Issue</h3>
+                <div class="command">git commit -m "Исправить баг со входом, fixes #42"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Автоматически закрывает Issue #42 при мердже</div>
+
+                <div class="note">
+                    <strong>💡 Ключевые слова для закрытия Issues:</strong>
+                    <ul>
+                        <li><strong>close, closes, closed</strong> - закрывает issue</li>
+                        <li><strong>fix, fixes, fixed</strong> - закрывает issue</li>
+                        <li><strong>resolve, resolves, resolved</strong> - закрывает issue</li>
+                    </ul>
+                    Пример: "Fixes #123" в сообщении коммита автоматически закроет Issue #123
+                </div>
+
+                <h3>GitHub Actions (базовый пример)</h3>
+                <div class="description">GitHub Actions - это CI/CD платформа для автоматизации</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Простой GitHub Actions workflow</strong>
+                    <pre># Создаём файл .github/workflows/test.yml
+
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    
+    - name: Install dependencies
+      run: npm install
+    
+    - name: Run tests
+      run: npm test</pre>
+                </div>
+
+                <h3>Защищённые ветки</h3>
+                <div class="description">Settings → Branches → Add rule:<br>
+                - Требовать review перед мерджем<br>
+                - Требовать успешные тесты<br>
+                - Запретить force push<br>
+                - Требовать линейную историю</div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="collaboration" class="section">
+                <h2>👥 Совместная работа</h2>
+                
+                <h3>Просмотр авторов файла</h3>
+                <div class="command">git blame файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает, кто и когда изменял каждую строку</div>
+
+                <h3>Сокращённый формат blame</h3>
+                <div class="command">git blame -L 10,20 файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию только для строк 10-20</div>
+
+                <h3>Временное сохранение изменений (stash)</h3>
+                <div class="command">git stash<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Сохраняет текущие изменения в стек</div>
+
+                <h3>Stash с сообщением</h3>
+                <div class="command">git stash save "WIP: работа над функцией"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Сохраняет stash с описанием</div>
+
+                <h3>Список stash</h3>
+                <div class="command">git stash list<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все сохранённые stash</div>
+
+                <h3>Применение stash</h3>
+                <div class="command">git stash apply<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Применяет последний stash (не удаляет его)</div>
+
+                <h3>Применение и удаление stash</h3>
+                <div class="command">git stash pop<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Применяет и удаляет последний stash</div>
+
+                <h3>Удаление stash</h3>
+                <div class="command">git stash drop<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет последний stash</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Использование stash</strong>
+                    <pre># Работаем над функцией
+echo "половина работы" > feature.js
+git add feature.js
+
+# Внезапно нужно срочно исправить баг в main
+# Сохраняем текущую работу
+git stash save "WIP: новая функция"
+
+# Переключаемся на main
+git checkout main
+
+# Исправляем баг
+echo "исправление" > fix.js
+git add fix.js
+git commit -m "Исправить критический баг"
+
+# Возвращаемся к работе над функцией
+git checkout feature-branch
+git stash pop
+
+# Продолжаем работу
+echo "завершение работы" >> feature.js
+git add feature.js
+git commit -m "Завершить новую функцию"</pre>
+                </div>
+
+                <h3>Cherry-pick (применение конкретного коммита)</h3>
+                <div class="command">git cherry-pick abc1234<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Применяет изменения из коммита abc1234 в текущую ветку</div>
+
+                <h3>Cherry-pick без коммита</h3>
+                <div class="command">git cherry-pick --no-commit abc1234<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Применяет изменения, но не создаёт коммит</div>
+
+                <h3>Просмотр изменений между ветками</h3>
+                <div class="command">git diff main..feature-branch<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает различия между ветками</div>
+
+                <h3>Коммиты в одной ветке, но не в другой</h3>
+                <div class="command">git log main..feature-branch<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает коммиты только в feature-branch</div>
+
+                <h3>Очистка удалённых веток</h3>
+                <div class="command">git remote prune origin<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет ссылки на удалённые ветки, которых больше нет на сервере</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Workflow команды</strong>
+                    <pre># Разработчик A: Создаёт функцию
+git checkout -b feature-auth
+# ... работа ...
+git commit -m "Добавить аутентификацию"
+git push origin feature-auth
+# Создаёт Pull Request
+
+# Разработчик B: Код ревью
+# Просматривает изменения на GitHub
+# Оставляет комментарии
+
+# Разработчик A: Вносит правки
+git checkout feature-auth
+# ... исправления ...
+git commit -m "Исправить замечания из ревью"
+git push origin feature-auth
+
+# Разработчик B: Одобряет и мерджит
+# Нажимает "Merge pull request" на GitHub
+
+# Разработчик A: Синхронизируется
+git checkout main
+git pull origin main
+git branch -d feature-auth</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="history" class="section">
+                <h2>📜 История и откат изменений</h2>
+                
+                <h3>Отмена изменений в файле</h3>
+                <div class="command">git restore файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отменяет изменения в файле (не в staging)</div>
+
+                <h3>Старый способ отмены</h3>
+                <div class="command">git checkout -- файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отменяет изменения (устаревший способ)</div>
+
+                <h3>Убрать файл из staging</h3>
+                <div class="command">git restore --staged файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Убирает файл из staging, но сохраняет изменения</div>
+
+                <h3>Старый способ убрать из staging</h3>
+                <div class="command">git reset HEAD файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Убирает из staging (устаревший способ)</div>
+
+                <h3>Откат последнего коммита (сохранить изменения)</h3>
+                <div class="command">git reset --soft HEAD~1<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отменяет коммит, но сохраняет изменения в staging</div>
+
+                <h3>Откат последнего коммита (убрать из staging)</h3>
+                <div class="command">git reset --mixed HEAD~1<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отменяет коммит, изменения остаются, но не в staging</div>
+
+                <h3>Откат последнего коммита (удалить изменения)</h3>
+                <div class="command">git reset --hard HEAD~1<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Полностью удаляет коммит и все изменения</div>
+
+                <h3>Откат к конкретному коммиту</h3>
+                <div class="command">git reset --hard abc1234<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Откатывается к коммиту abc1234, удаляя всё после него</div>
+
+                <h3>Безопасный откат (создаёт новый коммит)</h3>
+                <div class="command">git revert HEAD<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт новый коммит, отменяющий изменения последнего</div>
+
+                <h3>Revert конкретного коммита</h3>
+                <div class="command">git revert abc1234<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт коммит, отменяющий изменения из abc1234</div>
+
+                <div class="warning">
+                    <strong>⚠️ Важно понимать разницу:</strong>
+                    <ul>
+                        <li><strong>git reset</strong> - изменяет историю (опасно для публичных веток!)</li>
+                        <li><strong>git revert</strong> - создаёт новый коммит отмены (безопасно для публичных веток)</li>
+                    </ul>
+                    Используйте <strong>revert</strong> для публичных веток, <strong>reset</strong> только для локальных!
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Откат изменений (разные сценарии)</strong>
+                    <pre># Сценарий 1: Отменить изменения в файле (не добавлен в staging)
+echo "ошибка" > file.txt
+git restore file.txt  # Файл вернётся к последнему коммиту
+
+# Сценарий 2: Убрать файл из staging
+echo "изменение" > file.txt
+git add file.txt
+git restore --staged file.txt  # Убрано из staging, изменения остались
+
+# Сценарий 3: Исправить последний коммит
+git commit -m "Добавить фичу"
+# Ой, забыли файл!
+git add forgotten-file.txt
+git commit --amend --no-edit
+
+# Сценарий 4: Откатить последний коммит (локально)
+git reset --soft HEAD~1  # Коммит отменён, файлы в staging
+# Вносим правки
+git commit -m "Исправленная версия"
+
+# Сценарий 5: Отменить коммит (уже в origin)
+git revert HEAD  # Создаёт новый коммит отмены
+git push origin main  # Безопасно отправляем</pre>
+                </div>
+
+                <h3>Поиск потерянных коммитов (reflog)</h3>
+                <div class="command">git reflog<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает историю всех действий (можно восстановить потерянное)</div>
+
+                <h3>Восстановление после reset</h3>
+                <div class="command">git reset --hard abc1234<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Восстанавливает состояние из reflog</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Восстановление после ошибочного reset</strong>
+                    <pre># Случайно сделали reset
+git reset --hard HEAD~5  # Ой! Удалили 5 коммитов
+
+# Паника! Но не беда, смотрим reflog
+git reflog
+# Находим хеш коммита ДО ошибочного reset
+# Например: abc1234
+
+# Восстанавливаем
+git reset --hard abc1234
+
+# Всё вернулось!</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="advanced" class="section">
+                <h2>🔧 Продвинутые команды</h2>
+                
+                <h3>Поиск по содержимому коммитов</h3>
+                <div class="command">git log -S "функция"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Находит коммиты, где добавлялось/удалялось слово "функция"</div>
+
+                <h3>Поиск по regex в коммитах</h3>
+                <div class="command">git log -G "regex_pattern"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Поиск по регулярному выражению</div>
+
+                <h3>Bisect (поиск проблемного коммита)</h3>
+                <div class="command">git bisect start<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Начинает бинарный поиск проблемного коммита</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Использование git bisect</strong>
+                    <pre># Начинаем bisect
+git bisect start
+
+# Отмечаем текущий коммит как плохой (баг есть)
+git bisect bad
+
+# Отмечаем старый рабочий коммит как хороший
+git bisect good abc1234
+
+# Git переключит на средний коммит
+# Тестируем...
+
+# Если баг есть:
+git bisect bad
+
+# Если бага нет:
+git bisect good
+
+# Повторяем, пока Git не найдёт проблемный коммит
+
+# Завершаем
+git bisect reset</pre>
+                </div>
+
+                <h3>Submodules (подмодули)</h3>
+                <div class="command">git submodule add https://github.com/user/repo.git path/to/submodule<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет другой репозиторий как подмодуль</div>
+
+                <h3>Клонирование с подмодулями</h3>
+                <div class="command">git clone --recursive https://github.com/user/repo.git<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Клонирует репозиторий вместе с подмодулями</div>
+
+                <h3>Обновление подмодулей</h3>
+                <div class="command">git submodule update --remote<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Обновляет все подмодули до последних версий</div>
+
+                <h3>Worktree (несколько рабочих директорий)</h3>
+                <div class="command">git worktree add ../hotfix hotfix-branch<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт дополнительную рабочую директорию для другой ветки</div>
+
+                <h3>Список worktrees</h3>
+                <div class="command">git worktree list<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все рабочие директории</div>
+
+                <h3>Удаление worktree</h3>
+                <div class="command">git worktree remove ../hotfix<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет рабочую директорию</div>
+
+                <h3>Git hooks (хуки)</h3>
+                <div class="description">Хуки - это скрипты, выполняющиеся при определённых событиях Git</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Pre-commit hook (проверка перед коммитом)</strong>
+                    <pre># Создаём файл .git/hooks/pre-commit
+#!/bin/bash
+
+# Проверяем код линтером
+npm run lint
+if [ $? -ne 0 ]; then
+    echo "Lint проверка не пройдена!"
+    exit 1
+fi
+
+# Запускаем тесты
+npm test
+if [ $? -ne 0 ]; then
+    echo "Тесты не пройдены!"
+    exit 1
+fi
+
+echo "Все проверки пройдены!"
+exit 0
+
+# Делаем исполняемым
+chmod +x .git/hooks/pre-commit</pre>
+                </div>
+
+                <h3>Git attributes</h3>
+                <div class="description">Файл .gitattributes определяет атрибуты для путей</div>
+
+                <div class="example">
+                    <strong>📖 Пример: .gitattributes</strong>
+                    <pre># Автоматическая нормализация окончаний строк
+* text=auto
+
+# Бинарные файлы
+*.png binary
+*.jpg binary
+*.pdf binary
+
+# Лингвистика для GitHub
+*.js linguist-language=JavaScript
+*.sql linguist-detectable=true
+
+# Diff для специфичных типов
+*.json diff=json</pre>
+                </div>
+
+                <h3>Архивирование репозитория</h3>
+                <div class="command">git archive --format=zip --output=project.zip main<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт zip-архив ветки main (без .git)</div>
+
+                <h3>Экспорт патчей</h3>
+                <div class="command">git format-patch -1 HEAD<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт патч-файл из последнего коммита</div>
+
+                <h3>Применение патча</h3>
+                <div class="command">git apply 0001-patch-file.patch<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Применяет патч-файл</div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="github-cli" class="section">
+                <h2>⌨️ GitHub CLI</h2>
+                
+                <h3>Установка GitHub CLI</h3>
+                <div class="command">sudo apt install gh<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает GitHub CLI в Debian/Ubuntu</div>
+
+                <h3>Аутентификация</h3>
+                <div class="command">gh auth login<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Выполняет вход в GitHub через CLI</div>
+
+                <h3>Создание репозитория</h3>
+                <div class="command">gh repo create my-project --public<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт публичный репозиторий на GitHub</div>
+
+                <h3>Клонирование репозитория</h3>
+                <div class="command">gh repo clone username/repo<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Клонирует репозиторий</div>
+
+                <h3>Просмотр репозитория в браузере</h3>
+                <div class="command">gh repo view --web<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Открывает репозиторий в браузере</div>
+
+                <h3>Создание Pull Request</h3>
+                <div class="command">gh pr create --title "Новая функция" --body "Описание изменений"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт Pull Request через CLI</div>
+
+                <h3>Список Pull Requests</h3>
+                <div class="command">gh pr list<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все PR в репозитории</div>
+
+                <h3>Просмотр Pull Request</h3>
+                <div class="command">gh pr view 42<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает детали PR #42</div>
+
+                <h3>Checkout Pull Request</h3>
+                <div class="command">gh pr checkout 42<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переключается на ветку PR #42</div>
+
+                <h3>Мердж Pull Request</h3>
+                <div class="command">gh pr merge 42<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Мерджит PR #42</div>
+
+                <h3>Создание Issue</h3>
+                <div class="command">gh issue create --title "Баг в авторизации" --body "Описание бага"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт новый Issue</div>
+
+                <h3>Список Issues</h3>
+                <div class="command">gh issue list<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все открытые Issues</div>
+
+                <h3>Просмотр Issue</h3>
+                <div class="command">gh issue view 15<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает детали Issue #15</div>
+
+                <h3>Закрытие Issue</h3>
+                <div class="command">gh issue close 15<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Закрывает Issue #15</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Полный workflow с GitHub CLI</strong>
+                    <pre># Создаём репозиторий
+gh repo create my-awesome-project --public
+
+# Клонируем его
+gh repo clone my-awesome-project
+cd my-awesome-project
+
+# Работаем над функцией
+git checkout -b feature-new
+echo "New feature" > feature.txt
+git add feature.txt
+git commit -m "Добавить новую функцию"
+git push origin feature-new
+
+# Создаём PR
+gh pr create --title "Добавить новую функцию" \
+             --body "Эта функция делает что-то удивительное"
+
+# Проверяем статус
+gh pr status
+
+# Кто-то оставил комментарий, смотрим
+gh pr view 1
+
+# Всё ок, мерджим
+gh pr merge 1
+
+# Переключаемся обратно на main
+git checkout main
+git pull</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="tips" class="section">
+                <h2>💡 Советы и трюки</h2>
+                
+                <h3>Красивый лог</h3>
+                <div class="command">git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Выводит красивый цветной граф истории</div>
+
+                <h3>Создание алиаса для красивого лога</h3>
+                <div class="command">git config --global alias.lg "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Теперь можно использовать: git lg</div>
+
+                <h3>Подсчёт коммитов по авторам</h3>
+                <div class="command">git shortlog -sn<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает количество коммитов каждого автора</div>
+
+                <h3>Размер репозитория</h3>
+                <div class="command">git count-objects -vH<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает размер репозитория</div>
+
+                <h3>Очистка репозитория</h3>
+                <div class="command">git gc --aggressive --prune=now<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Оптимизирует и очищает репозиторий</div>
+
+                <h3>Удаление больших файлов из истории</h3>
+                <div class="command">git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch большой-файл.zip' --prune-empty --tag-name-filter cat -- --all<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет файл из всей истории (опасно!)</div>
+
+                <div class="note">
+                    <strong>💡 Полезные алиасы Git:</strong>
+                    <pre># Добавьте в ~/.gitconfig
+[alias]
+    st = status
+    co = checkout
+    br = branch
+    ci = commit
+    unstage = reset HEAD --
+    last = log -1 HEAD
+    visual = log --graph --oneline --all
+    amend = commit --amend --no-edit
+    undo = reset HEAD~1 --mixed
+    wipe = !git add -A && git commit -qm 'WIPE SAVEPOINT' && git reset HEAD~1 --hard</pre>
+                </div>
+
+                <h3>Поиск удалённых файлов</h3>
+                <div class="command">git log --all --full-history -- "**/файл.txt"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Находит файл, даже если он был удалён</div>
+
+                <h3>Восстановление удалённого файла</h3>
+                <div class="command">git checkout abc1234 -- путь/к/файлу.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Восстанавливает файл из коммита abc1234</div>
+
+                <h3>Git пустая папка</h3>
+                <div class="description">Git не отслеживает пустые папки. Чтобы сохранить структуру, создайте .gitkeep:</div>
+                <div class="command">touch пустая-папка/.gitkeep<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+
+                <div class="example">
+                    <strong>📖 Пример: .gitkeep для структуры папок</strong>
+                    <pre># Создаём структуру с пустыми папками
+mkdir -p logs cache temp uploads
+
+# Добавляем .gitkeep чтобы Git отслеживал папки
+touch logs/.gitkeep
+touch cache/.gitkeep
+touch temp/.gitkeep
+touch uploads/.gitkeep
+
+# Добавляем в Git
+git add */. gitkeep
+git commit -m "Добавить структуру папок"</pre>
+                </div>
+
+                <h3>Игнорирование локальных изменений</h3>
+                <div class="command">git update-index --assume-unchanged файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Git будет игнорировать изменения в файле</div>
+
+                <h3>Отмена игнорирования</h3>
+                <div class="command">git update-index --no-assume-unchanged файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Возвращает отслеживание файла</div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="workflows" class="section">
+                <h2>🔄 Рабочие процессы (Workflows)</h2>
+                
+                <h3>Git Flow</h3>
+                <div class="description">Классический workflow с несколькими постоянными ветками</div>
+
+                <div class="note">
+                    <strong>💡 Структура Git Flow:</strong>
+                    <ul>
+                        <li><strong>main</strong> - стабильная продакшен версия</li>
+                        <li><strong>develop</strong> - основная ветка разработки</li>
+                        <li><strong>feature/*</strong> - ветки для новых функций</li>
+                        <li><strong>release/*</strong> - подготовка к релизу</li>
+                        <li><strong>hotfix/*</strong> - срочные исправления продакшена</li>
+                    </ul>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Git Flow workflow</strong>
+                    <pre># Инициализация
+git checkout -b develop
+
+# Создание feature
+git checkout -b feature/user-auth develop
+# ... работа ...
+git add .
+git commit -m "Добавить аутентификацию"
+
+# Завершение feature
+git checkout develop
+git merge --no-ff feature/user-auth
+git branch -d feature/user-auth
+git push origin develop
+
+# Создание release
+git checkout -b release/1.0.0 develop
+# ... финальные правки ...
+git commit -am "Bump version to 1.0.0"
+
+# Завершение release
+git checkout main
+git merge --no-ff release/1.0.0
+git tag -a v1.0.0 -m "Release version 1.0.0"
+git checkout develop
+git merge --no-ff release/1.0.0
+git branch -d release/1.0.0
+
+# Hotfix
+git checkout -b hotfix/1.0.1 main
+# ... исправление ...
+git commit -am "Исправить критический баг"
+git checkout main
+git merge --no-ff hotfix/1.0.1
+git tag -a v1.0.1 -m "Hotfix 1.0.1"
+git checkout develop
+git merge --no-ff hotfix/1.0.1
+git branch -d hotfix/1.0.1</pre>
+                </div>
+
+                <h3>GitHub Flow</h3>
+                <div class="description">Упрощённый workflow для быстрой разработки</div>
+
+                <div class="note">
+                    <strong>💡 Принципы GitHub Flow:</strong>
+                    <ul>
+                        <li>Одна main ветка, всегда готовая к деплою</li>
+                        <li>Все фичи в отдельных ветках</li>
+                        <li>Pull Request для каждого изменения</li>
+                        <li>Code review обязателен</li>
+                        <li>Деплой после мерджа в main</li>
+                    </ul>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: GitHub Flow workflow</strong>
+                    <pre># Создаём ветку для функции
+git checkout -b add-search-feature main
+
+# Разрабатываем
+# ... работа ...
+git add .
+git commit -m "Реализовать поиск"
+git push origin add-search-feature
+
+# Создаём Pull Request на GitHub
+gh pr create --title "Добавить функцию поиска"
+
+# После ревью и одобрения - мерджим на GitHub
+
+# Локально обновляемся
+git checkout main
+git pull origin main
+git branch -d add-search-feature
+
+# Деплоим
+# ... процесс деплоя ...</pre>
+                </div>
+
+                <h3>Trunk Based Development</h3>
+                <div class="description">Минималистичный подход - все коммитят в main</div>
+
+                <div class="note">
+                    <strong>💡 Принципы Trunk Based:</strong>
+                    <ul>
+                        <li>Все работают в одной ветке (main/trunk)</li>
+                        <li>Очень короткоживущие ветки (часы, не дни)</li>
+                        <li>Частые коммиты и интеграции</li>
+                        <li>Feature flags для неготовых функций</li>
+                        <li>Сильный акцент на CI/CD и тестирование</li>
+                    </ul>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Сравнение workflows</strong>
+                    <table>
+                        <tr>
+                            <th>Аспект</th>
+                            <th>Git Flow</th>
+                            <th>GitHub Flow</th>
+                            <th>Trunk Based</th>
+                        </tr>
+                        <tr>
+                            <td>Сложность</td>
+                            <td>Высокая</td>
+                            <td>Средняя</td>
+                            <td>Низкая</td>
+                        </tr>
+                        <tr>
+                            <td>Основные ветки</td>
+                            <td>main, develop</td>
+                            <td>main</td>
+                            <td>main</td>
+                        </tr>
+                        <tr>
+                            <td>Жизнь feature-веток</td>
+                            <td>Недели</td>
+                            <td>Дни</td>
+                            <td>Часы</td>
+                        </tr>
+                        <tr>
+                            <td>Подходит для</td>
+                            <td>Релизы с версиями</td>
+                            <td>Continuous Deployment</td>
+                            <td>Высокая скорость</td>
+                        </tr>
+                        <tr>
+                            <td>Размер команды</td>
+                            <td>Средние/большие</td>
+                            <td>Любой</td>
+                            <td>Опытные команды</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Semantic Versioning в Git</strong>
+                    <pre># Создание тега версии
+git tag -a v1.2.3 -m "Release version 1.2.3"
+
+# Отправка тега на GitHub
+git push origin v1.2.3
+
+# Отправка всех тегов
+git push origin --tags
+
+# Список тегов
+git tag -l
+
+# Checkout конкретной версии
+git checkout v1.2.3
+
+# Удаление тега
+git tag -d v1.2.3
+git push origin --delete v1.2.3
+
+# Semantic Versioning: MAJOR.MINOR.PATCH
+# 1.0.0 - Major: несовместимые изменения API
+# 1.1.0 - Minor: новая функциональность (совместима)
+# 1.1.1 - Patch: исправления багов</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div class="note">
+                <strong>🎯 Заключение:</strong><br><br>
+                Git и GitHub - мощные инструменты для контроля версий и совместной работы. Ключ к эффективному использованию:
+                <ul>
+                    <li><strong>Частые коммиты</strong> - делайте атомарные, осмысленные коммиты</li>
+                    <li><strong>Хорошие сообщения</strong> - пишите понятные описания изменений</li>
+                    <li><strong>Ветки для функций</strong> - изолируйте работу над новыми фичами</li>
+                    <li><strong>Code review</strong> - используйте Pull Requests для проверки кода</li>
+                    <li><strong>Синхронизация</strong> - регулярно обновляйтесь из main/develop</li>
+                    <li><strong>Документация</strong> - ведите README и CONTRIBUTING</li>
+                </ul>
+                <br>
+                <strong>Полезные ресурсы:</strong>
+                <ul>
+                    <li>Официальная документация: <a href="https://git-scm.com/doc" target="_blank">git-scm.com/doc</a></li>
+                    <li>GitHub Guides: <a href="https://guides.github.com" target="_blank">guides.github.com</a></li>
+                    <li>Git Book (бесплатно): <a href="https://git-scm.com/book" target="_blank">git-scm.com/book</a></li>
+                    <li>GitHub Skills: <a href="https://skills.github.com" target="_blank">skills.github.com</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>🔀 Git и GitHub - основа современной разработки программного обеспечения</p>
+            <p>2025</p>
+        </footer>
+    </div>
+</body>
+</html>

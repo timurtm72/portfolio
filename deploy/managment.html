@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аппаратное управление и контроль - Debian 11</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #fc5c7d 0%, #6a82fb 100%);
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+        header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #fc5c7d;
+        }
+        .section h2 {
+            color: #232526;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+        .section h3 {
+            color: #414345;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .command {
+            background: #232526;
+            color: #00ff00;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            overflow-x: auto;
+            border: 1px solid #414345;
+            position: relative;
+            padding-right: 100px;
+        }
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #fc5c7d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .copy-btn:hover {
+            background: #6a82fb;
+            transform: translateY(-50%) scale(1.05);
+        }
+        .copy-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        .copy-btn.copied {
+            background: #28a745;
+        }
+        .description {
+            color: #555;
+            margin: 8px 0;
+            padding-left: 10px;
+        }
+        .note {
+            background: #fff3e0;
+            border-left: 4px solid #fc5c7d;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .note strong {
+            color: #bf360c;
+        }
+        .warning {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .warning strong {
+            color: #b71c1c;
+        }
+        .example {
+            background: #f3e5f5;
+            border-left: 4px solid #fc5c7d;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .example strong {
+            color: #232526;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .example pre {
+            background: #232526;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.4;
+        }
+        ul {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+        ul li {
+            margin: 8px 0;
+        }
+        footer {
+            background: #232526;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+        .toc {
+            background: #f8f9fa;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 8px;
+            border: 2px solid #fc5c7d;
+        }
+        .toc h2 {
+            color: #232526;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8em;
+        }
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .toc-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #fc5c7d;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #232526;
+            display: block;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .toc-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(252, 92, 125, 0.3);
+            border-left-color: #6a82fb;
+        }
+        .toc-item span {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        .back-to-top {
+            display: inline-block;
+            background: #fc5c7d;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        .back-to-top:hover {
+            background: #6a82fb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        table th {
+            background: #fc5c7d;
+            color: white;
+            font-weight: bold;
+        }
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        table tr:hover {
+            background: #f3e5f5;
+        }
+    </style>
+    <script>
+        function copyCommand(button) {
+            const commandDiv = button.parentElement;
+            const commandText = commandDiv.childNodes[0].textContent.trim();
+            
+            navigator.clipboard.writeText(commandText).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Скопировано!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Ошибка копирования: ', err);
+                button.textContent = 'Ошибка!';
+                setTimeout(() => {
+                    button.textContent = 'Копировать';
+                }, 2000);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ Аппаратное управление и контроль</h1>
+            <p>Полное руководство для Debian 11</p>
+        </header>
+
+        <div class="content">
+            <div id="toc" class="toc">
+                <h2>📑 Содержание</h2>
+                <div class="toc-grid">
+                    <a href="#system-info" class="toc-item">
+                        <span>💻</span>
+                        <strong>Информация о системе</strong>
+                    </a>
+                    <a href="#cpu" class="toc-item">
+                        <span>🔥</span>
+                        <strong>Процессор (CPU)</strong>
+                    </a>
+                    <a href="#memory" class="toc-item">
+                        <span>🧠</span>
+                        <strong>Память (RAM)</strong>
+                    </a>
+                    <a href="#disks" class="toc-item">
+                        <span>💾</span>
+                        <strong>Диски и разделы</strong>
+                    </a>
+                    <a href="#usb" class="toc-item">
+                        <span>🔌</span>
+                        <strong>USB устройства</strong>
+                    </a>
+                    <a href="#pci" class="toc-item">
+                        <span>🎰</span>
+                        <strong>PCI устройства</strong>
+                    </a>
+                    <a href="#gpu" class="toc-item">
+                        <span>🎮</span>
+                        <strong>Видеокарты</strong>
+                    </a>
+                    <a href="#audio" class="toc-item">
+                        <span>🔊</span>
+                        <strong>Аудио устройства</strong>
+                    </a>
+                    <a href="#sensors" class="toc-item">
+                        <span>🌡️</span>
+                        <strong>Датчики и температура</strong>
+                    </a>
+                    <a href="#power" class="toc-item">
+                        <span>🔋</span>
+                        <strong>Управление питанием</strong>
+                    </a>
+                    <a href="#kernel" class="toc-item">
+                        <span>🐧</span>
+                        <strong>Модули ядра</strong>
+                    </a>
+                    <a href="#monitoring" class="toc-item">
+                        <span>📊</span>
+                        <strong>Мониторинг системы</strong>
+                    </a>
+                </div>
+            </div>
+
+            <div id="system-info" class="section">
+                <h2>💻 Информация о системе</h2>
+                
+                <h3>Общая информация о системе</h3>
+                <div class="command">uname -a<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию о ядре, архитектуре, хостнейме</div>
+
+                <h3>Версия ядра Linux</h3>
+                <div class="command">uname -r<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает только версию ядра</div>
+
+                <h3>Архитектура системы</h3>
+                <div class="command">uname -m<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает архитектуру (x86_64, aarch64, и т.д.)</div>
+
+                <h3>Информация о дистрибутиве</h3>
+                <div class="command">lsb_release -a<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию о версии Debian</div>
+
+                <h3>Альтернативный способ</h3>
+                <div class="command">cat /etc/os-release<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает детальную информацию о системе</div>
+
+                <h3>Информация о hostname</h3>
+                <div class="command">hostname<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает имя компьютера</div>
+
+                <h3>Изменение hostname</h3>
+                <div class="command">sudo hostnamectl set-hostname new-hostname<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает новое имя компьютера</div>
+
+                <h3>Время работы системы (uptime)</h3>
+                <div class="command">uptime<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает, сколько времени система работает без перезагрузки</div>
+
+                <h3>Дата последней загрузки</h3>
+                <div class="command">who -b<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает дату и время последней загрузки</div>
+
+                <h3>Детальная информация о системе (dmidecode)</h3>
+                <div class="command">sudo dmidecode -t system<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию о производителе, модели системы</div>
+
+                <h3>Информация о BIOS</h3>
+                <div class="command">sudo dmidecode -t bios<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию о BIOS/UEFI</div>
+
+                <h3>Информация о материнской плате</h3>
+                <div class="command">sudo dmidecode -t baseboard<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает производителя и модель материнской платы</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Сбор полной информации о системе</strong>
+                    <pre># Создаём скрипт system-info.sh
+cat &lt;&lt;'EOF' &gt; system-info.sh
+#!/bin/bash
+echo "=== Информация о системе ==="
+echo "Hostname: $(hostname)"
+echo "Дистрибутив: $(lsb_release -ds)"
+echo "Ядро: $(uname -r)"
+echo "Архитектура: $(uname -m)"
+echo "Uptime: $(uptime -p)"
+echo ""
+echo "=== Производитель ==="
+sudo dmidecode -s system-manufacturer
+echo "Модель: $(sudo dmidecode -s system-product-name)"
+echo "BIOS: $(sudo dmidecode -s bios-version)"
+echo ""
+echo "=== CPU ==="
+lscpu | grep "Model name"
+echo ""
+echo "=== Память ==="
+free -h | grep "Mem:"
+echo ""
+echo "=== Диски ==="
+df -h | grep "^/dev"
+EOF
+
+chmod +x system-info.sh
+./system-info.sh</pre>
+                </div>
+
+                <h3>Детальная информация через inxi</h3>
+                <div class="command">sudo apt install inxi<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает мощный инструмент для сбора информации</div>
+
+                <div class="command">inxi -Fxz<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает полную информацию о системе</div>
+
+                <div class="note">
+                    <strong>💡 Полезные опции dmidecode:</strong>
+                    <ul>
+                        <li><strong>-t bios</strong> - информация о BIOS</li>
+                        <li><strong>-t system</strong> - информация о системе</li>
+                        <li><strong>-t baseboard</strong> - материнская плата</li>
+                        <li><strong>-t chassis</strong> - корпус</li>
+                        <li><strong>-t processor</strong> - процессор</li>
+                        <li><strong>-t memory</strong> - память</li>
+                        <li><strong>-t cache</strong> - кэш процессора</li>
+                    </ul>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="cpu" class="section">
+                <h2>🔥 Процессор (CPU)</h2>
+                
+                <h3>Информация о процессоре</h3>
+                <div class="command">lscpu<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает детальную информацию о CPU</div>
+
+                <h3>Альтернативный способ</h3>
+                <div class="command">cat /proc/cpuinfo<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию из ядра о каждом ядре процессора</div>
+
+                <h3>Количество ядер</h3>
+                <div class="command">nproc<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает количество доступных ядер</div>
+
+                <h3>Количество физических процессоров</h3>
+                <div class="command">grep "physical id" /proc/cpuinfo | sort -u | wc -l<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Подсчитывает количество физических процессоров</div>
+
+                <h3>Модель процессора</h3>
+                <div class="command">grep "model name" /proc/cpuinfo | head -1<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает модель CPU</div>
+
+                <h3>Частота процессора</h3>
+                <div class="command">lscpu | grep MHz<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает текущую частоту всех ядер</div>
+
+                <h3>Просмотр частоты в реальном времени</h3>
+                <div class="command">watch -n 1 "grep MHz /proc/cpuinfo"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Обновляет информацию о частоте каждую секунду</div>
+
+                <h3>Управление частотой CPU (cpufreq)</h3>
+                <div class="command">sudo apt install cpufrequtils<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает утилиты управления частотой</div>
+
+                <h3>Информация о cpufreq</h3>
+                <div class="command">cpufreq-info<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию о политике управления частотой</div>
+
+                <h3>Установка режима производительности</h3>
+                <div class="command">sudo cpufreq-set -g performance<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает максимальную производительность CPU</div>
+
+                <h3>Режим энергосбережения</h3>
+                <div class="command">sudo cpufreq-set -g powersave<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает режим экономии энергии</div>
+
+                <div class="note">
+                    <strong>💡 Режимы управления частотой (governors):</strong>
+                    <table>
+                        <tr>
+                            <th>Режим</th>
+                            <th>Описание</th>
+                        </tr>
+                        <tr>
+                            <td>performance</td>
+                            <td>Всегда максимальная частота</td>
+                        </tr>
+                        <tr>
+                            <td>powersave</td>
+                            <td>Всегда минимальная частота</td>
+                        </tr>
+                        <tr>
+                            <td>ondemand</td>
+                            <td>Динамическое изменение по нагрузке</td>
+                        </tr>
+                        <tr>
+                            <td>conservative</td>
+                            <td>Плавное изменение частоты</td>
+                        </tr>
+                        <tr>
+                            <td>schedutil</td>
+                            <td>Управление от планировщика ядра (современный)</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>Загрузка процессора</h3>
+                <div class="command">top<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Интерактивный мониторинг процессов и загрузки CPU</div>
+
+                <h3>Альтернатива - htop</h3>
+                <div class="command">sudo apt install htop<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает улучшенный top</div>
+
+                <div class="command">htop<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Запускает htop с цветным интерфейсом</div>
+
+                <h3>Средняя загрузка (load average)</h3>
+                <div class="command">cat /proc/loadavg<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает среднюю загрузку за 1, 5 и 15 минут</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Тест производительности CPU</strong>
+                    <pre># Установка sysbench
+sudo apt install sysbench
+
+# Однопоточный тест
+sysbench cpu --cpu-max-prime=20000 run
+
+# Многопоточный тест (все ядра)
+sysbench cpu --cpu-max-prime=20000 --threads=$(nproc) run
+
+# Стресс-тест CPU
+sudo apt install stress
+stress --cpu $(nproc) --timeout 60s
+
+# Мониторинг во время теста
+watch -n 1 "grep MHz /proc/cpuinfo | head -4"</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Ограничение CPU для процесса</strong>
+                    <pre># Установка cpulimit
+sudo apt install cpulimit
+
+# Ограничить процесс до 50% CPU
+cpulimit -p PID -l 50
+
+# Запустить программу с ограничением
+cpulimit -l 25 -- программа аргументы
+
+# Найти PID процесса по имени
+pidof имя_процесса</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="memory" class="section">
+                <h2>🧠 Память (RAM)</h2>
+                
+                <h3>Использование памяти</h3>
+                <div class="command">free -h<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает использование RAM и swap в читаемом формате</div>
+
+                <h3>Подробная информация</h3>
+                <div class="command">free -h --total<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает общую статистику с итогами</div>
+
+                <h3>Обновление каждую секунду</h3>
+                <div class="command">watch -n 1 free -h<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Мониторинг памяти в реальном времени</div>
+
+                <h3>Информация о модулях памяти</h3>
+                <div class="command">sudo dmidecode -t memory<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию о планках RAM</div>
+
+                <h3>Краткая информация о памяти</h3>
+                <div class="command">sudo dmidecode -t memory | grep -E "Size|Speed|Manufacturer|Type:"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Фильтрует важную информацию о RAM</div>
+
+                <h3>Максимальная поддерживаемая память</h3>
+                <div class="command">sudo dmidecode -t 16<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает максимальный объём поддерживаемой памяти</div>
+
+                <h3>Количество слотов памяти</h3>
+                <div class="command">sudo dmidecode -t memory | grep "Number Of Devices"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает количество слотов для RAM</div>
+
+                <h3>Очистка кэша (освобождение памяти)</h3>
+                <div class="command">sudo sync && sudo sysctl -w vm.drop_caches=3<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Очищает page cache, dentries и inodes</div>
+
+                <div class="warning">
+                    <strong>⚠️ Предупреждение:</strong> Очистка кэша обычно не требуется! Linux эффективно управляет памятью. Очистка может временно снизить производительность, так как придётся заново кэшировать данные.
+                </div>
+
+                <div class="note">
+                    <strong>💡 Понимание вывода free:</strong>
+                    <ul>
+                        <li><strong>total</strong> - общий объём RAM</li>
+                        <li><strong>used</strong> - используется программами</li>
+                        <li><strong>free</strong> - совсем не используется</li>
+                        <li><strong>shared</strong> - используется tmpfs</li>
+                        <li><strong>buff/cache</strong> - используется для кэша (может быть освобождено)</li>
+                        <li><strong>available</strong> - доступно для программ (важнее чем free!)</li>
+                    </ul>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример вывода free -h:</strong>
+                    <pre>              total        used        free      shared  buff/cache   available
+Mem:           15Gi       4.2Gi       8.1Gi       234Mi       3.2Gi        10Gi
+Swap:         2.0Gi          0B       2.0Gi</pre>
+                    <strong>Интерпретация:</strong> Из 16GB RAM используется 4.2GB программами, 3.2GB занято кэшем, доступно для программ 10GB. Swap не используется.
+                </div>
+
+                <h3>Топ процессов по памяти</h3>
+                <div class="command">ps aux --sort=-%mem | head -10<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает 10 процессов, потребляющих больше всего памяти</div>
+
+                <h3>Информация о swap</h3>
+                <div class="command">swapon --show<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию о swap разделах</div>
+
+                <h3>Создание swap файла</h3>
+                <div class="command">sudo fallocate -l 2G /swapfile<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт файл размером 2GB для swap</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Создание и активация swap файла</strong>
+                    <pre># Создаём файл 4GB
+sudo fallocate -l 4G /swapfile
+
+# Устанавливаем правильные права
+sudo chmod 600 /swapfile
+
+# Форматируем как swap
+sudo mkswap /swapfile
+
+# Активируем
+sudo swapon /swapfile
+
+# Проверяем
+swapon --show
+free -h
+
+# Делаем постоянным (добавляем в /etc/fstab)
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+# Настройка swappiness (насколько активно использовать swap)
+# 0 = минимально, 100 = агрессивно, 10 = рекомендуется для desktop
+sudo sysctl vm.swappiness=10
+echo "vm.swappiness=10" | sudo tee -a /etc/sysctl.conf</pre>
+                </div>
+
+                <h3>Удаление swap файла</h3>
+                <div class="command">sudo swapoff /swapfile && sudo rm /swapfile<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Деактивирует и удаляет swap файл</div>
+
+                <h3>Проверка утечек памяти</h3>
+                <div class="command">sudo apt install valgrind<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает инструмент для проверки утечек памяти</div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="disks" class="section">
+                <h2>💾 Диски и разделы</h2>
+                
+                <h3>Список всех дисков</h3>
+                <div class="command">lsblk<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все блочные устройства (диски, разделы)</div>
+
+                <h3>Подробная информация</h3>
+                <div class="command">lsblk -f<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает файловые системы и UUID</div>
+
+                <h3>Информация о дисках</h3>
+                <div class="command">sudo fdisk -l<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все диски и их разделы</div>
+
+                <h3>Использование дискового пространства</h3>
+                <div class="command">df -h<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает занятое и свободное место на разделах</div>
+
+                <h3>Только локальные файловые системы</h3>
+                <div class="command">df -h -x tmpfs -x devtmpfs<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Исключает временные файловые системы</div>
+
+                <h3>Информация об inodes</h3>
+                <div class="command">df -i<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает использование inodes</div>
+
+                <h3>Размер директории</h3>
+                <div class="command">du -sh /path/to/directory<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает общий размер директории</div>
+
+                <h3>Топ директорий по размеру</h3>
+                <div class="command">du -h --max-depth=1 / 2>/dev/null | sort -rh | head -20<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает 20 самых больших директорий</div>
+
+                <h3>S.M.A.R.T. информация о диске</h3>
+                <div class="command">sudo apt install smartmontools<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает утилиты S.M.A.R.T.</div>
+
+                <h3>Проверка здоровья диска</h3>
+                <div class="command">sudo smartctl -a /dev/sda<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает S.M.A.R.T. данные диска</div>
+
+                <h3>Быстрый тест диска</h3>
+                <div class="command">sudo smartctl -t short /dev/sda<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Запускает короткий тест диска</div>
+
+                <h3>Скорость чтения диска</h3>
+                <div class="command">sudo hdparm -Tt /dev/sda<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Тестирует скорость чтения диска</div>
+
+                <h3>Детальная информация о диске</h3>
+                <div class="command">sudo hdparm -I /dev/sda<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает детальную информацию о диске</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Тест производительности диска</strong>
+                    <pre># Установка fio для тестирования
+sudo apt install fio
+
+# Тест случайного чтения (4K блоки)
+sudo fio --name=random-read --ioengine=libaio --iodepth=32 \
+  --rw=randread --bs=4k --direct=1 --size=1G --numjobs=1 \
+  --runtime=60 --group_reporting --filename=/tmp/test-file
+
+# Тест последовательной записи
+sudo fio --name=sequential-write --ioengine=libaio --iodepth=1 \
+  --rw=write --bs=1m --direct=1 --size=1G \
+  --filename=/tmp/test-file
+
+# Простой тест записи с dd
+dd if=/dev/zero of=/tmp/test bs=1M count=1024 oflag=direct
+
+# Простой тест чтения
+dd if=/tmp/test of=/dev/null bs=1M
+
+# Очистка
+rm /tmp/test /tmp/test-file</pre>
+                </div>
+
+                <h3>Создание раздела (интерактивно)</h3>
+                <div class="command">sudo fdisk /dev/sdb<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Запускает fdisk для создания разделов</div>
+
+                <h3>Форматирование в ext4</h3>
+                <div class="command">sudo mkfs.ext4 /dev/sdb1<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Форматирует раздел в ext4</div>
+
+                <h3>Монтирование раздела</h3>
+                <div class="command">sudo mount /dev/sdb1 /mnt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Монтирует раздел в /mnt</div>
+
+                <h3>Размонтирование</h3>
+                <div class="command">sudo umount /mnt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Размонтирует раздел</div>
+
+                <h3>Просмотр смонтированных разделов</h3>
+                <div class="command">mount | grep "^/dev"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все смонтированные устройства</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Автомонтирование диска через /etc/fstab</strong>
+                    <pre># Узнаём UUID диска
+sudo blkid /dev/sdb1
+
+# Например: UUID="1234-5678"
+
+# Создаём точку монтирования
+sudo mkdir /mnt/mydisk
+
+# Редактируем /etc/fstab
+sudo nano /etc/fstab
+
+# Добавляем строку:
+# UUID=1234-5678 /mnt/mydisk ext4 defaults 0 2
+
+# Проверяем правильность fstab
+sudo mount -a
+
+# Если ошибок нет, диск смонтируется при следующей загрузке</pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Типы файловых систем:</strong>
+                    <table>
+                        <tr>
+                            <th>ФС</th>
+                            <th>Команда форматирования</th>
+                            <th>Применение</th>
+                        </tr>
+                        <tr>
+                            <td>ext4</td>
+                            <td>mkfs.ext4</td>
+                            <td>Стандартная ФС Linux</td>
+                        </tr>
+                        <tr>
+                            <td>xfs</td>
+                            <td>mkfs.xfs</td>
+                            <td>Для больших файлов</td>
+                        </tr>
+                        <tr>
+                            <td>btrfs</td>
+                            <td>mkfs.btrfs</td>
+                            <td>Современная с снимками</td>
+                        </tr>
+                        <tr>
+                            <td>ntfs</td>
+                            <td>mkfs.ntfs</td>
+                            <td>Совместимость с Windows</td>
+                        </tr>
+                        <tr>
+                            <td>vfat</td>
+                            <td>mkfs.vfat</td>
+                            <td>USB флешки, SD карты</td>
+                        </tr>
+                        <tr>
+                            <td>exfat</td>
+                            <td>mkfs.exfat</td>
+                            <td>Большие файлы на USB</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="usb" class="section">
+                <h2>🔌 USB устройства</h2>
+                
+                <h3>Список USB устройств</h3>
+                <div class="command">lsusb<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все подключенные USB устройства</div>
+
+                <h3>Детальная информация</h3>
+                <div class="command">lsusb -v<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Подробная информация о USB устройствах</div>
+
+                <h3>Дерево USB устройств</h3>
+                <div class="command">lsusb -t<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает структуру USB портов и устройств</div>
+
+                <h3>Информация об USB портах</h3>
+                <div class="command">sudo dmesg | grep -i usb<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает сообщения ядра об USB</div>
+
+                <h3>Мониторинг подключения USB</h3>
+                <div class="command">sudo dmesg -w<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отслеживает подключение/отключение устройств</div>
+
+                <h3>USB устройства в /dev</h3>
+                <div class="command">ls -l /dev/bus/usb/*/*<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает файлы USB устройств</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Определение USB флешки</strong>
+                    <pre># Смотрим устройства до подключения
+lsblk
+
+# Подключаем флешку
+
+# Смотрим что появилось
+lsblk
+# Допустим появился /dev/sdc1
+
+# Получаем информацию
+sudo fdisk -l /dev/sdc
+
+# Проверяем файловую систему
+sudo file -s /dev/sdc1
+
+# Монтируем
+sudo mount /dev/sdc1 /mnt
+
+# Проверяем содержимое
+ls /mnt
+
+# Безопасно извлекаем
+sudo umount /mnt
+# Теперь можно физически отключить флешку</pre>
+                </div>
+
+                <h3>Форматирование USB флешки</h3>
+                <div class="command">sudo mkfs.vfat -F 32 /dev/sdc1<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Форматирует в FAT32 (совместимость)</div>
+
+                <h3>Форматирование в exFAT</h3>
+                <div class="command">sudo apt install exfat-fuse exfat-utils<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает поддержку exFAT</div>
+
+                <div class="command">sudo mkfs.exfat /dev/sdc1<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Форматирует в exFAT (для больших файлов)</div>
+
+                <h3>Создание загрузочной USB флешки</h3>
+                <div class="command">sudo dd if=debian.iso of=/dev/sdc bs=4M status=progress && sync<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Записывает ISO образ на флешку</div>
+
+                <div class="warning">
+                    <strong>⚠️ ВНИМАНИЕ:</strong> Команда dd полностью перезапишет USB флешку! Все данные будут потеряны. Убедитесь, что указали правильное устройство (/dev/sdX, не /dev/sdX1)!
+                </div>
+
+                <h3>Проверка скорости USB</h3>
+                <div class="command">sudo hdparm -tT /dev/sdc<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Тестирует скорость чтения USB устройства</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Безопасное извлечение USB</strong>
+                    <pre># Проверяем что смонтировано
+mount | grep /dev/sdc1
+
+# Размонтируем
+sudo umount /dev/sdc1
+
+# Проверяем что больше не смонтировано
+mount | grep /dev/sdc1
+# Должно быть пусто
+
+# Опционально: очищаем буферы
+sync
+
+# Теперь можно физически извлечь флешку</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="pci" class="section">
+                <h2>🎰 PCI устройства</h2>
+                
+                <h3>Список PCI устройств</h3>
+                <div class="command">lspci<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все PCI/PCIe устройства</div>
+
+                <h3>Подробная информация</h3>
+                <div class="command">lspci -v<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Детальная информация о каждом устройстве</div>
+
+                <h3>Очень подробная информация</h3>
+                <div class="command">sudo lspci -vv<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Максимально подробная информация</div>
+
+                <h3>Дерево PCI устройств</h3>
+                <div class="command">lspci -t<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает структуру PCI шины</div>
+
+                <h3>PCI устройства с драйверами</h3>
+                <div class="command">lspci -k<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает используемые драйверы ядра</div>
+
+                <h3>Только видеокарты</h3>
+                <div class="command">lspci | grep -i vga<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Фильтрует только видеокарты</div>
+
+                <h3>Только сетевые адаптеры</h3>
+                <div class="command">lspci | grep -i ethernet<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает сетевые адаптеры</div>
+
+                <h3>Только аудио устройства</h3>
+                <div class="command">lspci | grep -i audio<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает звуковые карты</div>
+
+                <div class="example">
+                    <strong>📖 Пример вывода lspci:</strong>
+                    <pre>00:00.0 Host bridge: Intel Corporation Device 9b33
+00:02.0 VGA compatible controller: Intel Corporation UHD Graphics
+00:14.0 USB controller: Intel Corporation Device 02ed
+00:1f.3 Audio device: Intel Corporation Device 02c8
+01:00.0 Ethernet controller: Realtek Semiconductor RTL8111
+02:00.0 Network controller: Intel Corporation Wi-Fi 6 AX200</pre>
+                </div>
+
+                <h3>Информация о конкретном устройстве</h3>
+                <div class="command">lspci -s 00:02.0 -v<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию о устройстве по адресу 00:02.0</div>
+
+                <h3>Численные ID вместо имён</h3>
+                <div class="command">lspci -nn<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает vendor ID и device ID</div>
+
+                <div class="note">
+                    <strong>💡 Понимание адресов PCI:</strong>
+                    <ul>
+                        <li><strong>00:02.0</strong> - формат адреса: шина:устройство.функция</li>
+                        <li><strong>00</strong> - номер шины (bus)</li>
+                        <li><strong>02</strong> - номер устройства (device)</li>
+                        <li><strong>0</strong> - номер функции (function)</li>
+                    </ul>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="gpu" class="section">
+                <h2>🎮 Видеокарты</h2>
+                
+                <h3>Информация о видеокарте</h3>
+                <div class="command">lspci | grep -i vga<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает установленные видеокарты</div>
+
+                <h3>Детальная информация</h3>
+                <div class="command">lspci -v | grep -A 15 VGA<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Подробная информация о видеокарте</div>
+
+                <h3>Информация через glxinfo (OpenGL)</h3>
+                <div class="command">sudo apt install mesa-utils<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает утилиты Mesa</div>
+
+                <div class="command">glxinfo | grep "OpenGL"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию об OpenGL и видеодрайвере</div>
+
+                <h3>Рендерер и версия OpenGL</h3>
+                <div class="command">glxinfo | grep "OpenGL renderer"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает используемый рендерер</div>
+
+                <h3>Тест производительности GPU</h3>
+                <div class="command">glxgears<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Простой тест 3D производительности</div>
+
+                <h3>Информация для NVIDIA</h3>
+                <div class="command">nvidia-smi<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию о NVIDIA GPU (если установлен драйвер)</div>
+
+                <h3>Мониторинг NVIDIA GPU</h3>
+                <div class="command">watch -n 1 nvidia-smi<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Обновляет информацию каждую секунду</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Установка драйверов NVIDIA</strong>
+                    <pre># Определяем модель видеокарты
+lspci | grep -i nvidia
+
+# Добавляем non-free репозитории
+sudo apt edit-sources
+# Добавьте "non-free" к каждой строке deb
+
+# Обновляем список пакетов
+sudo apt update
+
+# Устанавливаем драйверы
+sudo apt install nvidia-driver firmware-misc-nonfree
+
+# Перезагружаемся
+sudo reboot
+
+# После перезагрузки проверяем
+nvidia-smi</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Установка драйверов AMD</strong>
+                    <pre># Определяем модель
+lspci | grep -i amd
+
+# Для современных AMD GPU драйверы уже в ядре
+# Устанавливаем дополнительные компоненты
+sudo apt install firmware-amd-graphics libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers xserver-xorg-video-amdgpu
+
+# Перезагружаемся
+sudo reboot
+
+# Проверяем
+glxinfo | grep "OpenGL renderer"</pre>
+                </div>
+
+                <h3>Переключение между Intel и NVIDIA (Optimus)</h3>
+                <div class="command">sudo apt install nvidia-prime<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает PRIME для гибридной графики</div>
+
+                <h3>Использование Intel</h3>
+                <div class="command">sudo prime-select intel<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переключает на интегрированную графику Intel</div>
+
+                <h3>Использование NVIDIA</h3>
+                <div class="command">sudo prime-select nvidia<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переключает на дискретную NVIDIA</div>
+
+                <h3>Текущая видеокарта</h3>
+                <div class="command">prime-select query<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает активную видеокарту</div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="audio" class="section">
+                <h2>🔊 Аудио устройства</h2>
+                
+                <h3>Список аудио устройств</h3>
+                <div class="command">lspci | grep -i audio<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает звуковые карты PCI</div>
+
+                <h3>ALSA устройства</h3>
+                <div class="command">aplay -l<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Список устройств воспроизведения</div>
+
+                <h3>Записывающие устройства</h3>
+                <div class="command">arecord -l<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Список устройств записи (микрофоны)</div>
+
+                <h3>Громкость через alsamixer</h3>
+                <div class="command">alsamixer<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Интерактивный микшер громкости</div>
+
+                <h3>PulseAudio информация</h3>
+                <div class="command">pactl info<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Информация о PulseAudio сервере</div>
+
+                <h3>Список sink (выходов)</h3>
+                <div class="command">pactl list sinks short<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает аудио выходы</div>
+
+                <h3>Список source (входов)</h3>
+                <div class="command">pactl list sources short<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает аудио входы (микрофоны)</div>
+
+                <h3>Установка громкости</h3>
+                <div class="command">pactl set-sink-volume @DEFAULT_SINK@ 50%<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает громкость на 50%</div>
+
+                <h3>Отключение звука</h3>
+                <div class="command">pactl set-sink-mute @DEFAULT_SINK@ toggle<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переключает mute</div>
+
+                <h3>Перезапуск PulseAudio</h3>
+                <div class="command">pulseaudio -k && pulseaudio --start<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Перезапускает аудио сервер</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Тест звука</strong>
+                    <pre># Тест левого канала
+speaker-test -t wav -c 2 -l 1
+
+# Или воспроизведение тестового файла
+paplay /usr/share/sounds/alsa/Front_Center.wav
+
+# Запись с микрофона (10 секунд)
+arecord -d 10 -f cd test.wav
+
+# Воспроизведение записи
+aplay test.wav
+
+# Проверка уровня микрофона
+arecord -vv /dev/null</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Устранение проблем со звуком</strong>
+                    <pre># Проверяем что звуковая карта обнаружена
+lspci | grep -i audio
+
+# Проверяем модуль ядра
+lsmod | grep snd
+
+# Проверяем ALSA
+aplay -l
+
+# Проверяем PulseAudio
+pactl info
+
+# Если нет звука, проверяем громкость
+alsamixer
+# Нажмите M чтобы снять mute (должно быть 00 внизу, не MM)
+
+# Перезапускаем PulseAudio
+pulseaudio -k
+pulseaudio --start
+
+# Устанавливаем аудио по умолчанию
+pactl set-default-sink имя_устройства</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="sensors" class="section">
+                <h2>🌡️ Датчики и температура</h2>
+                
+                <h3>Установка lm-sensors</h3>
+                <div class="command">sudo apt install lm-sensors<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает утилиты для работы с датчиками</div>
+
+                <h3>Обнаружение датчиков</h3>
+                <div class="command">sudo sensors-detect<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Автоматически находит датчики (нажимайте Enter или YES)</div>
+
+                <h3>Просмотр температур</h3>
+                <div class="command">sensors<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает температуры CPU, GPU и других компонентов</div>
+
+                <h3>Мониторинг температуры</h3>
+                <div class="command">watch -n 2 sensors<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Обновляет показания каждые 2 секунды</div>
+
+                <h3>Температура CPU из /proc</h3>
+                <div class="command">cat /sys/class/thermal/thermal_zone*/temp<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает температуры в миллиградусах Цельсия</div>
+
+                <h3>Температура в читаемом виде</h3>
+                <div class="command">paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/\([0-9]\{2\}\)\([0-9]\{3\}\)/\1.\2°C/'<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Форматирует температуры в градусы</div>
+
+                <h3>Температура жёсткого диска</h3>
+                <div class="command">sudo hddtemp /dev/sda<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает температуру HDD</div>
+
+                <h3>Установка hddtemp</h3>
+                <div class="command">sudo apt install hddtemp<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает утилиту для температуры дисков</div>
+
+                <h3>Температура через S.M.A.R.T.</h3>
+                <div class="command">sudo smartctl -A /dev/sda | grep Temperature<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Альтернативный способ для SSD/HDD</div>
+
+                <div class="example">
+                    <strong>📖 Пример вывода sensors:</strong>
+                    <pre>coretemp-isa-0000
+Adapter: ISA adapter
+Package id 0:  +45.0°C  (high = +80.0°C, crit = +100.0°C)
+Core 0:        +43.0°C  (high = +80.0°C, crit = +100.0°C)
+Core 1:        +45.0°C  (high = +80.0°C, crit = +100.0°C)
+Core 2:        +44.0°C  (high = +80.0°C, crit = +100.0°C)
+Core 3:        +42.0°C  (high = +80.0°C, crit = +100.0°C)
+
+acpitz-acpi-0
+Adapter: ACPI interface
+temp1:        +47.0°C</pre>
+                </div>
+
+                <h3>Скорость вентиляторов</h3>
+                <div class="command">sensors | grep fan<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает скорость вращения вентиляторов (RPM)</div>
+
+                <h3>Управление вентиляторами (fancontrol)</h3>
+                <div class="command">sudo apt install fancontrol<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает утилиту управления вентиляторами</div>
+
+                <h3>Настройка fancontrol</h3>
+                <div class="command">sudo pwmconfig<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Интерактивная настройка управления вентиляторами</div>
+
+                <div class="warning">
+                    <strong>⚠️ Внимание:</strong> Неправильная настройка вентиляторов может привести к перегреву! Будьте осторожны при использовании pwmconfig. Всегда тестируйте настройки под нагрузкой.
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Мониторинг температуры с уведомлениями</strong>
+                    <pre>#!/bin/bash
+# temp-monitor.sh - Скрипт мониторинга температуры
+
+TEMP_THRESHOLD=80  # Порог температуры в градусах
+CHECK_INTERVAL=60  # Интервал проверки в секундах
+
+while true; do
+    # Получаем температуру CPU
+    TEMP=$(sensors | grep "Package id 0:" | awk '{print $4}' | sed 's/+//;s/°C//')
+    
+    # Преобразуем в целое число
+    TEMP_INT=${TEMP%.*}
+    
+    echo "$(date): Температура CPU: ${TEMP}°C"
+    
+    # Проверяем превышение порога
+    if [ "$TEMP_INT" -gt "$TEMP_THRESHOLD" ]; then
+        echo "ВНИМАНИЕ! Температура превысила ${TEMP_THRESHOLD}°C!"
+        # Отправляем уведомление (требует notify-send)
+        notify-send -u critical "Перегрев!" "CPU: ${TEMP}°C"
+    fi
+    
+    sleep $CHECK_INTERVAL
+done</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="power" class="section">
+                <h2>🔋 Управление питанием</h2>
+                
+                <h3>Информация о батарее</h3>
+                <div class="command">upower -i /org/freedesktop/UPower/devices/battery_BAT0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию о батарее ноутбука</div>
+
+                <h3>Список всех устройств питания</h3>
+                <div class="command">upower -e<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все устройства UPower</div>
+
+                <h3>Краткая информация о батарее</h3>
+                <div class="command">cat /sys/class/power_supply/BAT0/capacity<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает заряд батареи в процентах</div>
+
+                <h3>Статус батареи</h3>
+                <div class="command">cat /sys/class/power_supply/BAT0/status<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает статус: Charging, Discharging, Full</div>
+
+                <h3>Установка TLP (управление питанием)</h3>
+                <div class="command">sudo apt install tlp tlp-rdw<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает TLP для экономии энергии</div>
+
+                <h3>Запуск TLP</h3>
+                <div class="command">sudo tlp start<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Активирует TLP</div>
+
+                <h3>Статистика TLP</h3>
+                <div class="command">sudo tlp-stat<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает подробную статистику энергопотребления</div>
+
+                <h3>Информация о батарее через TLP</h3>
+                <div class="command">sudo tlp-stat -b<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Только информация о батарее</div>
+
+                <h3>Установка powertop</h3>
+                <div class="command">sudo apt install powertop<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает инструмент анализа энергопотребления</div>
+
+                <h3>Запуск powertop</h3>
+                <div class="command">sudo powertop<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Интерактивный мониторинг энергопотребления</div>
+
+                <h3>Автонастройка powertop</h3>
+                <div class="command">sudo powertop --auto-tune<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Автоматически оптимизирует энергопотребление</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Мониторинг батареи в скрипте</strong>
+                    <pre>#!/bin/bash
+# battery-monitor.sh
+
+while true; do
+    CAPACITY=$(cat /sys/class/power_supply/BAT0/capacity)
+    STATUS=$(cat /sys/class/power_supply/BAT0/status)
+    
+    echo "Заряд батареи: ${CAPACITY}% (${STATUS})"
+    
+    # Уведомление при низком заряде
+    if [ "$CAPACITY" -lt 20 ] && [ "$STATUS" == "Discharging" ]; then
+        notify-send -u critical "Низкий заряд!" "Батарея: ${CAPACITY}%"
+    fi
+    
+    sleep 60
+done</pre>
+                </div>
+
+                <h3>Гибернация</h3>
+                <div class="command">sudo systemctl hibernate<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переводит систему в гибернацию</div>
+
+                <h3>Режим сна (suspend)</h3>
+                <div class="command">sudo systemctl suspend<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переводит в режим сна</div>
+
+                <h3>Гибридный режим</h3>
+                <div class="command">sudo systemctl hybrid-sleep<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Сон + гибернация</div>
+
+                <div class="note">
+                    <strong>💡 Режимы энергосбережения:</strong>
+                    <ul>
+                        <li><strong>Suspend (Sleep)</strong> - RAM остаётся под питанием, быстрое пробуждение</li>
+                        <li><strong>Hibernate</strong> - RAM на диск, полное выключение, медленное пробуждение</li>
+                        <li><strong>Hybrid sleep</strong> - комбинация suspend и hibernate</li>
+                        <li><strong>Shutdown</strong> - полное выключение</li>
+                    </ul>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="kernel" class="section">
+                <h2>🐧 Модули ядра</h2>
+                
+                <h3>Список загруженных модулей</h3>
+                <div class="command">lsmod<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все загруженные модули ядра</div>
+
+                <h3>Информация о модуле</h3>
+                <div class="command">modinfo имя_модуля<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию о конкретном модуле</div>
+
+                <h3>Загрузка модуля</h3>
+                <div class="command">sudo modprobe имя_модуля<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Загружает модуль ядра</div>
+
+                <h3>Выгрузка модуля</h3>
+                <div class="command">sudo modprobe -r имя_модуля<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Выгружает модуль ядра</div>
+
+                <h3>Список доступных модулей</h3>
+                <div class="command">find /lib/modules/$(uname -r) -type f -name '*.ko*'<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все доступные модули</div>
+
+                <h3>Поиск модуля по имени</h3>
+                <div class="command">modprobe -c | grep имя<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Ищет модуль в конфигурации</div>
+
+                <h3>Зависимости модуля</h3>
+                <div class="command">modprobe --show-depends имя_модуля<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает зависимости модуля</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Блокировка модуля</strong>
+                    <pre># Создаём файл для блокировки модуля
+sudo nano /etc/modprobe.d/blacklist.conf
+
+# Добавляем строку (например, блокируем nouveau):
+blacklist nouveau
+
+# Обновляем initramfs
+sudo update-initramfs -u
+
+# Перезагружаемся
+sudo reboot
+
+# После перезагрузки проверяем
+lsmod | grep nouveau
+# Модуль не должен быть загружен</pre>
+                </div>
+
+                <h3>Параметры загруженных модулей</h3>
+                <div class="command">cat /sys/module/имя_модуля/parameters/*<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает параметры модуля</div>
+
+                <h3>Логи модулей ядра</h3>
+                <div class="command">dmesg | grep -i имя_модуля<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает сообщения ядра о модуле</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Загрузка модуля с параметрами</strong>
+                    <pre># Загружаем модуль с параметром
+sudo modprobe модуль параметр=значение
+
+# Например, для модуля e1000e:
+sudo modprobe e1000e InterruptThrottleRate=3000
+
+# Для постоянной установки параметров создаём файл:
+sudo nano /etc/modprobe.d/модуль.conf
+
+# Добавляем:
+options модуль параметр=значение
+
+# Пример:
+options e1000e InterruptThrottleRate=3000</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="monitoring" class="section">
+                <h2>📊 Мониторинг системы</h2>
+                
+                <h3>Процессы и ресурсы (top)</h3>
+                <div class="command">top<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Интерактивный мониторинг процессов</div>
+
+                <h3>Улучшенный top (htop)</h3>
+                <div class="command">sudo apt install htop && htop<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Цветной интерактивный монитор</div>
+
+                <h3>Ещё более продвинутый (btop)</h3>
+                <div class="command">sudo apt install btop && btop<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Современный красивый монитор ресурсов</div>
+
+                <h3>Мониторинг в режиме batch</h3>
+                <div class="command">top -b -n 1<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Однократный вывод для скриптов</div>
+
+                <h3>Информация о системе (glances)</h3>
+                <div class="command">sudo apt install glances<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает мощный монитор</div>
+
+                <div class="command">glances<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Комплексный мониторинг CPU, RAM, диски, сеть</div>
+
+                <h3>Использование ресурсов процессом</h3>
+                <div class="command">ps aux | grep имя_процесса<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает использование ресурсов процессом</div>
+
+                <h3>Дерево процессов</h3>
+                <div class="command">pstree<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает иерархию процессов</div>
+
+                <h3>Процессы с потоками</h3>
+                <div class="command">pstree -p<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает PID процессов</div>
+
+                <h3>Информация о процессе</h3>
+                <div class="command">cat /proc/PID/status<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Детальная информация о процессе</div>
+
+                <h3>Открытые файлы процессом</h3>
+                <div class="command">lsof -p PID<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает открытые файлы и соединения</div>
+
+                <h3>Процессы использующие файл</h3>
+                <div class="command">lsof /path/to/file<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Какие процессы используют файл</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Создание скрипта мониторинга</strong>
+                    <pre>#!/bin/bash
+# system-monitor.sh - Комплексный мониторинг
+
+LOG_FILE="/var/log/system-monitor.log"
+
+while true; do
+    echo "=== $(date) ===" >> "$LOG_FILE"
+    
+    # CPU
+    echo "CPU:" >> "$LOG_FILE"
+    top -b -n1 | head -5 >> "$LOG_FILE"
+    
+    # Память
+    echo -e "\nMemory:" >> "$LOG_FILE"
+    free -h >> "$LOG_FILE"
+    
+    # Диски
+    echo -e "\nDisks:" >> "$LOG_FILE"
+    df -h | grep "^/dev" >> "$LOG_FILE"
+    
+    # Температура
+    echo -e "\nTemperature:" >> "$LOG_FILE"
+    sensors | grep -E "Core|Package" >> "$LOG_FILE"
+    
+    # Топ процессов по CPU
+    echo -e "\nTop CPU:" >> "$LOG_FILE"
+    ps aux --sort=-%cpu | head -6 >> "$LOG_FILE"
+    
+    # Топ процессов по RAM
+    echo -e "\nTop RAM:" >> "$LOG_FILE"
+    ps aux --sort=-%mem | head -6 >> "$LOG_FILE"
+    
+    echo -e "\n" >> "$LOG_FILE"
+    
+    sleep 300  # Каждые 5 минут
+done</pre>
+                </div>
+
+                <h3>Системные логи</h3>
+                <div class="command">sudo journalctl -f<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отслеживание системных логов в реальном времени</div>
+
+                <h3>Логи с фильтром</h3>
+                <div class="command">sudo journalctl -u имя_сервиса<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Логи конкретного сервиса</div>
+
+                <h3>Логи за период</h3>
+                <div class="command">sudo journalctl --since "1 hour ago"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Логи за последний час</div>
+
+                <h3>Размер журналов</h3>
+                <div class="command">sudo journalctl --disk-usage<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает занимаемое место логами</div>
+
+                <h3>Очистка старых логов</h3>
+                <div class="command">sudo journalctl --vacuum-time=7d<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет логи старше 7 дней</div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div class="note">
+                <strong>🎯 Заключение:</strong><br><br>
+                Эта справка охватывает основные аспекты аппаратного управления в Debian 11. Для более глубокого изучения рекомендуется:
+                <ul>
+                    <li>Документация ядра Linux: /usr/share/doc/linux-doc-*/</li>
+                    <li>Man страницы: man команда</li>
+                    <li>Debian Wiki: wiki.debian.org</li>
+                    <li>Arch Wiki (применимо и для Debian): wiki.archlinux.org</li>
+                </ul>
+                <br>
+                <strong>Полезные команды для быстрого обзора:</strong>
+                <ul>
+                    <li><strong>inxi -Fxz</strong> - полная информация о системе</li>
+                    <li><strong>hwinfo --short</strong> - краткая сводка оборудования</li>
+                    <li><strong>lshw</strong> - детальная информация об оборудовании</li>
+                    <li><strong>hardinfo</strong> - графический инструмент (GUI)</li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>⚙️ Аппаратное управление - ключ к эффективной работе с Linux</p>
+            <p>Debian 11 (Bullseye) | 2025</p>
+        </footer>
+    </div>
+</body>
+</html>

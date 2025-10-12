@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление сетевыми интерфейсами - Debian 11</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #134e4a 0%, #0f766e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+        header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #11998e;
+        }
+        .section h2 {
+            color: #134e4a;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+        .section h3 {
+            color: #0f766e;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .command {
+            background: #134e4a;
+            color: #00ff00;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            overflow-x: auto;
+            border: 1px solid #0f766e;
+            position: relative;
+            padding-right: 100px;
+        }
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #11998e;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .copy-btn:hover {
+            background: #38ef7d;
+            transform: translateY(-50%) scale(1.05);
+        }
+        .copy-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        .copy-btn.copied {
+            background: #28a745;
+        }
+        .description {
+            color: #555;
+            margin: 8px 0;
+            padding-left: 10px;
+        }
+        .note {
+            background: #d1f2eb;
+            border-left: 4px solid #11998e;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .note strong {
+            color: #0f766e;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .warning strong {
+            color: #856404;
+        }
+        .example {
+            background: #e7f9f5;
+            border-left: 4px solid #11998e;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .example strong {
+            color: #134e4a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .example pre {
+            background: #134e4a;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.4;
+        }
+        ul {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+        ul li {
+            margin: 8px 0;
+        }
+        footer {
+            background: #134e4a;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+        .toc {
+            background: #f8f9fa;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 8px;
+            border: 2px solid #11998e;
+        }
+        .toc h2 {
+            color: #134e4a;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8em;
+        }
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .toc-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #11998e;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #134e4a;
+            display: block;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .toc-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(17, 153, 142, 0.3);
+            border-left-color: #38ef7d;
+        }
+        .toc-item span {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        .back-to-top {
+            display: inline-block;
+            background: #11998e;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        .back-to-top:hover {
+            background: #38ef7d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        table th {
+            background: #11998e;
+            color: white;
+            font-weight: bold;
+        }
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        table tr:hover {
+            background: #e7f9f5;
+        }
+    </style>
+    <script>
+        function copyCommand(button) {
+            const commandDiv = button.parentElement;
+            const commandText = commandDiv.childNodes[0].textContent.trim();
+            
+            navigator.clipboard.writeText(commandText).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Скопировано!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Ошибка копирования: ', err);
+                button.textContent = 'Ошибка!';
+                setTimeout(() => {
+                    button.textContent = 'Копировать';
+                }, 2000);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌐 Управление сетевыми интерфейсами</h1>
+            <p>Полное руководство по командам для Debian 11</p>
+        </header>
+
+        <div class="content">
+            <div id="toc" class="toc">
+                <h2>📑 Содержание</h2>
+                <div class="toc-grid">
+                    <a href="#basics" class="toc-item">
+                        <span>📋</span>
+                        <strong>Основные команды просмотра</strong>
+                    </a>
+                    <a href="#ip-command" class="toc-item">
+                        <span>🔧</span>
+                        <strong>Команда ip (modern)</strong>
+                    </a>
+                    <a href="#ifconfig" class="toc-item">
+                        <span>⚙️</span>
+                        <strong>Команда ifconfig (legacy)</strong>
+                    </a>
+                    <a href="#configuration" class="toc-item">
+                        <span>📝</span>
+                        <strong>Настройка интерфейсов</strong>
+                    </a>
+                    <a href="#static-ip" class="toc-item">
+                        <span>🔢</span>
+                        <strong>Статический IP</strong>
+                    </a>
+                    <a href="#dhcp" class="toc-item">
+                        <span>🔄</span>
+                        <strong>DHCP настройка</strong>
+                    </a>
+                    <a href="#routing" class="toc-item">
+                        <span>🛣️</span>
+                        <strong>Маршрутизация</strong>
+                    </a>
+                    <a href="#dns" class="toc-item">
+                        <span>🌍</span>
+                        <strong>DNS настройка</strong>
+                    </a>
+                    <a href="#bonding" class="toc-item">
+                        <span>🔗</span>
+                        <strong>Bonding и VLAN</strong>
+                    </a>
+                    <a href="#diagnostics" class="toc-item">
+                        <span>🔍</span>
+                        <strong>Диагностика сети</strong>
+                    </a>
+                    <a href="#troubleshooting" class="toc-item">
+                        <span>🛠️</span>
+                        <strong>Устранение проблем</strong>
+                    </a>
+                    <a href="#examples" class="toc-item">
+                        <span>💡</span>
+                        <strong>Практические примеры</strong>
+                    </a>
+                </div>
+            </div>
+
+            <div id="basics" class="section">
+                <h2>📋 Основные команды просмотра</h2>
+                
+                <h3>Просмотр всех сетевых интерфейсов</h3>
+                <div class="command">ip link show<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все сетевые интерфейсы и их состояние (UP/DOWN)</div>
+
+                <h3>Просмотр IP адресов</h3>
+                <div class="command">ip addr show<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отображает IP адреса всех интерфейсов</div>
+
+                <h3>Короткая форма команды</h3>
+                <div class="command">ip a<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Краткая форма команды ip addr show</div>
+
+                <h3>Информация о конкретном интерфейсе</h3>
+                <div class="command">ip addr show eth0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию только об интерфейсе eth0</div>
+
+                <h3>Список всех интерфейсов (включая неактивные)</h3>
+                <div class="command">ip link<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает физические и виртуальные сетевые интерфейсы</div>
+
+                <h3>Статистика интерфейсов</h3>
+                <div class="command">ip -s link<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает статистику передачи/приёма пакетов</div>
+
+                <div class="example">
+                    <strong>📖 Пример вывода ip addr show:</strong>
+                    <pre>1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+    inet6 ::1/128 scope host
+
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP
+    link/ether 08:00:27:12:34:56 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.1.100/24 brd 192.168.1.255 scope global eth0
+    inet6 fe80::a00:27ff:fe12:3456/64 scope link</pre>
+                    <strong>Расшифровка:</strong>
+                    <ul>
+                        <li><strong>lo</strong> - loopback интерфейс (локальная петля)</li>
+                        <li><strong>eth0</strong> - Ethernet интерфейс</li>
+                        <li><strong>UP</strong> - интерфейс активен</li>
+                        <li><strong>DOWN</strong> - интерфейс неактивен</li>
+                        <li><strong>mtu 1500</strong> - максимальный размер пакета</li>
+                        <li><strong>inet 192.168.1.100/24</strong> - IPv4 адрес с маской /24</li>
+                        <li><strong>link/ether</strong> - MAC адрес</li>
+                    </ul>
+                </div>
+
+                <h3>Просмотр с цветным выводом</h3>
+                <div class="command">ip -c addr show<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Включает цветной вывод для лучшей читаемости</div>
+
+                <h3>Только IPv4 адреса</h3>
+                <div class="command">ip -4 addr show<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает только IPv4 адреса</div>
+
+                <h3>Только IPv6 адреса</h3>
+                <div class="command">ip -6 addr show<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает только IPv6 адреса</div>
+
+                <div class="note">
+                    <strong>💡 Типы сетевых интерфейсов:</strong>
+                    <ul>
+                        <li><strong>lo</strong> - Loopback (петля обратной связи, 127.0.0.1)</li>
+                        <li><strong>eth0, eth1</strong> - Ethernet интерфейсы (проводные)</li>
+                        <li><strong>wlan0, wlan1</strong> - WiFi интерфейсы (беспроводные)</li>
+                        <li><strong>ens33, ens18</strong> - Предсказуемые имена Ethernet (новая схема именования)</li>
+                        <li><strong>enp0s3</strong> - PCI Ethernet (en = Ethernet, p0 = порт 0, s3 = слот 3)</li>
+                        <li><strong>br0</strong> - Bridge интерфейс (мост)</li>
+                        <li><strong>tun0, tap0</strong> - Туннельные интерфейсы (VPN)</li>
+                        <li><strong>veth</strong> - Virtual Ethernet (Docker, LXC)</li>
+                    </ul>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="ip-command" class="section">
+                <h2>🔧 Команда ip (современный подход)</h2>
+                
+                <h3>Включение интерфейса</h3>
+                <div class="command">sudo ip link set eth0 up<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Активирует сетевой интерфейс eth0</div>
+
+                <h3>Отключение интерфейса</h3>
+                <div class="command">sudo ip link set eth0 down<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Деактивирует сетевой интерфейс eth0</div>
+
+                <h3>Добавление IP адреса</h3>
+                <div class="command">sudo ip addr add 192.168.1.100/24 dev eth0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Назначает IP адрес 192.168.1.100 с маской /24 интерфейсу eth0</div>
+
+                <h3>Удаление IP адреса</h3>
+                <div class="command">sudo ip addr del 192.168.1.100/24 dev eth0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет IP адрес с интерфейса</div>
+
+                <h3>Очистка всех IP адресов</h3>
+                <div class="command">sudo ip addr flush dev eth0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет все IP адреса с интерфейса eth0</div>
+
+                <h3>Изменение MTU</h3>
+                <div class="command">sudo ip link set eth0 mtu 1400<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает максимальный размер пакета (MTU) в 1400 байт</div>
+
+                <h3>Изменение MAC адреса</h3>
+                <div class="command">sudo ip link set eth0 address 00:11:22:33:44:55<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Изменяет MAC адрес интерфейса (MAC spoofing)</div>
+
+                <h3>Добавление нескольких IP адресов</h3>
+                <div class="command">sudo ip addr add 192.168.1.101/24 dev eth0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет дополнительный IP адрес на тот же интерфейс</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Настройка интерфейса с нуля</strong>
+                    <pre># Отключаем интерфейс
+sudo ip link set eth0 down
+
+# Устанавливаем новый IP адрес
+sudo ip addr add 192.168.1.50/24 dev eth0
+
+# Включаем интерфейс
+sudo ip link set eth0 up
+
+# Добавляем шлюз по умолчанию
+sudo ip route add default via 192.168.1.1
+
+# Проверяем настройки
+ip addr show eth0
+ip route show</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Добавление нескольких IP адресов</strong>
+                    <pre># Основной IP
+sudo ip addr add 192.168.1.100/24 dev eth0
+
+# Дополнительные IP адреса
+sudo ip addr add 192.168.1.101/24 dev eth0
+sudo ip addr add 192.168.1.102/24 dev eth0
+sudo ip addr add 192.168.1.103/24 dev eth0
+
+# Проверяем все адреса
+ip addr show eth0
+
+# Вывод покажет все 4 адреса на одном интерфейсе</pre>
+                </div>
+
+                <h3>Установка имени интерфейса (alias)</h3>
+                <div class="command">sudo ip link set eth0 alias "External Network"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает описание интерфейса для удобства</div>
+
+                <div class="note">
+                    <strong>💡 Преимущества команды ip:</strong>
+                    <ul>
+                        <li>Современный стандарт в Linux (заменяет ifconfig)</li>
+                        <li>Больше функциональности (маршрутизация, туннели, политики)</li>
+                        <li>Поддержка IPv6 из коробки</li>
+                        <li>Более подробная информация об интерфейсах</li>
+                        <li>Входит в пакет iproute2 (стандартно установлен)</li>
+                    </ul>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="ifconfig" class="section">
+                <h2>⚙️ Команда ifconfig (устаревший метод)</h2>
+                
+                <div class="warning">
+                    <strong>⚠️ Внимание:</strong> ifconfig считается устаревшей командой. Рекомендуется использовать команду <strong>ip</strong>. Однако ifconfig всё ещё широко используется и может потребоваться для совместимости со старыми скриптами.
+                </div>
+
+                <h3>Установка ifconfig (если не установлен)</h3>
+                <div class="command">sudo apt install net-tools<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает пакет net-tools, содержащий ifconfig</div>
+
+                <h3>Просмотр всех интерфейсов</h3>
+                <div class="command">ifconfig<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все активные сетевые интерфейсы</div>
+
+                <h3>Просмотр всех интерфейсов (включая неактивные)</h3>
+                <div class="command">ifconfig -a<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все интерфейсы, даже выключенные</div>
+
+                <h3>Просмотр конкретного интерфейса</h3>
+                <div class="command">ifconfig eth0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию только об eth0</div>
+
+                <h3>Включение интерфейса</h3>
+                <div class="command">sudo ifconfig eth0 up<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Активирует интерфейс eth0</div>
+
+                <h3>Отключение интерфейса</h3>
+                <div class="command">sudo ifconfig eth0 down<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Деактивирует интерфейс eth0</div>
+
+                <h3>Назначение IP адреса</h3>
+                <div class="command">sudo ifconfig eth0 192.168.1.100 netmask 255.255.255.0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает IP адрес и маску подсети</div>
+
+                <h3>Изменение MTU</h3>
+                <div class="command">sudo ifconfig eth0 mtu 1400<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Изменяет максимальный размер пакета</div>
+
+                <h3>Изменение MAC адреса</h3>
+                <div class="command">sudo ifconfig eth0 hw ether 00:11:22:33:44:55<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Изменяет MAC адрес интерфейса</div>
+
+                <div class="note">
+                    <strong>💡 Таблица соответствия команд:</strong>
+                    <table>
+                        <tr>
+                            <th>ifconfig (устарело)</th>
+                            <th>ip (современный)</th>
+                            <th>Описание</th>
+                        </tr>
+                        <tr>
+                            <td>ifconfig</td>
+                            <td>ip addr show</td>
+                            <td>Показать все интерфейсы</td>
+                        </tr>
+                        <tr>
+                            <td>ifconfig eth0</td>
+                            <td>ip addr show eth0</td>
+                            <td>Показать конкретный интерфейс</td>
+                        </tr>
+                        <tr>
+                            <td>ifconfig eth0 up</td>
+                            <td>ip link set eth0 up</td>
+                            <td>Включить интерфейс</td>
+                        </tr>
+                        <tr>
+                            <td>ifconfig eth0 down</td>
+                            <td>ip link set eth0 down</td>
+                            <td>Выключить интерфейс</td>
+                        </tr>
+                        <tr>
+                            <td>ifconfig eth0 192.168.1.100</td>
+                            <td>ip addr add 192.168.1.100/24 dev eth0</td>
+                            <td>Назначить IP адрес</td>
+                        </tr>
+                        <tr>
+                            <td>route</td>
+                            <td>ip route</td>
+                            <td>Показать таблицу маршрутизации</td>
+                        </tr>
+                        <tr>
+                            <td>netstat</td>
+                            <td>ss</td>
+                            <td>Показать сетевые соединения</td>
+                        </tr>
+                        <tr>
+                            <td>arp</td>
+                            <td>ip neigh</td>
+                            <td>Показать ARP таблицу</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="configuration" class="section">
+                <h2>📝 Настройка интерфейсов через файлы</h2>
+                
+                <h3>Основной файл конфигурации</h3>
+                <div class="command">sudo nano /etc/network/interfaces<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Открывает главный файл конфигурации сетевых интерфейсов</div>
+
+                <h3>Проверка конфигурации</h3>
+                <div class="command">cat /etc/network/interfaces<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Просматривает текущую конфигурацию</div>
+
+                <h3>Применение изменений (перезапуск интерфейса)</h3>
+                <div class="command">sudo ifdown eth0 && sudo ifup eth0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Перезапускает интерфейс для применения изменений</div>
+
+                <h3>Перезапуск сетевой службы</h3>
+                <div class="command">sudo systemctl restart networking<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Перезапускает службу networking (применяет все изменения)</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Базовая конфигурация /etc/network/interfaces</strong>
+                    <pre># Loopback интерфейс
+auto lo
+iface lo inet loopback
+
+# Основной Ethernet интерфейс с DHCP
+auto eth0
+iface eth0 inet dhcp
+
+# WiFi интерфейс (управляется NetworkManager)
+# Обычно не настраивается здесь</pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Структура конфигурации:</strong>
+                    <ul>
+                        <li><strong>auto eth0</strong> - автоматически активировать при загрузке</li>
+                        <li><strong>allow-hotplug eth0</strong> - активировать при обнаружении устройства</li>
+                        <li><strong>iface eth0 inet dhcp</strong> - использовать DHCP для IPv4</li>
+                        <li><strong>iface eth0 inet static</strong> - использовать статический IPv4</li>
+                        <li><strong>iface eth0 inet6 dhcp</strong> - использовать DHCP для IPv6</li>
+                    </ul>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Важно:</strong>
+                    <ul>
+                        <li>В Debian 11 с NetworkManager файл /etc/network/interfaces может игнорироваться для некоторых интерфейсов</li>
+                        <li>Всегда делайте резервную копию перед изменениями: <code>sudo cp /etc/network/interfaces /etc/network/interfaces.backup</code></li>
+                        <li>Неправильная конфигурация может привести к потере сетевого подключения</li>
+                        <li>Для серверов рекомендуется настройка через /etc/network/interfaces</li>
+                        <li>Для десктопов обычно используется NetworkManager</li>
+                    </ul>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="static-ip" class="section">
+                <h2>🔢 Настройка статического IP адреса</h2>
+                
+                <h3>Метод 1: Через файл конфигурации (постоянный)</h3>
+                <div class="command">sudo nano /etc/network/interfaces<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Открывает файл для редактирования</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Конфигурация статического IP</strong>
+                    <pre># Loopback
+auto lo
+iface lo inet loopback
+
+# Статический IP на eth0
+auto eth0
+iface eth0 inet static
+    address 192.168.1.100
+    netmask 255.255.255.0
+    gateway 192.168.1.1
+    dns-nameservers 8.8.8.8 8.8.4.4
+    dns-search example.com
+
+# Или в формате CIDR
+auto eth0
+iface eth0 inet static
+    address 192.168.1.100/24
+    gateway 192.168.1.1
+    dns-nameservers 8.8.8.8 8.8.4.4</pre>
+                </div>
+
+                <h3>Метод 2: Временная настройка (до перезагрузки)</h3>
+                <div class="command">sudo ip addr add 192.168.1.100/24 dev eth0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет IP адрес временно</div>
+
+                <div class="command">sudo ip route add default via 192.168.1.1<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет шлюз по умолчанию</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Полная настройка статического IP временно</strong>
+                    <pre># Отключаем интерфейс
+sudo ip link set eth0 down
+
+# Очищаем старые настройки
+sudo ip addr flush dev eth0
+
+# Добавляем новый IP
+sudo ip addr add 192.168.1.100/24 dev eth0
+
+# Включаем интерфейс
+sudo ip link set eth0 up
+
+# Добавляем шлюз
+sudo ip route add default via 192.168.1.1
+
+# Настраиваем DNS (редактируем /etc/resolv.conf)
+echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+echo "nameserver 8.8.4.4" | sudo tee -a /etc/resolv.conf
+
+# Проверяем
+ip addr show eth0
+ip route show
+ping -c 3 8.8.8.8</pre>
+                </div>
+
+                <h3>Метод 3: Через nmcli (для NetworkManager)</h3>
+                <div class="command">nmcli connection modify eth0 ipv4.method manual ipv4.addresses 192.168.1.100/24 ipv4.gateway 192.168.1.1 ipv4.dns "8.8.8.8,8.8.4.4"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Настраивает статический IP через NetworkManager</div>
+
+                <div class="command">nmcli connection up eth0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Применяет изменения</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Настройка нескольких статических IP</strong>
+                    <pre># В файле /etc/network/interfaces
+
+auto eth0
+iface eth0 inet static
+    address 192.168.1.100/24
+    gateway 192.168.1.1
+
+# Дополнительные IP адреса (aliases)
+auto eth0:0
+iface eth0:0 inet static
+    address 192.168.1.101/24
+
+auto eth0:1
+iface eth0:1 inet static
+    address 192.168.1.102/24
+
+# Применяем
+sudo systemctl restart networking</pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Расчёт сетевых параметров:</strong>
+                    <table>
+                        <tr>
+                            <th>CIDR</th>
+                            <th>Маска подсети</th>
+                            <th>Количество хостов</th>
+                            <th>Диапазон</th>
+                        </tr>
+                        <tr>
+                            <td>/24</td>
+                            <td>255.255.255.0</td>
+                            <td>254</td>
+                            <td>192.168.1.1 - 192.168.1.254</td>
+                        </tr>
+                        <tr>
+                            <td>/16</td>
+                            <td>255.255.0.0</td>
+                            <td>65,534</td>
+                            <td>192.168.0.1 - 192.168.255.254</td>
+                        </tr>
+                        <tr>
+                            <td>/8</td>
+                            <td>255.0.0.0</td>
+                            <td>16,777,214</td>
+                            <td>10.0.0.1 - 10.255.255.254</td>
+                        </tr>
+                        <tr>
+                            <td>/30</td>
+                            <td>255.255.255.252</td>
+                            <td>2</td>
+                            <td>Для point-to-point связей</td>
+                        </tr>
+                        <tr>
+                            <td>/32</td>
+                            <td>255.255.255.255</td>
+                            <td>1</td>
+                            <td>Один конкретный хост</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="dhcp" class="section">
+                <h2>🔄 DHCP настройка</h2>
+                
+                <h3>Настройка DHCP через файл конфигурации</h3>
+                <div class="command">sudo nano /etc/network/interfaces<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Открывает файл для настройки DHCP</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Конфигурация DHCP</strong>
+                    <pre>auto eth0
+iface eth0 inet dhcp
+
+# С дополнительными параметрами
+auto eth0
+iface eth0 inet dhcp
+    hostname my-debian-pc
+    client 00:11:22:33:44:55</pre>
+                </div>
+
+                <h3>Запрос нового IP от DHCP</h3>
+                <div class="command">sudo dhclient -r eth0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Освобождает текущий IP адрес</div>
+
+                <div class="command">sudo dhclient eth0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Запрашивает новый IP адрес от DHCP сервера</div>
+
+                <h3>Обновление DHCP аренды</h3>
+                <div class="command">sudo dhclient -v eth0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Обновляет аренду IP адреса с подробным выводом</div>
+
+                <h3>Просмотр DHCP аренды</h3>
+                <div class="command">cat /var/lib/dhcp/dhclient.leases<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию об арендованных IP адресах</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Освобождение и получение нового IP</strong>
+                    <pre># Показать текущий IP
+ip addr show eth0
+
+# Освободить IP
+sudo dhclient -r eth0
+
+# Проверить - IP должен исчезнуть
+ip addr show eth0
+
+# Получить новый IP
+sudo dhclient -v eth0
+
+# Проверить новый IP
+ip addr show eth0
+ping -c 3 8.8.8.8</pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 DHCP клиенты в Debian:</strong>
+                    <ul>
+                        <li><strong>dhclient</strong> - стандартный DHCP клиент ISC</li>
+                        <li><strong>dhcpcd</strong> - альтернативный DHCP клиент</li>
+                        <li><strong>NetworkManager</strong> - использует внутренний DHCP клиент</li>
+                    </ul>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="routing" class="section">
+                <h2>🛣️ Маршрутизация</h2>
+                
+                <h3>Просмотр таблицы маршрутизации</h3>
+                <div class="command">ip route show<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает таблицу маршрутизации</div>
+
+                <h3>Короткая форма</h3>
+                <div class="command">ip r<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Краткая форма команды ip route show</div>
+
+                <h3>Добавление шлюза по умолчанию</h3>
+                <div class="command">sudo ip route add default via 192.168.1.1<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет маршрут по умолчанию через указанный шлюз</div>
+
+                <h3>Удаление шлюза по умолчанию</h3>
+                <div class="command">sudo ip route del default<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет маршрут по умолчанию</div>
+
+                <h3>Добавление статического маршрута</h3>
+                <div class="command">sudo ip route add 10.0.0.0/24 via 192.168.1.254<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет маршрут к сети 10.0.0.0/24 через шлюз 192.168.1.254</div>
+
+                <h3>Удаление статического маршрута</h3>
+                <div class="command">sudo ip route del 10.0.0.0/24<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет маршрут к указанной сети</div>
+
+                <h3>Добавление маршрута через интерфейс</h3>
+                <div class="command">sudo ip route add 172.16.0.0/16 dev eth1<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет маршрут к сети через конкретный интерфейс</div>
+
+                <h3>Просмотр маршрута к конкретному хосту</h3>
+                <div class="command">ip route get 8.8.8.8<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает, через какой интерфейс и шлюз пройдёт пакет к 8.8.8.8</div>
+
+                <div class="example">
+                    <strong>📖 Пример вывода ip route show:</strong>
+                    <pre>default via 192.168.1.1 dev eth0 proto static metric 100
+10.0.0.0/24 via 192.168.1.254 dev eth0
+172.16.0.0/16 dev eth1 proto kernel scope link src 172.16.1.100
+192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.100</pre>
+                    <strong>Расшифровка:</strong>
+                    <ul>
+                        <li><strong>default via 192.168.1.1</strong> - маршрут по умолчанию через шлюз 192.168.1.1</li>
+                        <li><strong>dev eth0</strong> - через интерфейс eth0</li>
+                        <li><strong>proto static</strong> - статически настроенный маршрут</li>
+                        <li><strong>proto kernel</strong> - автоматически созданный ядром</li>
+                        <li><strong>scope link</strong> - маршрут в локальной сети</li>
+                        <li><strong>src 192.168.1.100</strong> - исходящий IP для этого маршрута</li>
+                    </ul>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Настройка маршрутизации между двумя сетями</strong>
+                    <pre># Сценарий: компьютер с двумя сетевыми картами
+# eth0: 192.168.1.100/24 (подключен к сети A)
+# eth1: 10.0.0.1/24 (подключен к сети B)
+# Задача: маршрутизировать трафик между сетями
+
+# Включаем IP forwarding
+sudo sysctl -w net.ipv4.ip_forward=1
+
+# Делаем постоянным
+echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
+
+# На компьютерах в сети A (192.168.1.0/24):
+# Добавляем маршрут к сети B через наш шлюз
+sudo ip route add 10.0.0.0/24 via 192.168.1.100
+
+# На компьютерах в сети B (10.0.0.0/24):
+# Добавляем маршрут к сети A через наш шлюз
+sudo ip route add 192.168.1.0/24 via 10.0.0.1
+
+# Проверяем
+ping -c 3 10.0.0.5  # с компьютера в сети A</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Постоянные маршруты в /etc/network/interfaces</strong>
+                    <pre>auto eth0
+iface eth0 inet static
+    address 192.168.1.100/24
+    gateway 192.168.1.1
+    # Добавляем статические маршруты
+    up ip route add 10.0.0.0/24 via 192.168.1.254
+    up ip route add 172.16.0.0/16 via 192.168.1.253
+    # Удаляем при отключении
+    down ip route del 10.0.0.0/24
+    down ip route del 172.16.0.0/16</pre>
+                </div>
+
+                <h3>Очистка кэша маршрутизации</h3>
+                <div class="command">sudo ip route flush cache<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Очищает кэш таблицы маршрутизации</div>
+
+                <h3>Установка метрики маршрута</h3>
+                <div class="command">sudo ip route add default via 192.168.1.1 metric 100<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет маршрут с приоритетом (меньше = выше приоритет)</div>
+
+                <div class="note">
+                    <strong>💡 Понимание метрик:</strong>
+                    <ul>
+                        <li>Метрика определяет приоритет маршрута</li>
+                        <li>Чем меньше метрика, тем выше приоритет</li>
+                        <li>Используется при наличии нескольких маршрутов к одной сети</li>
+                        <li>По умолчанию: проводные интерфейсы = 100, WiFi = 600</li>
+                    </ul>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="dns" class="section">
+                <h2>🌍 DNS настройка</h2>
+                
+                <h3>Просмотр текущих DNS серверов</h3>
+                <div class="command">cat /etc/resolv.conf<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает настроенные DNS серверы</div>
+
+                <h3>Временное изменение DNS</h3>
+                <div class="command">echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает Google DNS (изменения временные)</div>
+
+                <h3>Добавление нескольких DNS серверов</h3>
+                <div class="command">sudo nano /etc/resolv.conf<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Открывает файл для редактирования</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Содержимое /etc/resolv.conf</strong>
+                    <pre># Google DNS
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+
+# Cloudflare DNS
+nameserver 1.1.1.1
+nameserver 1.0.0.1
+
+# Локальный домен
+search local.domain.com
+domain local.domain.com</pre>
+                </div>
+
+                <h3>Постоянная настройка DNS (через interfaces)</h3>
+                <div class="command">sudo nano /etc/network/interfaces<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Настройка DNS в конфигурации интерфейса</div>
+
+                <div class="example">
+                    <strong>📖 Пример: DNS в /etc/network/interfaces</strong>
+                    <pre>auto eth0
+iface eth0 inet static
+    address 192.168.1.100/24
+    gateway 192.168.1.1
+    dns-nameservers 8.8.8.8 8.8.4.4
+    dns-search example.com</pre>
+                </div>
+
+                <h3>Настройка через resolvconf</h3>
+                <div class="command">sudo apt install resolvconf<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает resolvconf для управления DNS</div>
+
+                <div class="command">sudo nano /etc/resolvconf/resolv.conf.d/head<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Редактирует постоянные DNS настройки</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Содержимое /etc/resolvconf/resolv.conf.d/head</strong>
+                    <pre># Мои постоянные DNS серверы
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+nameserver 1.1.1.1</pre>
+                </div>
+
+                <h3>Обновление resolv.conf</h3>
+                <div class="command">sudo resolvconf -u<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Обновляет /etc/resolv.conf на основе конфигурации</div>
+
+                <h3>Проверка DNS резолвинга</h3>
+                <div class="command">nslookup google.com<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Проверяет разрешение доменного имени</div>
+
+                <h3>Подробная проверка DNS</h3>
+                <div class="command">dig google.com<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Детальная информация о DNS запросе</div>
+
+                <h3>Проверка с конкретным DNS сервером</h3>
+                <div class="command">dig @8.8.8.8 google.com<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Запрашивает DNS у конкретного сервера</div>
+
+                <h3>Краткий ответ DNS</h3>
+                <div class="command">dig +short google.com<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает только IP адрес</div>
+
+                <h3>Обратный DNS lookup</h3>
+                <div class="command">dig -x 8.8.8.8<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Определяет доменное имя по IP адресу</div>
+
+                <div class="note">
+                    <strong>💡 Популярные публичные DNS серверы:</strong>
+                    <table>
+                        <tr>
+                            <th>Провайдер</th>
+                            <th>Первичный</th>
+                            <th>Вторичный</th>
+                            <th>Особенности</th>
+                        </tr>
+                        <tr>
+                            <td>Google</td>
+                            <td>8.8.8.8</td>
+                            <td>8.8.4.4</td>
+                            <td>Быстрый, надёжный</td>
+                        </tr>
+                        <tr>
+                            <td>Cloudflare</td>
+                            <td>1.1.1.1</td>
+                            <td>1.0.0.1</td>
+                            <td>Приватность, скорость</td>
+                        </tr>
+                        <tr>
+                            <td>Quad9</td>
+                            <td>9.9.9.9</td>
+                            <td>149.112.112.112</td>
+                            <td>Блокировка вредоносных сайтов</td>
+                        </tr>
+                        <tr>
+                            <td>OpenDNS</td>
+                            <td>208.67.222.222</td>
+                            <td>208.67.220.220</td>
+                            <td>Фильтрация контента</td>
+                        </tr>
+                        <tr>
+                            <td>Yandex DNS</td>
+                            <td>77.88.8.8</td>
+                            <td>77.88.8.1</td>
+                            <td>Быстрый для РФ</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Тестирование скорости DNS</strong>
+                    <pre># Установка namebench
+sudo apt install namebench
+
+# Или с помощью dig измерить время ответа
+time dig @8.8.8.8 google.com
+time dig @1.1.1.1 google.com
+time dig @9.9.9.9 google.com
+
+# Выбираем самый быстрый</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="bonding" class="section">
+                <h2>🔗 Bonding и VLAN</h2>
+                
+                <h3>Установка необходимых пакетов</h3>
+                <div class="command">sudo apt install ifenslave vlan<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает инструменты для bonding и VLAN</div>
+
+                <h3>Загрузка модуля bonding</h3>
+                <div class="command">sudo modprobe bonding<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Загружает модуль ядра для bonding</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Настройка bonding (объединение интерфейсов)</strong>
+                    <pre># Создаём файл /etc/network/interfaces
+auto bond0
+iface bond0 inet static
+    address 192.168.1.100/24
+    gateway 192.168.1.1
+    bond-slaves eth0 eth1
+    bond-mode active-backup
+    bond-miimon 100
+    bond-downdelay 200
+    bond-updelay 200
+
+# Применяем
+sudo ifup bond0</pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Режимы bonding:</strong>
+                    <table>
+                        <tr>
+                            <th>Режим</th>
+                            <th>Номер</th>
+                            <th>Описание</th>
+                        </tr>
+                        <tr>
+                            <td>balance-rr</td>
+                            <td>0</td>
+                            <td>Round-robin, распределение нагрузки</td>
+                        </tr>
+                        <tr>
+                            <td>active-backup</td>
+                            <td>1</td>
+                            <td>Один активный, остальные резервные</td>
+                        </tr>
+                        <tr>
+                            <td>balance-xor</td>
+                            <td>2</td>
+                            <td>Распределение по MAC адресам</td>
+                        </tr>
+                        <tr>
+                            <td>broadcast</td>
+                            <td>3</td>
+                            <td>Отправка на все интерфейсы</td>
+                        </tr>
+                        <tr>
+                            <td>802.3ad</td>
+                            <td>4</td>
+                            <td>LACP агрегация (требует поддержки свитча)</td>
+                        </tr>
+                        <tr>
+                            <td>balance-tlb</td>
+                            <td>5</td>
+                            <td>Адаптивная балансировка передачи</td>
+                        </tr>
+                        <tr>
+                            <td>balance-alb</td>
+                            <td>6</td>
+                            <td>Адаптивная балансировка приёма/передачи</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>Загрузка модуля 8021q (VLAN)</h3>
+                <div class="command">sudo modprobe 8021q<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Загружает модуль ядра для VLAN</div>
+
+                <h3>Создание VLAN интерфейса</h3>
+                <div class="command">sudo ip link add link eth0 name eth0.10 type vlan id 10<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт VLAN 10 на интерфейсе eth0</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Настройка VLAN в /etc/network/interfaces</strong>
+                    <pre># Основной интерфейс
+auto eth0
+iface eth0 inet manual
+
+# VLAN 10 (офисная сеть)
+auto eth0.10
+iface eth0.10 inet static
+    address 192.168.10.100/24
+    vlan-raw-device eth0
+
+# VLAN 20 (гостевая сеть)
+auto eth0.20
+iface eth0.20 inet static
+    address 192.168.20.100/24
+    vlan-raw-device eth0
+
+# VLAN 30 (серверная сеть)
+auto eth0.30
+iface eth0.30 inet static
+    address 192.168.30.100/24
+    vlan-raw-device eth0</pre>
+                </div>
+
+                <h3>Удаление VLAN интерфейса</h3>
+                <div class="command">sudo ip link delete eth0.10<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет VLAN интерфейс</div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="diagnostics" class="section">
+                <h2>🔍 Диагностика сети</h2>
+                
+                <h3>Проверка подключения (ping)</h3>
+                <div class="command">ping -c 4 8.8.8.8<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отправляет 4 ICMP пакета на адрес 8.8.8.8</div>
+
+                <h3>Непрерывный ping</h3>
+                <div class="command">ping google.com<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Непрерывная проверка связи (Ctrl+C для остановки)</div>
+
+                <h3>Трассировка маршрута</h3>
+                <div class="command">traceroute google.com<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает путь пакетов до назначения</div>
+
+                <h3>Альтернативная трассировка (mtr)</h3>
+                <div class="command">sudo apt install mtr<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает улучшенный инструмент трассировки</div>
+
+                <div class="command">mtr google.com<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Интерактивная трассировка с статистикой</div>
+
+                <h3>Просмотр активных соединений</h3>
+                <div class="command">ss -tunap<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все TCP и UDP соединения</div>
+
+                <h3>Просмотр открытых портов</h3>
+                <div class="command">sudo ss -tulpn<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает слушающие порты и процессы</div>
+
+                <h3>Альтернатива - netstat</h3>
+                <div class="command">sudo netstat -tulpn<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устаревший, но популярный инструмент</div>
+
+                <h3>Проверка доступности порта</h3>
+                <div class="command">nc -zv google.com 80<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Проверяет, открыт ли порт 80 на google.com</div>
+
+                <h3>Сканирование портов (nmap)</h3>
+                <div class="command">sudo apt install nmap<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает nmap</div>
+
+                <div class="command">nmap 192.168.1.1<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Сканирует открытые порты на хосте</div>
+
+                <h3>Измерение скорости сети (iperf3)</h3>
+                <div class="command">sudo apt install iperf3<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает iperf3 для тестирования пропускной способности</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Тест скорости с iperf3</strong>
+                    <pre># На сервере (машина A):
+iperf3 -s
+
+# На клиенте (машина B):
+iperf3 -c IP_МАШИНЫ_A
+
+# Тест в обратном направлении
+iperf3 -c IP_МАШИНЫ_A -R
+
+# Тест UDP с указанной скоростью
+iperf3 -c IP_МАШИНЫ_A -u -b 100M</pre>
+                </div>
+
+                <h3>Анализ ARP таблицы</h3>
+                <div class="command">ip neigh show<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает ARP таблицу (соответствие IP-MAC)</div>
+
+                <h3>Очистка ARP кэша</h3>
+                <div class="command">sudo ip neigh flush all<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Очищает ARP таблицу</div>
+
+                <h3>Захват трафика (tcpdump)</h3>
+                <div class="command">sudo tcpdump -i eth0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Захватывает весь трафик на eth0</div>
+
+                <h3>Захват с фильтром</h3>
+                <div class="command">sudo tcpdump -i eth0 port 80<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Захватывает только HTTP трафик</div>
+
+                <h3>Сохранение в файл</h3>
+                <div class="command">sudo tcpdump -i eth0 -w capture.pcap<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Сохраняет захваченный трафик в файл</div>
+
+                <h3>Анализ трафика (Wireshark)</h3>
+                <div class="command">sudo apt install wireshark<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает Wireshark для графического анализа</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Диагностика проблем с подключением</strong>
+                    <pre># Шаг 1: Проверка интерфейса
+ip addr show eth0
+# Убеждаемся, что интерфейс UP и имеет IP
+
+# Шаг 2: Проверка локальной связи
+ping -c 3 127.0.0.1
+# Должно работать всегда (loopback)
+
+# Шаг 3: Проверка шлюза
+ping -c 3 192.168.1.1
+# Если не работает - проблема в локальной сети
+
+# Шаг 4: Проверка внешнего IP
+ping -c 3 8.8.8.8
+# Если не работает - проблема с маршрутизацией/интернетом
+
+# Шаг 5: Проверка DNS
+ping -c 3 google.com
+# Если IP работает, а домен нет - проблема с DNS
+
+# Шаг 6: Трассировка
+mtr 8.8.8.8
+# Смотрим где обрывается связь
+
+# Шаг 7: Проверка таблицы маршрутизации
+ip route show
+# Убеждаемся, что есть default gateway</pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Полезные опции ss:</strong>
+                    <ul>
+                        <li><strong>-t</strong> - показать TCP соединения</li>
+                        <li><strong>-u</strong> - показать UDP соединения</li>
+                        <li><strong>-l</strong> - показать слушающие сокеты</li>
+                        <li><strong>-n</strong> - не резолвить имена</li>
+                        <li><strong>-p</strong> - показать процессы</li>
+                        <li><strong>-a</strong> - показать все соединения</li>
+                    </ul>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="troubleshooting" class="section">
+                <h2>🛠️ Устранение проблем</h2>
+                
+                <div class="example">
+                    <strong>📖 Проблема 1: Нет подключения к интернету</strong>
+                    <pre># Диагностика
+ip addr show
+# Проверяем наличие IP адреса
+
+ping -c 3 192.168.1.1
+# Проверяем доступность шлюза
+
+# Если шлюз не доступен:
+sudo dhclient -r eth0 && sudo dhclient eth0
+# Обновляем IP от DHCP
+
+# Проверяем маршруты
+ip route show
+# Должен быть default gateway
+
+# Если нет, добавляем:
+sudo ip route add default via 192.168.1.1
+
+# Проверяем DNS
+cat /etc/resolv.conf
+# Должны быть nameserver записи
+
+# Если нет, добавляем:
+echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Проблема 2: Медленное подключение</strong>
+                    <pre># Проверка задержки
+ping -c 10 8.8.8.8
+# Смотрим на время ответа и packet loss
+
+# Трассировка для определения узкого места
+mtr --report 8.8.8.8
+# Смотрим где увеличивается задержка
+
+# Проверка загрузки интерфейса
+ip -s link show eth0
+# Смотрим на ошибки и потери пакетов
+
+# Проверка дуплекса и скорости
+ethtool eth0
+# Должно быть: Speed: 1000Mb/s, Duplex: Full
+
+# Если нет ethtool:
+sudo apt install ethtool
+
+# Установка скорости вручную (если нужно):
+sudo ethtool -s eth0 speed 1000 duplex full autoneg on</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Проблема 3: Конфликт IP адресов</strong>
+                    <pre># Проверка конфликтов
+sudo arping -I eth0 -c 3 192.168.1.100
+# Показывает, отвечает ли кто-то на этот IP
+
+# Проверка ARP таблицы
+ip neigh show
+# Смотрим на дублирующиеся MAC адреса
+
+# Очистка ARP кэша
+sudo ip neigh flush all
+
+# Смена IP адреса
+sudo ip addr del 192.168.1.100/24 dev eth0
+sudo ip addr add 192.168.1.101/24 dev eth0
+
+# Или запрос нового IP от DHCP
+sudo dhclient -r eth0
+sudo dhclient eth0</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Проблема 4: Интерфейс не поднимается</strong>
+                    <pre># Проверка состояния
+ip link show eth0
+# Смотрим на <NO-CARRIER> или <DOWN>
+
+# Проверка физического подключения кабеля
+sudo ethtool eth0 | grep "Link detected"
+# Должно быть: Link detected: yes
+
+# Проверка драйвера
+dmesg | grep eth0
+# Ищем ошибки загрузки драйвера
+
+# Попытка перезагрузки интерфейса
+sudo ip link set eth0 down
+sleep 2
+sudo ip link set eth0 up
+
+# Проверка модуля ядра
+lsmod | grep ethernet_driver_name
+# Убеждаемся что модуль загружен
+
+# Перезагрузка модуля (пример для e1000e):
+sudo modprobe -r e1000e
+sudo modprobe e1000e</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Проблема 5: DNS не работает</strong>
+                    <pre># Проверка файла resolv.conf
+cat /etc/resolv.conf
+# Проверяем наличие nameserver записей
+
+# Тест конкретного DNS сервера
+dig @8.8.8.8 google.com
+# Если работает - проблема в локальном DNS
+
+# Проверка systemd-resolved (если используется)
+systemctl status systemd-resolved
+
+# Проверка /etc/nsswitch.conf
+cat /etc/nsswitch.conf | grep hosts
+# Должно быть: hosts: files dns
+
+# Временное решение
+echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+echo "nameserver 8.8.4.4" | sudo tee -a /etc/resolv.conf
+
+# Постоянное решение через resolvconf
+sudo apt install resolvconf
+echo "nameserver 8.8.8.8" | sudo tee -a /etc/resolvconf/resolv.conf.d/head
+sudo resolvconf -u</pre>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Важные напоминания:</strong>
+                    <ul>
+                        <li>Всегда делайте резервную копию конфигурации перед изменениями</li>
+                        <li>Изменения через команду ip временные (до перезагрузки)</li>
+                        <li>Для постоянных изменений используйте /etc/network/interfaces</li>
+                        <li>При удалённой работе будьте осторожны с сетевыми изменениями</li>
+                        <li>Используйте screen или tmux для защиты от разрыва соединения</li>
+                    </ul>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="examples" class="section">
+                <h2>💡 Практические примеры и сценарии</h2>
+                
+                <div class="example">
+                    <strong>📖 Сценарий 1: Настройка домашнего сервера с двумя интерфейсами</strong>
+                    <pre># eth0 - подключен к интернету (WAN)
+# eth1 - подключен к локальной сети (LAN)
+
+# Файл /etc/network/interfaces:
+auto eth0
+iface eth0 inet dhcp
+
+auto eth1
+iface eth1 inet static
+    address 192.168.100.1/24
+
+# Включаем IP forwarding
+sudo sysctl -w net.ipv4.ip_forward=1
+echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
+
+# Настройка NAT (требуется iptables)
+sudo apt install iptables-persistent
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+sudo iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
+sudo iptables -A FORWARD -i eth0 -o eth1 -m state --state RELATED,ESTABLISHED -j ACCEPT
+sudo netfilter-persistent save
+
+# Настройка DHCP сервера для LAN
+sudo apt install isc-dhcp-server
+# Настройте /etc/dhcp/dhcpd.conf</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 2: Создание точки доступа WiFi</strong>
+                    <pre># wlan0 - WiFi адаптер
+# eth0 - интернет подключение
+
+# Установка необходимых пакетов
+sudo apt install hostapd dnsmasq
+
+# Настройка hostapd (/etc/hostapd/hostapd.conf):
+interface=wlan0
+driver=nl80211
+ssid=MyAccessPoint
+hw_mode=g
+channel=6
+wmm_enabled=0
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+wpa=2
+wpa_passphrase=MyPassword123
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP
+rsn_pairwise=CCMP
+
+# Настройка dnsmasq (/etc/dnsmasq.conf):
+interface=wlan0
+dhcp-range=192.168.50.2,192.168.50.20,255.255.255.0,24h
+
+# Настройка wlan0:
+sudo ip addr add 192.168.50.1/24 dev wlan0
+
+# Включение forwarding
+sudo sysctl -w net.ipv4.ip_forward=1
+
+# NAT
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+# Запуск сервисов
+sudo systemctl start hostapd
+sudo systemctl start dnsmasq</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 3: Настройка резервного канала (failover)</strong>
+                    <pre># eth0 - основной канал
+# eth1 - резервный канал
+
+# /etc/network/interfaces:
+auto eth0
+iface eth0 inet dhcp
+    metric 100
+
+auto eth1
+iface eth1 inet dhcp
+    metric 200
+
+# Меньшая метрика = выше приоритет
+# При падении eth0 автоматически переключится на eth1
+
+# Проверка активного маршрута:
+ip route show
+# default via 192.168.1.1 dev eth0 metric 100
+# default via 10.0.0.1 dev eth1 metric 200</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 4: Мониторинг сетевой активности</strong>
+                    <pre># Установка инструментов мониторинга
+sudo apt install iftop nethogs bmon vnstat
+
+# iftop - показывает текущие соединения и их пропускную способность
+sudo iftop -i eth0
+
+# nethogs - показывает использование сети по процессам
+sudo nethogs eth0
+
+# bmon - красивый монитор полосы пропускания
+bmon -p eth0
+
+# vnstat - статистика использования сети за период
+vnstat -i eth0
+vnstat -i eth0 -d  # за день
+vnstat -i eth0 -m  # за месяц
+
+# Настройка автосбора статистики vnstat
+sudo systemctl enable vnstat
+sudo systemctl start vnstat</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 5: Создание моста (bridge) для виртуальных машин</strong>
+                    <pre># Установка bridge-utils
+sudo apt install bridge-utils
+
+# Создание моста
+sudo brctl addbr br0
+sudo brctl addif br0 eth0
+
+# Или через ip команду:
+sudo ip link add name br0 type bridge
+sudo ip link set eth0 master br0
+
+# Настройка в /etc/network/interfaces:
+auto br0
+iface br0 inet dhcp
+    bridge_ports eth0
+    bridge_stp off
+    bridge_fd 0
+    bridge_maxwait 0
+
+# Применение
+sudo ifup br0
+
+# Теперь виртуальные машины могут подключаться к br0
+# и получать IP из той же сети что и физический интерфейс</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 6: Скрипт для автоматической диагностики сети</strong>
+                    <pre>#!/bin/bash
+# network-check.sh - Скрипт проверки сети
+
+echo "=== Проверка сетевых интерфейсов ==="
+ip addr show
+
+echo -e "\n=== Проверка таблицы маршрутизации ==="
+ip route show
+
+echo -e "\n=== Проверка DNS ==="
+cat /etc/resolv.conf
+
+echo -e "\n=== Проверка локальной связи (loopback) ==="
+ping -c 3 127.0.0.1
+
+echo -e "\n=== Проверка шлюза ==="
+GATEWAY=$(ip route | grep default | awk '{print $3}' | head -n 1)
+if [ -n "$GATEWAY" ]; then
+    echo "Шлюз: $GATEWAY"
+    ping -c 3 $GATEWAY
+else
+    echo "Шлюз не найден!"
+fi
+
+echo -e "\n=== Проверка внешней связи ==="
+ping -c 3 8.8.8.8
+
+echo -e "\n=== Проверка DNS ==="
+ping -c 3 google.com
+
+echo -e "\n=== Активные соединения ==="
+ss -tunap | head -n 20
+
+echo -e "\n=== Использование портов ==="
+sudo ss -tulpn
+
+echo -e "\n=== Диагностика завершена ==="</pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Полезные алиасы для .bashrc:</strong>
+                    <pre># Добавьте в ~/.bashrc
+alias netinfo='ip addr show'
+alias netroute='ip route show'
+alias netstat='ss -tunap'
+alias netlisten='sudo ss -tulpn'
+alias netcheck='ping -c 3 8.8.8.8 && ping -c 3 google.com'
+alias netspeed='speedtest-cli'
+alias netmon='sudo iftop -i eth0'
+alias netreset='sudo systemctl restart networking'
+
+# После добавления:
+source ~/.bashrc</pre>
+                </div>
+
+                <div class="note">
+                    <strong>🎯 Итоговая таблица команд:</strong>
+                    <table>
+                        <tr>
+                            <th>Задача</th>
+                            <th>Команда</th>
+                        </tr>
+                        <tr>
+                            <td>Показать интерфейсы</td>
+                            <td><code>ip addr show</code></td>
+                        </tr>
+                        <tr>
+                            <td>Включить интерфейс</td>
+                            <td><code>sudo ip link set eth0 up</code></td>
+                        </tr>
+                        <tr>
+                            <td>Добавить IP</td>
+                            <td><code>sudo ip addr add 192.168.1.100/24 dev eth0</code></td>
+                        </tr>
+                        <tr>
+                            <td>Добавить шлюз</td>
+                            <td><code>sudo ip route add default via 192.168.1.1</code></td>
+                        </tr>
+                        <tr>
+                            <td>Обновить DHCP</td>
+                            <td><code>sudo dhclient -r eth0 && sudo dhclient eth0</code></td>
+                        </tr>
+                        <tr>
+                            <td>Проверить связь</td>
+                            <td><code>ping -c 3 8.8.8.8</code></td>
+                        </tr>
+                        <tr>
+                            <td>Трассировка</td>
+                            <td><code>mtr google.com</code></td>
+                        </tr>
+                        <tr>
+                            <td>Показать порты</td>
+                            <td><code>sudo ss -tulpn</code></td>
+                        </tr>
+                        <tr>
+                            <td>Проверить DNS</td>
+                            <td><code>dig google.com</code></td>
+                        </tr>
+                        <tr>
+                            <td>Перезапуск сети</td>
+                            <td><code>sudo systemctl restart networking</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>🌐 Управление сетевыми интерфейсами - основа системного администрирования Linux</p>
+            <p>Debian 11 (Bullseye) | 2025</p>
+        </footer>
+    </div>
+</body>
+</html>

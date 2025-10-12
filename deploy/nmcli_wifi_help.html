@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetworkManager WiFi - Команды для Debian 11</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        .section h3 {
+            color: #34495e;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .command {
+            background: #2c3e50;
+            color: #00ff00;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            overflow-x: auto;
+            border: 1px solid #1a252f;
+            position: relative;
+            padding-right: 100px;
+        }
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .copy-btn:hover {
+            background: #764ba2;
+            transform: translateY(-50%) scale(1.05);
+        }
+        .copy-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        .copy-btn.copied {
+            background: #28a745;
+        }
+        .description {
+            color: #555;
+            margin: 8px 0;
+            padding-left: 10px;
+        }
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .note strong {
+            color: #856404;
+        }
+        ul {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+        ul li {
+            margin: 8px 0;
+        }
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+        .example {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .example strong {
+            color: #2c3e50;
+        }
+        .example pre {
+            background: #2c3e50;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.4;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .warning strong {
+            color: #856404;
+        }
+        .toc {
+            background: #f8f9fa;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+        }
+        .toc h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8em;
+        }
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .toc-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #2c3e50;
+            display: block;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .toc-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            border-left-color: #764ba2;
+        }
+        .toc-item span {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        .back-to-top {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        .back-to-top:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+    <script>
+        function copyCommand(button) {
+            const commandDiv = button.parentElement;
+            const commandText = commandDiv.childNodes[0].textContent.trim();
+            
+            navigator.clipboard.writeText(commandText).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Скопировано!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Ошибка копирования: ', err);
+                button.textContent = 'Ошибка!';
+                setTimeout(() => {
+                    button.textContent = 'Копировать';
+                }, 2000);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📡 NetworkManager WiFi</h1>
+            <p>Руководство по командам для Debian 11</p>
+        </header>
+
+        <div class="content">
+            <div id="toc" class="toc">
+                <h2>📑 Содержание</h2>
+                <div class="toc-grid">
+                    <a href="#basic" class="toc-item">
+                        <span>🔍</span>
+                        <strong>Основные команды просмотра</strong>
+                    </a>
+                    <a href="#connect" class="toc-item">
+                        <span>🔗</span>
+                        <strong>Подключение к WiFi сети</strong>
+                    </a>
+                    <a href="#manage" class="toc-item">
+                        <span>⚙️</span>
+                        <strong>Управление соединениями</strong>
+                    </a>
+                    <a href="#details" class="toc-item">
+                        <span>📝</span>
+                        <strong>Детальная информация</strong>
+                    </a>
+                    <a href="#radio" class="toc-item">
+                        <span>🔧</span>
+                        <strong>Управление WiFi радио</strong>
+                    </a>
+                    <a href="#security" class="toc-item">
+                        <span>🔑</span>
+                        <strong>Работа с паролями</strong>
+                    </a>
+                    <a href="#autoconnect" class="toc-item">
+                        <span>⚡</span>
+                        <strong>Автоматическое подключение</strong>
+                    </a>
+                    <a href="#troubleshoot" class="toc-item">
+                        <span>🛠️</span>
+                        <strong>Устранение неполадок</strong>
+                    </a>
+                    <a href="#additional" class="toc-item">
+                        <span>📚</span>
+                        <strong>Дополнительные команды</strong>
+                    </a>
+                </div>
+            </div>
+
+            <div id="basic" class="section">
+                <h2>🔍 Основные команды просмотра</h2>
+                
+                <h3>Проверка статуса NetworkManager</h3>
+                <div class="command">sudo systemctl status NetworkManager<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает состояние службы NetworkManager - запущена ли, активна ли, есть ли ошибки</div>
+
+                <h3>Просмотр всех устройств</h3>
+                <div class="command">nmcli device status<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отображает список всех сетевых устройств и их состояние</div>
+
+                <div class="example">
+                    <strong>Пример вывода:</strong>
+                    <pre>DEVICE  TYPE      STATE         CONNECTION
+wlan0   wifi      connected     MyHomeWiFi
+eth0    ethernet  unavailable   --
+lo      loopback  unmanaged     --</pre>
+                </div>
+
+                <h3>Список доступных WiFi сетей</h3>
+                <div class="command">nmcli device wifi list<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все доступные WiFi сети в радиусе действия с информацией о сигнале, безопасности и частоте</div>
+
+                <div class="example">
+                    <strong>Пример вывода:</strong>
+                    <pre>IN-USE  BSSID              SSID           MODE   CHAN  RATE       SIGNAL  BARS  SECURITY
+*       00:11:22:33:44:55  MyHomeWiFi     Infra  6     54 Mbit/s  85      ▂▄▆█  WPA2
+        AA:BB:CC:DD:EE:FF  NeighborWiFi   Infra  11    54 Mbit/s  45      ▂▄__  WPA2
+        FF:EE:DD:CC:BB:AA  CafeNetwork    Infra  1     54 Mbit/s  30      ▂___  --</pre>
+                    <strong>Расшифровка столбцов:</strong>
+                    <ul>
+                        <li><strong>IN-USE</strong> - * означает текущее подключение</li>
+                        <li><strong>BSSID</strong> - MAC-адрес точки доступа</li>
+                        <li><strong>SSID</strong> - имя сети</li>
+                        <li><strong>MODE</strong> - режим (Infra = Infrastructure)</li>
+                        <li><strong>CHAN</strong> - канал WiFi (1-14)</li>
+                        <li><strong>RATE</strong> - максимальная скорость</li>
+                        <li><strong>SIGNAL</strong> - уровень сигнала (0-100)</li>
+                        <li><strong>BARS</strong> - визуальный индикатор сигнала</li>
+                        <li><strong>SECURITY</strong> - тип шифрования (WPA2, WPA3, -- = открытая)</li>
+                    </ul>
+                </div>
+
+                <h3>Обновить список сетей</h3>
+                <div class="command">nmcli device wifi rescan<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Повторное сканирование доступных WiFi сетей (полезно, если не видите нужную сеть)</div>
+
+                <h3>Показать текущее подключение</h3>
+                <div class="command">nmcli connection show --active<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отображает только активные соединения прямо сейчас</div>
+
+                <h3>Быстрая проверка статуса WiFi</h3>
+                <div class="command">nmcli -t -f DEVICE,STATE device<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Компактный вывод устройств и их состояния</div>
+
+                <div class="note">
+                    <strong>💡 Уровни сигнала WiFi:</strong>
+                    <ul>
+                        <li><strong>80-100%</strong> - Отличный сигнал ▂▄▆█</li>
+                        <li><strong>60-79%</strong> - Хороший сигнал ▂▄▆_</li>
+                        <li><strong>40-59%</strong> - Средний сигнал ▂▄__</li>
+                        <li><strong>20-39%</strong> - Слабый сигнал ▂___</li>
+                        <li><strong>0-19%</strong> - Очень слабый сигнал ____</li>
+                    </ul>
+                </div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="connect" class="section">
+                <h2>🔗 Подключение к WiFi сети</h2>
+                
+                <h3>Подключение к открытой сети</h3>
+                <div class="command">sudo nmcli device wifi connect "SSID_СЕТИ"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Подключается к открытой WiFi сети (без пароля)</div>
+
+                <h3>Подключение к защищённой сети</h3>
+                <div class="command">sudo nmcli device wifi connect "SSID_СЕТИ" password "ВАШ_ПАРОЛЬ"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Подключается к WiFi сети с паролем (WPA/WPA2/WPA3)</div>
+
+                <h3>Подключение к скрытой сети</h3>
+                <div class="command">sudo nmcli device wifi connect "SSID_СЕТИ" password "ВАШ_ПАРОЛЬ" hidden yes<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Подключается к скрытой WiFi сети (которая не транслирует свой SSID)</div>
+
+                <h3>Подключение с указанием интерфейса</h3>
+                <div class="command">sudo nmcli device wifi connect "SSID_СЕТИ" password "пароль" ifname wlan0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Подключается через конкретный WiFi адаптер (полезно при наличии нескольких адаптеров)</div>
+
+                <h3>Подключение по BSSID</h3>
+                <div class="command">sudo nmcli device wifi connect "SSID_СЕТИ" password "пароль" bssid 00:11:22:33:44:55<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Подключается к конкретной точке доступа по MAC-адресу (полезно когда несколько AP с одинаковым SSID)</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Подключение к домашней сети</strong>
+                    <pre># Сканируем доступные сети
+nmcli device wifi list
+
+# Находим нашу сеть "MyHomeWiFi"
+# Подключаемся с паролем
+sudo nmcli device wifi connect "MyHomeWiFi" password "mySecretPassword123"
+
+# Проверяем подключение
+nmcli connection show --active
+
+# Вывод:
+# NAME         UUID                                  TYPE  DEVICE
+# MyHomeWiFi   12345678-1234-1234-1234-123456789012  wifi  wlan0</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Подключение к скрытой сети офиса</strong>
+                    <pre># Сеть "OfficeHidden" не отображается в списке
+nmcli device wifi list
+# Её там нет!
+
+# Подключаемся напрямую, указав hidden yes
+sudo nmcli device wifi connect "OfficeHidden" password "OfficePass2024" hidden yes
+
+# Успех! Проверяем
+ping -c 4 8.8.8.8</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Подключение к публичной сети без пароля</strong>
+                    <pre># В кафе видим открытую сеть "CafeFreeWiFi"
+nmcli device wifi list | grep -i cafe
+
+# Подключаемся без пароля
+sudo nmcli device wifi connect "CafeFreeWiFi"
+
+# Открываем браузер для авторизации через портал</pre>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Безопасность:</strong>
+                    <ul>
+                        <li>Пароль передаётся в командной строке и может сохраниться в истории команд</li>
+                        <li>Используйте <code>history -c</code> после ввода пароля или пробел перед командой</li>
+                        <li>Не подключайтесь к неизвестным открытым сетям без VPN</li>
+                        <li>Предпочитайте сети с WPA3, затем WPA2</li>
+                    </ul>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Типы безопасности WiFi:</strong>
+                    <ul>
+                        <li><strong>WPA3</strong> - современный, самый безопасный стандарт</li>
+                        <li><strong>WPA2</strong> - распространённый, достаточно безопасный</li>
+                        <li><strong>WPA</strong> - устаревший, слабая защита</li>
+                        <li><strong>WEP</strong> - очень старый, легко взламывается, не используйте!</li>
+                        <li><strong>Открытая</strong> - без шифрования, любой видит ваш трафик</li>
+                    </ul>
+                </div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="manage" class="section">
+                <h2>⚙️ Управление соединениями</h2>
+                
+                <h3>Просмотр всех соединений</h3>
+                <div class="command">nmcli connection show<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает список всех сохранённых соединений</div>
+
+                <h3>Просмотр активных соединений</h3>
+                <div class="command">nmcli connection show --active<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отображает только активные соединения</div>
+
+                <h3>Активация соединения</h3>
+                <div class="command">nmcli connection up "ИМЯ_СОЕДИНЕНИЯ"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Активирует сохранённое соединение</div>
+
+                <h3>Деактивация соединения</h3>
+                <div class="command">nmcli connection down "ИМЯ_СОЕДИНЕНИЯ"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отключает активное соединение</div>
+
+                <h3>Удаление соединения</h3>
+                <div class="command">nmcli connection delete "ИМЯ_СОЕДИНЕНИЯ"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет сохранённое соединение из системы</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="details" class="section">
+                <h2>📝 Детальная информация</h2>
+                
+                <h3>Подробная информация о соединении</h3>
+                <div class="command">nmcli connection show "ИМЯ_СОЕДИНЕНИЯ"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отображает все параметры конкретного соединения</div>
+
+                <h3>Информация об устройстве</h3>
+                <div class="command">nmcli device show wlan0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает детальную информацию о WiFi адаптере (замените wlan0 на ваш интерфейс)</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="radio" class="section">
+                <h2>🔧 Управление WiFi радио</h2>
+                
+                <h3>Включить WiFi</h3>
+                <div class="command">nmcli radio wifi on<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Включает WiFi адаптер</div>
+
+                <h3>Выключить WiFi</h3>
+                <div class="command">nmcli radio wifi off<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Выключает WiFi адаптер</div>
+
+                <h3>Статус WiFi</h3>
+                <div class="command">nmcli radio wifi<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает, включён или выключен WiFi</div>
+
+                <h3>Статус всех радио</h3>
+                <div class="command">nmcli radio all<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает статус всех беспроводных интерфейсов</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="security" class="section">
+                <h2>🔑 Работа с паролями и безопасностью</h2>
+                
+                <h3>Просмотр сохранённого пароля</h3>
+                <div class="command">sudo nmcli connection show "ИМЯ_СОЕДИНЕНИЯ" | grep psk<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отображает сохранённый пароль WiFi сети</div>
+
+                <h3>Изменение пароля</h3>
+                <div class="command">nmcli connection modify "ИМЯ_СОЕДИНЕНИЯ" wifi-sec.psk "НОВЫЙ_ПАРОЛЬ"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Изменяет пароль для сохранённого соединения</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="autoconnect" class="section">
+                <h2>⚡ Автоматическое подключение</h2>
+                
+                <h3>Включить автоподключение</h3>
+                <div class="command">nmcli connection modify "ИМЯ_СОЕДИНЕНИЯ" connection.autoconnect yes<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Включает автоматическое подключение к сети</div>
+
+                <h3>Выключить автоподключение</h3>
+                <div class="command">nmcli connection modify "ИМЯ_СОЕДИНЕНИЯ" connection.autoconnect no<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отключает автоматическое подключение к сети</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="troubleshoot" class="section">
+                <h2>🛠️ Устранение неполадок</h2>
+                
+                <h3>Перезапуск NetworkManager</h3>
+                <div class="command">sudo systemctl restart NetworkManager<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Перезапускает службу NetworkManager (часто помогает при проблемах с подключением)</div>
+
+                <h3>Отключение устройства</h3>
+                <div class="command">nmcli device disconnect wlan0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отключает WiFi устройство</div>
+
+                <h3>Повторное подключение устройства</h3>
+                <div class="command">nmcli device connect wlan0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Подключает WiFi устройство обратно</div>
+
+                <h3>Проверка логов</h3>
+                <div class="command">journalctl -u NetworkManager -f<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Просмотр логов NetworkManager в реальном времени (для диагностики проблем)</div>
+
+                <h3>Просмотр последних 100 строк логов</h3>
+                <div class="command">journalctl -u NetworkManager -n 100<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает последние 100 записей журнала</div>
+
+                <h3>Логи за последний час</h3>
+                <div class="command">journalctl -u NetworkManager --since "1 hour ago"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает логи NetworkManager за последний час</div>
+
+                <h3>Проверка драйвера WiFi адаптера</h3>
+                <div class="command">lspci -k | grep -A 3 Network<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию о WiFi адаптере и используемом драйвере</div>
+
+                <h3>Проверка состояния интерфейса</h3>
+                <div class="command">ip link show wlan0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает состояние сетевого интерфейса</div>
+
+                <h3>Проверка IP адреса</h3>
+                <div class="command">ip addr show wlan0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает IP адрес и другую информацию об интерфейсе</div>
+
+                <h3>Тест подключения</h3>
+                <div class="command">ping -c 4 8.8.8.8<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Проверяет подключение к интернету (пингует Google DNS)</div>
+
+                <h3>Проверка DNS</h3>
+                <div class="command">nslookup google.com<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Проверяет работу DNS резолвера</div>
+
+                <h3>Трассировка маршрута</h3>
+                <div class="command">traceroute google.com<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает путь пакетов до назначения</div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 1: WiFi не подключается</strong>
+                    <pre># Проблема: не можете подключиться к сети
+
+# Шаг 1: Проверяем, включен ли WiFi
+nmcli radio wifi
+# Если "disabled", включаем:
+nmcli radio wifi on
+
+# Шаг 2: Проверяем статус адаптера
+nmcli device status
+# Должно быть: wlan0  wifi  disconnected  --
+
+# Шаг 3: Сканируем сети
+nmcli device wifi list
+# Находим нашу сеть в списке
+
+# Шаг 4: Пробуем подключиться
+sudo nmcli device wifi connect "MyWiFi" password "password123"
+
+# Шаг 5: Если не работает, смотрим логи
+journalctl -u NetworkManager -n 50 --no-pager
+
+# Шаг 6: Перезапускаем NetworkManager
+sudo systemctl restart NetworkManager
+
+# Шаг 7: Пробуем снова
+sudo nmcli device wifi connect "MyWiFi" password "password123"</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 2: Подключено, но нет интернета</strong>
+                    <pre># Проблема: WiFi подключен, но интернет не работает
+
+# Шаг 1: Проверяем подключение
+nmcli connection show --active
+# WiFi должен быть в списке
+
+# Шаг 2: Проверяем IP адрес
+ip addr show wlan0
+# Должен быть IP типа 192.168.x.x или 10.x.x.x
+
+# Шаг 3: Пингуем роутер
+ping -c 4 192.168.1.1
+# Если работает - проблема не в WiFi
+
+# Шаг 4: Пингуем внешний IP
+ping -c 4 8.8.8.8
+# Если работает - проблема в DNS
+
+# Шаг 5: Проверяем DNS
+nslookup google.com
+# Если не работает - меняем DNS
+
+# Шаг 6: Устанавливаем Google DNS
+sudo nmcli connection modify "MyWiFi" ipv4.dns "8.8.8.8 8.8.4.4"
+sudo nmcli connection down "MyWiFi"
+sudo nmcli connection up "MyWiFi"
+
+# Шаг 7: Проверяем снова
+ping -c 4 google.com</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 3: Слабый сигнал WiFi</strong>
+                    <pre># Проблема: медленное подключение, обрывы
+
+# Шаг 1: Проверяем уровень сигнала
+nmcli device wifi list
+# Смотрим на SIGNAL и BARS нашей сети
+
+# Шаг 2: Проверяем помехи
+nmcli device wifi list | grep "CHAN"
+# Смотрим, какие каналы заняты
+
+# Если много сетей на одном канале (например, 6):
+# - Роутер на канале 6: 5 сетей
+# - Роутер на канале 11: 2 сети
+# Рекомендуется переключить роутер на менее загруженный канал
+
+# Шаг 3: Проверяем скорость
+sudo apt install speedtest-cli
+speedtest-cli
+
+# Шаг 4: Проверяем качество соединения
+ping -c 100 192.168.1.1
+# Смотрим на % потерь пакетов (packet loss)
+
+# Если потери > 5% - проблема с сигналом
+# Решение: переместите роутер, используйте репитер или поменяйте канал</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 4: Автоматическое переподключение не работает</strong>
+                    <pre># Проблема: после перезагрузки WiFi не подключается автоматически
+
+# Шаг 1: Проверяем настройку автоподключения
+nmcli connection show "MyWiFi" | grep autoconnect
+# Должно быть: connection.autoconnect: yes
+
+# Шаг 2: Если "no", включаем автоподключение
+nmcli connection modify "MyWiFi" connection.autoconnect yes
+
+# Шаг 3: Устанавливаем приоритет
+nmcli connection modify "MyWiFi" connection.autoconnect-priority 10
+
+# Шаг 4: Перезагружаемся для проверки
+sudo reboot
+
+# После перезагрузки проверяем:
+nmcli connection show --active</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 5: Ошибка "Secrets were required, but not provided"</strong>
+                    <pre># Проблема: ошибка при подключении о недостающих секретах
+
+# Это означает, что пароль не сохранён или неверен
+
+# Шаг 1: Удаляем старое соединение
+nmcli connection delete "MyWiFi"
+
+# Шаг 2: Создаём новое подключение с правильным паролем
+sudo nmcli device wifi connect "MyWiFi" password "correctPassword123"
+
+# Шаг 3: Проверяем
+nmcli connection show --active</pre>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Распространённые проблемы:</strong>
+                    <ul>
+                        <li><strong>WiFi постоянно отключается</strong> - проверьте power management: <code>sudo iwconfig wlan0 power off</code></li>
+                        <li><strong>"Device not ready"</strong> - драйвер не загружен, проверьте: <code>sudo dmesg | grep firmware</code></li>
+                        <li><strong>Медленная скорость</strong> - помехи или слабый сигнал, смените канал на роутере</li>
+                        <li><strong>Не видит 5GHz сети</strong> - ваш адаптер может не поддерживать 5GHz</li>
+                        <li><strong>"Connection failed"</strong> - неверный пароль или несовместимый тип шифрования</li>
+                    </ul>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Команды диагностики одной строкой:</strong>
+                    <ul>
+                        <li><strong>Полная диагностика</strong>: <code>nmcli && ip a && ping -c 3 8.8.8.8</code></li>
+                        <li><strong>Сброс WiFi</strong>: <code>nmcli radio wifi off && sleep 5 && nmcli radio wifi on</code></li>
+                        <li><strong>Быстрое переподключение</strong>: <code>nmcli con down "MyWiFi" && nmcli con up "MyWiFi"</code></li>
+                        <li><strong>Проверка всего стека</strong>: <code>ping -c 1 127.0.0.1 && ping -c 1 192.168.1.1 && ping -c 1 8.8.8.8 && ping -c 1 google.com</code></li>
+                    </ul>
+                </div>
+
+                <div class="note">
+                    <strong>🔧 Справочная таблица: Типичные проблемы и решения</strong>
+                    <table>
+                        <tr>
+                            <th>Проблема</th>
+                            <th>Возможная причина</th>
+                            <th>Решение</th>
+                        </tr>
+                        <tr>
+                            <td>WiFi адаптер не обнаружен</td>
+                            <td>Драйвер не загружен</td>
+                            <td><code>lspci -k | grep -A 3 Network</code><br>Установите драйвер или firmware</td>
+                        </tr>
+                        <tr>
+                            <td>Не видит сети 5GHz</td>
+                            <td>Адаптер не поддерживает 5GHz</td>
+                            <td><code>iw list | grep 5... MHz</code><br>Если пусто - нет поддержки</td>
+                        </tr>
+                        <tr>
+                            <td>Постоянные разрывы соединения</td>
+                            <td>Power management</td>
+                            <td><code>sudo iwconfig wlan0 power off</code><br>Добавьте в автозапуск</td>
+                        </tr>
+                        <tr>
+                            <td>Медленная скорость</td>
+                            <td>Перегруженный канал</td>
+                            <td>Смените канал WiFi на роутере<br>Используйте анализатор: <code>wavemon</code></td>
+                        </tr>
+                        <tr>
+                            <td>Ошибка аутентификации</td>
+                            <td>Неверный пароль</td>
+                            <td>Удалите соединение:<br><code>nmcli con delete "WiFi"</code><br>Создайте заново</td>
+                        </tr>
+                        <tr>
+                            <td>Получен IP 169.254.x.x</td>
+                            <td>DHCP сервер недоступен</td>
+                            <td>Перезапустите роутер<br>Или установите статический IP</td>
+                        </tr>
+                        <tr>
+                            <td>DNS не работает</td>
+                            <td>Проблема с DNS сервером</td>
+                            <td>Смените на Google DNS:<br><code>nmcli con modify "WiFi" ipv4.dns "8.8.8.8"</code></td>
+                        </tr>
+                        <tr>
+                            <td>Не подключается к корпоративной сети</td>
+                            <td>WPA Enterprise настройки</td>
+                            <td>Используйте GUI настройки<br>или настройте через nmcli advanced</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div class="note">
+                <strong>💡 Полезные советы:</strong>
+                <ul>
+                    <li>Для большинства команд управления требуются права root (sudo)</li>
+                    <li>Имена с пробелами нужно заключать в кавычки</li>
+                    <li>Используйте Tab для автодополнения команд</li>
+                    <li>Конфигурационные файлы находятся в /etc/NetworkManager/</li>
+                    <li>Сохранённые соединения хранятся в /etc/NetworkManager/system-connections/</li>
+                </ul>
+            </div>
+
+            <div id="additional" class="section">
+                <h2>📚 Дополнительные команды</h2>
+                
+                <h3>Интерактивный редактор</h3>
+                <div class="command">nmcli connection edit "ИМЯ_СОЕДИНЕНИЯ"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Открывает интерактивный редактор соединения</div>
+
+                <h3>Справка по командам</h3>
+                <div class="command">nmcli --help<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает справку по командам nmcli</div>
+
+                <h3>Версия NetworkManager</h3>
+                <div class="command">nmcli --version<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отображает версию установленного NetworkManager</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Практические сценарии использования</h2>
+
+                <div class="example">
+                    <strong>📖 Сценарий: Переключение между домашней и рабочей сетью</strong>
+                    <pre># Утром на работе
+sudo nmcli connection up "OfficeWiFi"
+
+# Вечером дома
+sudo nmcli connection up "HomeWiFi"
+
+# Или автоматически по приоритету
+nmcli connection modify "HomeWiFi" connection.autoconnect-priority 100
+nmcli connection modify "OfficeWiFi" connection.autoconnect-priority 90
+# Теперь дома будет автоматически подключаться к HomeWiFi</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий: Настройка статического IP в WiFi сети</strong>
+                    <pre># Подключаемся к сети
+sudo nmcli device wifi connect "MyWiFi" password "password123"
+
+# Настраиваем статический IP
+nmcli connection modify "MyWiFi" ipv4.method manual
+nmcli connection modify "MyWiFi" ipv4.addresses 192.168.1.100/24
+nmcli connection modify "MyWiFi" ipv4.gateway 192.168.1.1
+nmcli connection modify "MyWiFi" ipv4.dns "8.8.8.8,8.8.4.4"
+
+# Применяем изменения
+nmcli connection down "MyWiFi"
+nmcli connection up "MyWiFi"
+
+# Проверяем
+ip addr show wlan0</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий: Создание скрипта для быстрого переподключения</strong>
+                    <pre># Создаём скрипт reconnect-wifi.sh
+cat &lt;&lt;'EOF' &gt; ~/reconnect-wifi.sh
+#!/bin/bash
+WIFI_NAME="MyHomeWiFi"
+echo "Отключение от $WIFI_NAME..."
+nmcli connection down "$WIFI_NAME"
+sleep 2
+echo "Подключение к $WIFI_NAME..."
+nmcli connection up "$WIFI_NAME"
+echo "Проверка подключения..."
+ping -c 3 8.8.8.8 && echo "✓ Подключение успешно!" || echo "✗ Нет подключения"
+EOF
+
+# Делаем исполняемым
+chmod +x ~/reconnect-wifi.sh
+
+# Используем
+~/reconnect-wifi.sh</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий: Подключение к сети с MAC-фильтрацией</strong>
+                    <pre># Узнаём MAC адрес нашего адаптера
+ip link show wlan0 | grep "link/ether"
+
+# Допустим, MAC: aa:bb:cc:dd:ee:ff
+# Добавляем этот MAC в настройки роутера
+
+# После этого подключаемся обычным способом
+sudo nmcli device wifi connect "SecureNetwork" password "password"
+
+# Если нужно изменить MAC адрес (спуфинг):
+sudo ip link set wlan0 down
+sudo ip link set wlan0 address aa:bb:cc:dd:ee:ff
+sudo ip link set wlan0 up</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий: Создание мобильной точки доступа (hotspot)</strong>
+                    <pre># Создаём точку доступа с именем "MyHotspot" и паролем
+nmcli device wifi hotspot ifname wlan0 ssid "MyHotspot" password "HotspotPass123"
+
+# Проверяем
+nmcli connection show --active
+
+# Останавливаем hotspot
+nmcli connection down Hotspot
+
+# Настройка постоянного hotspot
+nmcli connection add type wifi ifname wlan0 \
+  con-name MyHotspot \
+  autoconnect yes \
+  ssid MyHotspot
+
+nmcli connection modify MyHotspot \
+  wifi-sec.key-mgmt wpa-psk \
+  wifi-sec.psk "HotspotPass123" \
+  ipv4.method shared \
+  ipv6.method ignore
+
+# Запускаем
+nmcli connection up MyHotspot</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий: Экспорт и импорт настроек WiFi</strong>
+                    <pre># Экспорт настроек всех подключений
+sudo cp -r /etc/NetworkManager/system-connections /tmp/wifi-backup
+
+# Или конкретного подключения
+sudo cp "/etc/NetworkManager/system-connections/MyWiFi.nmconnection" ~/wifi-backup.nmconnection
+
+# Импорт на другом компьютере
+sudo cp ~/wifi-backup.nmconnection /etc/NetworkManager/system-connections/
+sudo chmod 600 /etc/NetworkManager/system-connections/wifi-backup.nmconnection
+sudo systemctl restart NetworkManager
+
+# Проверяем
+nmcli connection show</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий: Мониторинг качества WiFi соединения</strong>
+                    <pre># Устанавливаем wavemon для мониторинга
+sudo apt install wavemon
+
+# Запускаем мониторинг
+wavemon
+
+# Или через командную строку
+watch -n 1 'nmcli device wifi list | head -n 2'
+
+# Проверяем скорость
+sudo apt install iperf3
+# На сервере (другой компьютер):
+iperf3 -s
+# На клиенте:
+iperf3 -c 192.168.1.100
+
+# Тест стабильности
+ping -i 0.2 192.168.1.1 | while read line; do 
+  echo "$(date) - $line"
+done</pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Полезные алиасы для .bashrc:</strong>
+                    <pre># Добавьте в ~/.bashrc
+alias wifi-list='nmcli device wifi list'
+alias wifi-status='nmcli connection show --active'
+alias wifi-on='nmcli radio wifi on'
+alias wifi-off='nmcli radio wifi off'
+alias wifi-restart='sudo systemctl restart NetworkManager'
+alias wifi-speed='speedtest-cli'
+
+# После добавления выполните:
+source ~/.bashrc</pre>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>NetworkManager - мощный инструмент управления сетью в Linux</p>
+            <p>Debian 11 (Bullseye) | 2025</p>
+        </footer>
+    </div>
+</body>
+</html>

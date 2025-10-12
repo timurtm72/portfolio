@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Команды для работы с папками и файлами - Debian 11</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        .section h3 {
+            color: #34495e;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .command {
+            background: #2c3e50;
+            color: #00ff00;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            overflow-x: auto;
+            border: 1px solid #1a252f;
+            position: relative;
+            padding-right: 100px;
+        }
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .copy-btn:hover {
+            background: #764ba2;
+            transform: translateY(-50%) scale(1.05);
+        }
+        .copy-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        .copy-btn.copied {
+            background: #28a745;
+        }
+        .description {
+            color: #555;
+            margin: 8px 0;
+            padding-left: 10px;
+        }
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .note strong {
+            color: #856404;
+        }
+        .warning {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .warning strong {
+            color: #721c24;
+        }
+        ul {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+        ul li {
+            margin: 8px 0;
+        }
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+        .example {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .toc {
+            background: #f8f9fa;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+        }
+        .toc h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8em;
+        }
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .toc-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #2c3e50;
+            display: block;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .toc-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            border-left-color: #764ba2;
+        }
+        .toc-item span {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        .back-to-top {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        .back-to-top:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        table th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        table tr:hover {
+            background: #e7f3ff;
+        }
+    </style>
+    <script>
+        function copyCommand(button) {
+            const commandDiv = button.parentElement;
+            const commandText = commandDiv.childNodes[0].textContent.trim();
+            
+            navigator.clipboard.writeText(commandText).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Скопировано!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Ошибка копирования: ', err);
+                button.textContent = 'Ошибка!';
+                setTimeout(() => {
+                    button.textContent = 'Копировать';
+                }, 2000);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📁 Работа с папками и файлами</h1>
+            <p>Полное руководство по командам Linux для Debian 11</p>
+        </header>
+
+        <div class="content">
+            <div id="toc" class="toc">
+                <h2>📑 Содержание</h2>
+                <div class="toc-grid">
+                    <a href="#navigation" class="toc-item">
+                        <span>🗂️</span>
+                        <strong>Навигация по файловой системе</strong>
+                    </a>
+                    <a href="#viewing" class="toc-item">
+                        <span>👀</span>
+                        <strong>Просмотр содержимого</strong>
+                    </a>
+                    <a href="#creating-dirs" class="toc-item">
+                        <span>📂</span>
+                        <strong>Создание папок</strong>
+                    </a>
+                    <a href="#creating-files" class="toc-item">
+                        <span>📄</span>
+                        <strong>Создание и редактирование файлов</strong>
+                    </a>
+                    <a href="#copying" class="toc-item">
+                        <span>📋</span>
+                        <strong>Копирование файлов и папок</strong>
+                    </a>
+                    <a href="#moving" class="toc-item">
+                        <span>✂️</span>
+                        <strong>Перемещение и переименование</strong>
+                    </a>
+                    <a href="#deleting" class="toc-item">
+                        <span>🗑️</span>
+                        <strong>Удаление файлов и папок</strong>
+                    </a>
+                    <a href="#searching" class="toc-item">
+                        <span>🔍</span>
+                        <strong>Поиск файлов и папок</strong>
+                    </a>
+                    <a href="#permissions" class="toc-item">
+                        <span>🔐</span>
+                        <strong>Права доступа</strong>
+                    </a>
+                    <a href="#size" class="toc-item">
+                        <span>📊</span>
+                        <strong>Информация о размере</strong>
+                    </a>
+                    <a href="#links" class="toc-item">
+                        <span>🔗</span>
+                        <strong>Символические ссылки</strong>
+                    </a>
+                    <a href="#archives" class="toc-item">
+                        <span>📦</span>
+                        <strong>Архивирование и сжатие</strong>
+                    </a>
+                    <a href="#additional" class="toc-item">
+                        <span>🔄</span>
+                        <strong>Дополнительные команды</strong>
+                    </a>
+                </div>
+            </div>
+
+            <div id="navigation" class="section">
+                <h2>🗂️ Навигация по файловой системе</h2>
+                
+                <h3>Показать текущую директорию</h3>
+                <div class="command">pwd<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Выводит полный путь к текущей директории</div>
+
+                <h3>Перейти в директорию</h3>
+                <div class="command">cd /путь/к/папке<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переходит в указанную директорию</div>
+
+                <h3>Перейти в домашнюю директорию</h3>
+                <div class="command">cd ~<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переходит в домашнюю папку пользователя</div>
+
+                <h3>Перейти на уровень выше</h3>
+                <div class="command">cd ..<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переходит на один уровень выше в иерархии папок</div>
+
+                <h3>Вернуться в предыдущую директорию</h3>
+                <div class="command">cd -<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Возвращается в предыдущую директорию</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="viewing" class="section">
+                <h2>👀 Просмотр содержимого</h2>
+                
+                <h3>Список файлов и папок</h3>
+                <div class="command">ls<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает содержимое текущей директории</div>
+
+                <h3>Подробный список</h3>
+                <div class="command">ls -l<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает подробную информацию о файлах (права, владелец, размер, дата)</div>
+
+                <h3>Показать скрытые файлы</h3>
+                <div class="command">ls -la<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает все файлы, включая скрытые (начинающиеся с точки)</div>
+
+                <h3>Список с размерами в читаемом формате</h3>
+                <div class="command">ls -lh<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отображает размеры в Кб, Мб, Гб вместо байтов</div>
+
+                <h3>Список с сортировкой по времени</h3>
+                <div class="command">ls -lt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Сортирует файлы по времени изменения (новые сверху)</div>
+
+                <h3>Рекурсивный просмотр</h3>
+                <div class="command">ls -R<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает содержимое всех подпапок</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="creating-dirs" class="section">
+                <h2>📂 Создание папок</h2>
+                
+                <h3>Создать новую папку</h3>
+                <div class="command">mkdir имя_папки<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт новую директорию с указанным именем</div>
+
+                <h3>Создать несколько папок</h3>
+                <div class="command">mkdir папка1 папка2 папка3<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт несколько папок одновременно</div>
+
+                <h3>Создать вложенные папки</h3>
+                <div class="command">mkdir -p родитель/дочерняя/внук<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт всю цепочку директорий, включая несуществующие родительские</div>
+
+                <h3>Создать папку с правами доступа</h3>
+                <div class="command">mkdir -m 755 имя_папки<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт папку с указанными правами доступа</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Создание структуры проекта</strong>
+                    <pre># Создаём структуру для веб-проекта одной командой
+mkdir -p myproject/{src,public/{css,js,images},tests,docs}
+
+# Проверяем структуру
+tree myproject
+
+# Результат:
+# myproject/
+# ├── src/
+# ├── public/
+# │   ├── css/
+# │   ├── js/
+# │   └── images/
+# ├── tests/
+# └── docs/</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Создание папок по датам</strong>
+                    <pre># Создаём папки для ежедневных бэкапов
+mkdir -p backup/$(date +%Y)/$(date +%m)/$(date +%d)
+
+# Или за несколько дней сразу
+for i in {1..7}; do
+    mkdir -p "backup/day_$i"
+done
+
+# Создаём архивные папки по годам
+mkdir -p archive/{2020..2025}/{01..12}</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="creating-files" class="section">
+                <h2>📄 Создание и редактирование файлов</h2>
+                
+                <h3>Создать пустой файл</h3>
+                <div class="command">touch имя_файла.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт новый пустой файл или обновляет время изменения существующего</div>
+
+                <h3>Создать несколько файлов</h3>
+                <div class="command">touch файл1.txt файл2.txt файл3.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт несколько файлов одновременно</div>
+
+                <h3>Редактировать файл в nano</h3>
+                <div class="command">nano имя_файла.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Открывает файл в текстовом редакторе nano</div>
+
+                <h3>Редактировать файл в vim</h3>
+                <div class="command">vim имя_файла.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Открывает файл в редакторе vim</div>
+
+                <h3>Просмотр содержимого файла</h3>
+                <div class="command">cat имя_файла.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Выводит содержимое файла в терминал</div>
+
+                <h3>Постраничный просмотр файла</h3>
+                <div class="command">less имя_файла.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Открывает файл для чтения с возможностью прокрутки</div>
+
+                <h3>Просмотр первых строк</h3>
+                <div class="command">head -n 10 имя_файла.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает первые 10 строк файла</div>
+
+                <h3>Просмотр последних строк</h3>
+                <div class="command">tail -n 10 имя_файла.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает последние 10 строк файла</div>
+
+                <h3>Отслеживание изменений файла</h3>
+                <div class="command">tail -f имя_файла.log<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отображает новые строки файла в реальном времени (полезно для логов)</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="copying" class="section">
+                <h2>📋 Копирование файлов и папок</h2>
+                
+                <h3>Копировать файл</h3>
+                <div class="command">cp исходный.txt копия.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт копию файла</div>
+
+                <h3>Копировать файл в другую папку</h3>
+                <div class="command">cp файл.txt /путь/к/папке/<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Копирует файл в указанную директорию</div>
+
+                <h3>Копировать несколько файлов</h3>
+                <div class="command">cp файл1.txt файл2.txt /путь/к/папке/<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Копирует несколько файлов в одну папку</div>
+
+                <h3>Копировать папку рекурсивно</h3>
+                <div class="command">cp -r папка_источник папка_назначение<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Копирует папку со всем содержимым</div>
+
+                <h3>Копировать с подтверждением</h3>
+                <div class="command">cp -i файл.txt /путь/к/папке/<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Спрашивает подтверждение при перезаписи существующих файлов</div>
+
+                <h3>Копировать с сохранением атрибутов</h3>
+                <div class="command">cp -p файл.txt копия.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Сохраняет время изменения, права доступа и владельца</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="moving" class="section">
+                <h2>✂️ Перемещение и переименование</h2>
+                
+                <h3>Переместить файл</h3>
+                <div class="command">mv файл.txt /путь/к/папке/<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Перемещает файл в другую директорию</div>
+
+                <h3>Переименовать файл</h3>
+                <div class="command">mv старое_имя.txt новое_имя.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Переименовывает файл</div>
+
+                <h3>Переместить папку</h3>
+                <div class="command">mv папка /путь/к/новому/месту/<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Перемещает папку со всем содержимым</div>
+
+                <h3>Переместить с подтверждением</h3>
+                <div class="command">mv -i файл.txt /путь/к/папке/<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Спрашивает подтверждение при перезаписи</div>
+
+                <h3>Переместить несколько файлов</h3>
+                <div class="command">mv файл1.txt файл2.txt /путь/к/папке/<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Перемещает несколько файлов в одну папку</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="deleting" class="section">
+                <h2>🗑️ Удаление файлов и папок</h2>
+                
+                <div class="warning">
+                    <strong>⚠️ ВНИМАНИЕ:</strong> Удаление в Linux необратимо! Файлы не попадают в корзину. Будьте осторожны с командой rm.
+                </div>
+
+                <h3>Удалить файл</h3>
+                <div class="command">rm файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет файл безвозвратно</div>
+
+                <h3>Удалить несколько файлов</h3>
+                <div class="command">rm файл1.txt файл2.txt файл3.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет несколько файлов</div>
+
+                <h3>Удалить с подтверждением</h3>
+                <div class="command">rm -i файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Запрашивает подтверждение перед удалением</div>
+
+                <h3>Удалить пустую папку</h3>
+                <div class="command">rmdir имя_папки<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет только пустую директорию</div>
+
+                <h3>Удалить папку со всем содержимым</h3>
+                <div class="command">rm -r имя_папки<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Рекурсивно удаляет папку и всё её содержимое</div>
+
+                <h3>Принудительное удаление</h3>
+                <div class="command">rm -rf имя_папки<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет без подтверждения (используйте с осторожностью!)</div>
+
+                <h3>Удалить все файлы с расширением</h3>
+                <div class="command">rm *.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Удаляет все файлы .txt в текущей папке</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="searching" class="section">
+                <h2>🔍 Поиск файлов и папок</h2>
+                
+                <h3>Найти файл по имени</h3>
+                <div class="command">find /путь -name "имя_файла.txt"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Ищет файл с точным именем</div>
+
+                <h3>Найти файл без учёта регистра</h3>
+                <div class="command">find /путь -iname "имя_файла.txt"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Ищет файл игнорируя регистр букв</div>
+
+                <h3>Найти все файлы с расширением</h3>
+                <div class="command">find /путь -name "*.txt"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Находит все файлы .txt</div>
+
+                <h3>Найти папки</h3>
+                <div class="command">find /путь -type d -name "имя_папки"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Ищет только директории</div>
+
+                <h3>Найти файлы по размеру</h3>
+                <div class="command">find /путь -size +100M<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Находит файлы больше 100 Мб</div>
+
+                <h3>Найти файлы изменённые за последние 7 дней</h3>
+                <div class="command">find /путь -mtime -7<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Находит файлы изменённые за последнюю неделю</div>
+
+                <h3>Поиск по содержимому файлов</h3>
+                <div class="command">grep -r "текст_для_поиска" /путь<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Рекурсивно ищет текст внутри файлов</div>
+
+                <h3>Быстрый поиск по базе</h3>
+                <div class="command">locate имя_файла<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Быстро находит файл в системной базе (требует updatedb)</div>
+
+                <h3>Обновление базы locate</h3>
+                <div class="command">sudo updatedb<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Обновляет базу данных файлов для команды locate</div>
+
+                <div class="example">
+                    <strong>📖 Пример: Поиск всех конфигурационных файлов</strong>
+                    <pre># Найти все файлы .conf в системе
+sudo find / -name "*.conf" 2>/dev/null
+
+# Найти конфигурационные файлы в /etc
+find /etc -name "*.conf"
+
+# Найти и показать содержимое
+find /etc -name "*.conf" -exec cat {} \;</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Поиск и удаление временных файлов</strong>
+                    <pre># Найти все временные файлы старше 7 дней
+find /tmp -type f -mtime +7
+
+# Найти и удалить их
+find /tmp -type f -mtime +7 -delete
+
+# Найти большие лог-файлы (больше 100MB)
+find /var/log -type f -size +100M
+
+# Найти и сжать большие логи
+find /var/log -type f -size +100M -exec gzip {} \;</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Поиск дубликатов файлов</strong>
+                    <pre># Установка fdupes
+sudo apt install fdupes
+
+# Поиск дубликатов в папке
+fdupes -r ~/Downloads
+
+# Поиск и интерактивное удаление дубликатов
+fdupes -rd ~/Downloads
+
+# Или через find по размеру
+find . -type f -exec md5sum {} \; | sort | uniq -w32 -dD</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Поиск файлов по содержимому</strong>
+                    <pre># Найти файлы содержащие "password"
+grep -r "password" /home/user/documents
+
+# Найти в файлах Python слово "import"
+grep -r "import" --include="*.py" .
+
+# Поиск с игнорированием регистра и показом номеров строк
+grep -rni "error" /var/log
+
+# Поиск с контекстом (3 строки до и после)
+grep -C 3 "error" file.log</pre>
+                </div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="permissions" class="section">
+                <h2>🔐 Права доступа</h2>
+                
+                <h3>Просмотр прав доступа</h3>
+                <div class="command">ls -l файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает права доступа к файлу</div>
+
+                <h3>Изменить права (числовой формат)</h3>
+                <div class="command">chmod 755 файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает права rwxr-xr-x (755)</div>
+
+                <h3>Изменить права (символьный формат)</h3>
+                <div class="command">chmod u+x файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Добавляет право на выполнение владельцу</div>
+
+                <h3>Рекурсивно изменить права папки</h3>
+                <div class="command">chmod -R 755 папка<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Применяет права ко всем файлам внутри папки</div>
+
+                <h3>Сменить владельца файла</h3>
+                <div class="command">sudo chown пользователь:группа файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Изменяет владельца и группу файла</div>
+
+                <h3>Рекурсивно сменить владельца папки</h3>
+                <div class="command">sudo chown -R пользователь:группа папка<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Изменяет владельца для всего содержимого папки</div>
+
+                <div class="note">
+                    <strong>💡 Расшифровка прав доступа:</strong>
+                    <ul>
+                        <li><strong>r</strong> (read) = 4 - чтение</li>
+                        <li><strong>w</strong> (write) = 2 - запись</li>
+                        <li><strong>x</strong> (execute) = 1 - выполнение</li>
+                        <li><strong>755</strong> = rwxr-xr-x (владелец: все права, остальные: чтение и выполнение)</li>
+                        <li><strong>644</strong> = rw-r--r-- (владелец: чтение и запись, остальные: только чтение)</li>
+                        <li><strong>777</strong> = rwxrwxrwx (все права для всех - небезопасно!)</li>
+                    </ul>
+
+                    <strong>📊 Таблица часто используемых прав доступа:</strong>
+                    <table>
+                        <tr>
+                            <th>Числовой</th>
+                            <th>Символьный</th>
+                            <th>Описание</th>
+                            <th>Применение</th>
+                        </tr>
+                        <tr>
+                            <td>644</td>
+                            <td>rw-r--r--</td>
+                            <td>Владелец может читать и писать, остальные только читать</td>
+                            <td>Обычные файлы</td>
+                        </tr>
+                        <tr>
+                            <td>755</td>
+                            <td>rwxr-xr-x</td>
+                            <td>Владелец - все права, остальные - чтение и выполнение</td>
+                            <td>Директории, исполняемые файлы</td>
+                        </tr>
+                        <tr>
+                            <td>700</td>
+                            <td>rwx------</td>
+                            <td>Только владелец имеет все права</td>
+                            <td>Приватные директории (~/.ssh)</td>
+                        </tr>
+                        <tr>
+                            <td>600</td>
+                            <td>rw-------</td>
+                            <td>Только владелец может читать и писать</td>
+                            <td>Приватные файлы (ключи SSH)</td>
+                        </tr>
+                        <tr>
+                            <td>777</td>
+                            <td>rwxrwxrwx</td>
+                            <td>Все могут всё (ОПАСНО!)</td>
+                            <td>Только для тестирования</td>
+                        </tr>
+                        <tr>
+                            <td>666</td>
+                            <td>rw-rw-rw-</td>
+                            <td>Все могут читать и писать</td>
+                            <td>Общие файлы данных</td>
+                        </tr>
+                        <tr>
+                            <td>555</td>
+                            <td>r-xr-xr-x</td>
+                            <td>Все могут читать и выполнять, никто не может изменять</td>
+                            <td>Защищенные скрипты</td>
+                        </tr>
+                        <tr>
+                            <td>444</td>
+                            <td>r--r--r--</td>
+                            <td>Только чтение для всех</td>
+                            <td>Конфигурационные файлы</td>
+                        </tr>
+                    </table>
+
+                    <strong>👥 Специальные биты:</strong>
+                    <table>
+                        <tr>
+                            <th>Бит</th>
+                            <th>Числовое</th>
+                            <th>Описание</th>
+                            <th>Пример</th>
+                        </tr>
+                        <tr>
+                            <td>SUID</td>
+                            <td>4000</td>
+                            <td>Выполняется с правами владельца</td>
+                            <td><code>chmod 4755 file</code><br>/usr/bin/passwd</td>
+                        </tr>
+                        <tr>
+                            <td>SGID</td>
+                            <td>2000</td>
+                            <td>Выполняется с правами группы</td>
+                            <td><code>chmod 2755 file</code><br>Общие папки проектов</td>
+                        </tr>
+                        <tr>
+                            <td>Sticky</td>
+                            <td>1000</td>
+                            <td>Только владелец может удалить файл</td>
+                            <td><code>chmod 1777 /tmp</code><br>Временная папка /tmp</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="size" class="section">
+                <h2>📊 Информация о размере</h2>
+                
+                <h3>Размер файла</h3>
+                <div class="command">ls -lh файл.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает размер файла в читаемом формате</div>
+
+                <h3>Размер папки</h3>
+                <div class="command">du -sh папка<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает общий размер папки</div>
+
+                <h3>Размер всех элементов в папке</h3>
+                <div class="command">du -h --max-depth=1<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает размер каждого элемента в текущей папке</div>
+
+                <h3>Свободное место на дисках</h3>
+                <div class="command">df -h<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает использование дискового пространства</div>
+
+                <h3>Найти самые большие файлы</h3>
+                <div class="command">du -ah /путь | sort -rh | head -n 10<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Выводит 10 самых больших файлов</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="links" class="section">
+                <h2>🔗 Символические ссылки</h2>
+                
+                <h3>Создать символическую ссылку</h3>
+                <div class="command">ln -s /путь/к/файлу ссылка<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт символическую ссылку (как ярлык в Windows)</div>
+
+                <h3>Создать жёсткую ссылку</h3>
+                <div class="command">ln /путь/к/файлу ссылка<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт жёсткую ссылку на файл</div>
+
+                <h3>Просмотр ссылок</h3>
+                <div class="command">ls -l ссылка<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает, куда указывает символическая ссылка</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="archives" class="section">
+                <h2>📦 Архивирование и сжатие</h2>
+                
+                <h3>Создать tar-архив</h3>
+                <div class="command">tar -cvf архив.tar папка<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт tar-архив без сжатия</div>
+
+                <h3>Создать tar.gz архив</h3>
+                <div class="command">tar -czvf архив.tar.gz папка<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт сжатый tar.gz архив</div>
+
+                <h3>Распаковать tar-архив</h3>
+                <div class="command">tar -xvf архив.tar<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Извлекает содержимое tar-архива</div>
+
+                <h3>Распаковать tar.gz архив</h3>
+                <div class="command">tar -xzvf архив.tar.gz<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Распаковывает сжатый tar.gz архив</div>
+
+                <h3>Просмотр содержимого архива</h3>
+                <div class="command">tar -tvf архив.tar<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает содержимое архива без распаковки</div>
+
+                <h3>Создать zip-архив</h3>
+                <div class="command">zip -r архив.zip папка<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаёт zip-архив</div>
+
+                <h3>Распаковать zip-архив</h3>
+                <div class="command">unzip архив.zip<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Распаковывает zip-архив</div>
+
+                <div class="note">
+                    <strong>💡 Пояснение флагов tar:</strong>
+                    <ul>
+                        <li><strong>c</strong> - создать архив (create)</li>
+                        <li><strong>x</strong> - извлечь архив (extract)</li>
+                        <li><strong>v</strong> - подробный вывод (verbose)</li>
+                        <li><strong>f</strong> - имя файла (file)</li>
+                        <li><strong>z</strong> - сжатие gzip</li>
+                        <li><strong>t</strong> - просмотр содержимого (list)</li>
+                    </ul>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Резервное копирование домашней директории</strong>
+                    <pre># Полный бэкап домашней папки
+tar -czvf ~/backup-home-$(date +%Y%m%d).tar.gz ~
+
+# Бэкап с исключением больших папок
+tar -czvf ~/backup-selective.tar.gz \
+    --exclude='Downloads' \
+    --exclude='*.tmp' \
+    --exclude='.cache' \
+    --exclude='node_modules' \
+    ~/Documents ~/Pictures ~/Music
+
+# Инкрементальный бэкап (только изменённые файлы)
+tar -czf backup-incremental.tar.gz \
+    --listed-incremental=backup.snar \
+    ~/Documents
+
+# Создание бэкапа с проверкой целостности
+tar -czf backup.tar.gz ~/Documents && \
+tar -tzf backup.tar.gz > /dev/null && \
+echo "✓ Архив создан успешно" || \
+echo "✗ Ошибка создания архива"</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Работа с зашифрованными архивами</strong>
+                    <pre># Создание зашифрованного архива с gpg
+tar -czf - ~/Documents | gpg -c > documents-encrypted.tar.gz.gpg
+
+# Распаковка зашифрованного архива
+gpg -d documents-encrypted.tar.gz.gpg | tar -xz
+
+# Или используя 7z с паролем
+sudo apt install p7zip-full
+7z a -p -mhe=on documents-encrypted.7z ~/Documents
+
+# Распаковка
+7z x documents-encrypted.7z</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Разделение больших архивов</strong>
+                    <pre># Создать архив и разделить на части по 100MB
+tar -czf - /large/directory | split -b 100M - backup.tar.gz.part
+
+# Объединить части обратно и распаковать
+cat backup.tar.gz.part* | tar -xz
+
+# Создание многотомного архива с 7z
+7z a -v100m backup.7z /large/directory
+
+# Распаковка многотомного архива
+7z x backup.7z.001</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Пример: Автоматический ротационный бэкап</strong>
+                    <pre>#!/bin/bash
+# backup-rotation.sh - Создаёт бэкапы и хранит только последние 7 дней
+
+BACKUP_DIR=~/backups
+SOURCE_DIR=~/Documents
+MAX_BACKUPS=7
+
+# Создаём директорию для бэкапов
+mkdir -p "$BACKUP_DIR"
+
+# Создаём новый бэкап
+BACKUP_FILE="$BACKUP_DIR/backup-$(date +%Y%m%d-%H%M%S).tar.gz"
+tar -czf "$BACKUP_FILE" "$SOURCE_DIR"
+
+# Проверяем успешность
+if [ $? -eq 0 ]; then
+    echo "✓ Бэкап создан: $BACKUP_FILE"
+    
+    # Удаляем старые бэкапы, оставляем только последние MAX_BACKUPS
+    cd "$BACKUP_DIR"
+    ls -t backup-*.tar.gz | tail -n +$((MAX_BACKUPS + 1)) | xargs -r rm
+    
+    echo "✓ Старые бэкапы очищены"
+else
+    echo "✗ Ошибка создания бэкапа"
+    exit 1
+fi</pre>
+                </div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="additional" class="section">
+                <h2>🔄 Дополнительные полезные команды</h2>
+                
+                <h3>Подсчёт файлов в папке</h3>
+                <div class="command">ls -1 | wc -l<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает количество файлов и папок</div>
+
+                <h3>Создать дерево директорий</h3>
+                <div class="command">tree<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отображает структуру папок в виде дерева (требует установки tree)</div>
+
+                <h3>Определить тип файла</h3>
+                <div class="command">file имя_файла<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Определяет тип и формат файла</div>
+
+                <h3>Сравнить два файла</h3>
+                <div class="command">diff файл1.txt файл2.txt<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает различия между файлами</div>
+
+                <h3>Синхронизация папок</h3>
+                <div class="command">rsync -av источник/ назначение/<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Синхронизирует содержимое папок</div>
+
+                <h3>Очистить экран терминала</h3>
+                <div class="command">clear<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Очищает экран терминала</div>
+                
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Расширенные практические сценарии</h2>
+
+                <div class="example">
+                    <strong>📖 Сценарий 1: Массовое переименование файлов</strong>
+                    <pre># Переименовать все .txt в .md
+for file in *.txt; do
+    mv "$file" "${file%.txt}.md"
+done
+
+# Добавить префикс ко всем файлам
+for file in *.jpg; do
+    mv "$file" "photo_$file"
+done
+
+# Изменить регистр имён файлов
+for file in *; do
+    mv "$file" "$(echo $file | tr '[:upper:]' '[:lower:]')"
+done
+
+# Использование rename (если установлен)
+sudo apt install rename
+rename 's/\.txt$/\.md/' *.txt
+rename 'y/A-Z/a-z/' *</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 2: Создание и восстановление бэкапов</strong>
+                    <pre># Создание бэкапа домашней директории
+tar -czvf ~/backup-$(date +%Y%m%d).tar.gz ~/Documents
+
+# Создание инкрементального бэкапа
+rsync -avz --delete ~/Documents/ /backup/documents/
+
+# Создание бэкапа с исключениями
+tar -czvf backup.tar.gz \
+    --exclude='*.tmp' \
+    --exclude='node_modules' \
+    ~/myproject/
+
+# Восстановление из бэкапа
+tar -xzvf backup-20250101.tar.gz -C /restore/location/
+
+# Автоматический бэкап (добавить в crontab)
+0 2 * * * tar -czvf /backup/daily-$(date +\%Y\%m\%d).tar.gz ~/Documents</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 3: Работа с большим количеством файлов</strong>
+                    <pre># Найти и удалить все пустые файлы
+find . -type f -empty -delete
+
+# Найти и удалить все пустые папки
+find . -type d -empty -delete
+
+# Подсчитать количество файлов каждого типа
+find . -type f | sed 's/.*\.//' | sort | uniq -c | sort -rn
+
+# Найти 10 самых больших файлов
+find . -type f -exec du -h {} + | sort -rh | head -10
+
+# Массовое изменение прав
+find . -type f -name "*.sh" -exec chmod +x {} \;
+find . -type d -exec chmod 755 {} \;
+find . -type f -exec chmod 644 {} \;</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 4: Синхронизация и копирование</strong>
+                    <pre># Синхронизация двух папок с сохранением атрибутов
+rsync -avz /source/ /destination/
+
+# Синхронизация по сети
+rsync -avz -e ssh /local/folder/ user@server:/remote/folder/
+
+# Копирование только новых файлов
+rsync -av --update /source/ /destination/
+
+# Зеркалирование с удалением лишних файлов
+rsync -av --delete /source/ /destination/
+
+# Копирование с прогресс-баром
+rsync -av --progress /large/folder/ /backup/
+
+# Копирование с ограничением скорости (1MB/s)
+rsync -av --bwlimit=1024 /source/ /destination/</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 5: Работа с логами и текстовыми файлами</strong>
+                    <pre># Найти строки с ошибками в логах
+grep -i "error" /var/log/syslog
+
+# Показать последние 100 строк и следить за обновлениями
+tail -n 100 -f /var/log/syslog
+
+# Подсчитать уникальные IP-адреса в логе
+cat access.log | awk '{print $1}' | sort | uniq -c | sort -rn
+
+# Найти самые частые строки в файле
+sort file.txt | uniq -c | sort -rn | head -10
+
+# Объединить несколько файлов
+cat file1.txt file2.txt file3.txt > combined.txt
+
+# Разделить большой файл на части по 1000 строк
+split -l 1000 bigfile.txt part_
+
+# Удалить пустые строки из файла
+sed '/^$/d' file.txt > file_no_empty.txt
+
+# Заменить текст во всех файлах
+find . -name "*.txt" -exec sed -i 's/old/new/g' {} \;</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 6: Организация фотографий по дате</strong>
+                    <pre># Установка exiftool
+sudo apt install libimage-exiftool-perl
+
+# Создание структуры папок по дате съёмки
+exiftool -r '-Directory&lt;DateTimeOriginal' -d ~/Photos/%Y/%m/%d ~/Photos/unsorted/
+
+# Или через скрипт с датой изменения файла
+for file in *.jpg; do
+    date=$(stat -c %y "$file" | cut -d' ' -f1)
+    year=$(echo $date | cut -d'-' -f1)
+    month=$(echo $date | cut -d'-' -f2)
+    mkdir -p "$year/$month"
+    mv "$file" "$year/$month/"
+done
+
+# Переименование фото с добавлением даты
+for file in *.jpg; do
+    date=$(stat -c %y "$file" | cut -d' ' -f1)
+    mv "$file" "${date}_${file}"
+done</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 7: Безопасное удаление файлов</strong>
+                    <pre># Установка trash-cli для корзины в консоли
+sudo apt install trash-cli
+
+# Вместо rm используем trash
+trash-put file.txt
+
+# Просмотр корзины
+trash-list
+
+# Восстановление файла
+trash-restore
+
+# Очистка корзины
+trash-empty
+
+# Или создать алиас для безопасности
+echo "alias rm='trash-put'" >> ~/.bashrc
+
+# Безвозвратное удаление с затиранием
+sudo apt install secure-delete
+srm -v file.txt</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 8: Мониторинг изменений файлов</strong>
+                    <pre># Установка inotify-tools
+sudo apt install inotify-tools
+
+# Мониторинг изменений в папке
+inotifywait -m /path/to/watch
+
+# Выполнить команду при изменении файла
+while inotifywait -e modify file.txt; do
+    echo "Файл изменён: $(date)"
+done
+
+# Мониторинг и логирование
+inotifywait -m -r -e modify,create,delete ~/Documents | \
+    while read path action file; do
+        echo "$(date): $action - $path$file" >> changes.log
+    done
+
+# Автоматическая синхронизация при изменениях
+inotifywait -m -r -e modify,create,delete ~/Documents | \
+    while read; do
+        rsync -av ~/Documents/ /backup/documents/
+    done</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 9: Создание скриптов автоматизации</strong>
+                    <pre># Скрипт для автоматической организации Downloads
+#!/bin/bash
+# organize-downloads.sh
+
+DOWNLOAD_DIR=~/Downloads
+DOCS_DIR=~/Documents
+PICS_DIR=~/Pictures
+MUSIC_DIR=~/Music
+VIDEO_DIR=~/Videos
+
+# Перемещение документов
+find "$DOWNLOAD_DIR" -name "*.pdf" -o -name "*.doc" -o -name "*.docx" | \
+    xargs -I {} mv {} "$DOCS_DIR/"
+
+# Перемещение изображений
+find "$DOWNLOAD_DIR" -name "*.jpg" -o -name "*.png" -o -name "*.gif" | \
+    xargs -I {} mv {} "$PICS_DIR/"
+
+# Перемещение музыки
+find "$DOWNLOAD_DIR" -name "*.mp3" -o -name "*.flac" | \
+    xargs -I {} mv {} "$MUSIC_DIR/"
+
+# Перемещение видео
+find "$DOWNLOAD_DIR" -name "*.mp4" -o -name "*.mkv" -o -name "*.avi" | \
+    xargs -I {} mv {} "$VIDEO_DIR/"
+
+echo "Организация завершена!"
+
+# Сделать исполняемым и добавить в crontab
+chmod +x organize-downloads.sh
+# Запускать каждый час: 0 * * * * ~/organize-downloads.sh</pre>
+                </div>
+
+                <div class="example">
+                    <strong>📖 Сценарий 10: Работа с разрешениями и владельцами</strong>
+                    <pre># Изменить владельца всех файлов веб-сервера
+sudo chown -R www-data:www-data /var/www/html
+
+# Установить правильные права для веб-приложения
+find /var/www/html -type d -exec chmod 755 {} \;
+find /var/www/html -type f -exec chmod 644 {} \;
+
+# Сделать скрипты исполняемыми
+find ~/bin -name "*.sh" -exec chmod +x {} \;
+
+# Найти файлы с SUID битом (потенциальная угроза)
+find / -perm -4000 -type f 2>/dev/null
+
+# Найти файлы доступные для записи всем
+find / -perm -002 -type f 2>/dev/null
+
+# Установить umask для новых файлов
+echo "umask 022" >> ~/.bashrc</pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Полезные алиасы для .bashrc:</strong>
+                    <pre># Добавьте в ~/.bashrc для удобства
+alias ll='ls -lah'
+alias la='ls -A'
+alias l='ls -CF'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias mkdir='mkdir -pv'
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias df='df -h'
+alias du='du -h'
+alias free='free -h'
+alias grep='grep --color=auto'
+alias tree='tree -C'
+alias backup='tar -czvf backup-$(date +%Y%m%d-%H%M%S).tar.gz'
+
+# После добавления выполните:
+source ~/.bashrc</pre>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Важные напоминания:</strong>
+                    <ul>
+                        <li>Всегда делайте резервные копии перед массовыми операциями</li>
+                        <li>Проверяйте команды на тестовых данных перед применением</li>
+                        <li>Используйте флаг -i для интерактивного подтверждения rm, cp, mv</li>
+                        <li>Будьте осторожны с правами root и командой sudo</li>
+                        <li>Регулярно проверяйте свободное место: df -h</li>
+                        <li>Используйте табуляцию для автодополнения путей</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="note">
+                <strong>💡 Полезные советы:</strong>
+                <ul>
+                    <li>Используйте <strong>Tab</strong> для автодополнения имён файлов и команд</li>
+                    <li>Используйте <strong>Ctrl+C</strong> для прерывания выполнения команды</li>
+                    <li>Используйте <strong>стрелки вверх/вниз</strong> для навигации по истории команд</li>
+                    <li>Символ <strong>~</strong> означает домашнюю директорию пользователя</li>
+                    <li>Символ <strong>.</strong> означает текущую директорию</li>
+                    <li>Символ <strong>..</strong> означает родительскую директорию</li>
+                    <li>Символ <strong>*</strong> - wildcard, означающий "любые символы"</li>
+                    <li>Всегда делайте резервные копии перед удалением!</li>
+                </ul>
+            </div>
+
+            <div class="example">
+                <strong>📝 Примеры использования:</strong><br><br>
+                # Создать структуру проекта<br>
+                mkdir -p проект/{src/{components,utils},public/{css,js,img},tests,docs}<br><br>
+                
+                # Найти все большие файлы (более 100MB) и показать их размер<br>
+                find . -type f -size +100M -exec ls -lh {} \; | awk '{print $9 ": " $5}'<br><br>
+                
+                # Резервное копирование с архивацией и датой<br>
+                tar -czvf ~/backup-$(date +%Y%m%d-%H%M%S).tar.gz ~/Документы/<br><br>
+                
+                # Быстрая очистка кэша и временных файлов<br>
+                rm -rf ~/.cache/* /tmp/* 2>/dev/null<br><br>
+
+                # Поиск и замена текста во всех файлах проекта<br>
+                find . -name "*.txt" -exec sed -i 's/старый_текст/новый_текст/g' {} \;<br><br>
+
+                # Создание символических ссылок для быстрого доступа<br>
+                ln -s ~/Projects/website /var/www/html/mysite<br><br>
+
+                # Копирование с сохранением структуры<br>
+                rsync -av --progress /source/ /destination/
+            </div>
+        </div>
+
+        <footer>
+            <p>Управление файлами и папками в Linux - мощный инструмент в руках опытного пользователя</p>
+            <p>Debian 11 (Bullseye) | 2025</p>
+        </footer>
+    </div>
+</body>
+</html>

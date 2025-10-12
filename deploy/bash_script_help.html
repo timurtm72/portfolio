@@ -1,0 +1,2607 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Справочник по Bash скриптингу</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+        header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #2d3748;
+        }
+        .section h2 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+        .section h3 {
+            color: #4a5568;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .command {
+            background: #1a202c;
+            color: #00ff00;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            overflow-x: auto;
+            border: 1px solid #2d3748;
+            position: relative;
+            padding-right: 100px;
+        }
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .copy-btn:hover {
+            background: #764ba2;
+            transform: translateY(-50%) scale(1.05);
+        }
+        .copy-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        .copy-btn.copied {
+            background: #28a745;
+        }
+        .description {
+            color: #555;
+            margin: 8px 0;
+            padding-left: 10px;
+        }
+        .note {
+            background: #e6f3ff;
+            border-left: 4px solid #2d3748;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .note strong {
+            color: #2d3748;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .warning strong {
+            color: #856404;
+        }
+        .danger {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .danger strong {
+            color: #721c24;
+        }
+        .example {
+            background: #f0f4f8;
+            border-left: 4px solid #2d3748;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .example strong {
+            color: #2d3748;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .example pre {
+            background: #1a202c;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.4;
+        }
+        ul, ol {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+        ul li, ol li {
+            margin: 8px 0;
+        }
+        footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+        .toc {
+            background: #f8f9fa;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 8px;
+            border: 2px solid #2d3748;
+        }
+        .toc h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8em;
+        }
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .toc-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #2d3748;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #2d3748;
+            display: block;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .toc-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(45, 55, 72, 0.3);
+            border-left-color: #667eea;
+        }
+        .toc-item span {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        .back-to-top {
+            display: inline-block;
+            background: #2d3748;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        .back-to-top:hover {
+            background: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        table th {
+            background: #2d3748;
+            color: white;
+            font-weight: bold;
+        }
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        table tr:hover {
+            background: #e6f3ff;
+        }
+        code {
+            background: #e6f3ff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #2d3748;
+        }
+    </style>
+    <script>
+        function copyCommand(button) {
+            const commandDiv = button.parentElement;
+            const commandText = commandDiv.childNodes[0].textContent.trim();
+            
+            navigator.clipboard.writeText(commandText).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Скопировано!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Ошибка копирования: ', err);
+                button.textContent = 'Ошибка!';
+                setTimeout(() => {
+                    button.textContent = 'Копировать';
+                }, 2000);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💻 Справочник по Bash скриптингу</h1>
+            <p>Полное руководство по написанию shell скриптов</p>
+        </header>
+
+        <div class="content">
+            <div id="toc" class="toc">
+                <h2>📑 Содержание</h2>
+                <div class="toc-grid">
+                    <a href="#basics" class="toc-item">
+                        <span>📋</span>
+                        <strong>Основы скриптов</strong>
+                    </a>
+                    <a href="#variables" class="toc-item">
+                        <span>📦</span>
+                        <strong>Переменные</strong>
+                    </a>
+                    <a href="#conditions" class="toc-item">
+                        <span>🔀</span>
+                        <strong>Условные операторы</strong>
+                    </a>
+                    <a href="#loops" class="toc-item">
+                        <span>🔄</span>
+                        <strong>Циклы</strong>
+                    </a>
+                    <a href="#functions" class="toc-item">
+                        <span>⚙️</span>
+                        <strong>Функции</strong>
+                    </a>
+                    <a href="#arrays" class="toc-item">
+                        <span>📚</span>
+                        <strong>Массивы</strong>
+                    </a>
+                    <a href="#strings" class="toc-item">
+                        <span>📝</span>
+                        <strong>Работа со строками</strong>
+                    </a>
+                    <a href="#files" class="toc-item">
+                        <span>📁</span>
+                        <strong>Работа с файлами</strong>
+                    </a>
+                    <a href="#input-output" class="toc-item">
+                        <span>⌨️</span>
+                        <strong>Ввод/Вывод</strong>
+                    </a>
+                    <a href="#operators" class="toc-item">
+                        <span>🔢</span>
+                        <strong>Операторы</strong>
+                    </a>
+                    <a href="#arguments" class="toc-item">
+                        <span>🎯</span>
+                        <strong>Аргументы скрипта</strong>
+                    </a>
+                    <a href="#examples" class="toc-item">
+                        <span>💡</span>
+                        <strong>Практические примеры</strong>
+                    </a>
+                </div>
+            </div>
+
+            <div id="basics" class="section">
+                <h2>📋 Основы Bash скриптов</h2>
+                
+                <h3>Создание первого скрипта</h3>
+                <div class="example">
+                    <strong>📖 Базовая структура скрипта:</strong>
+                    <pre>#!/bin/bash
+# Это комментарий
+# Первая строка (shebang) указывает интерпретатор
+
+echo "Hello, World!"
+echo "Мой первый bash скрипт"</pre>
+                </div>
+
+                <h3>Создание и запуск скрипта</h3>
+                <div class="command">nano myscript.sh<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаём файл скрипта</div>
+
+                <div class="command">chmod +x myscript.sh<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Делаем скрипт исполняемым</div>
+
+                <div class="command">./myscript.sh<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Запускаем скрипт</div>
+
+                <div class="note">
+                    <strong>💡 Способы запуска скрипта:</strong>
+                    <ul>
+                        <li><code>./script.sh</code> - запуск как исполняемый файл (требует chmod +x)</li>
+                        <li><code>bash script.sh</code> - запуск через bash (права не нужны)</li>
+                        <li><code>sh script.sh</code> - запуск через sh</li>
+                        <li><code>source script.sh</code> или <code>. script.sh</code> - выполнение в текущей оболочке</li>
+                    </ul>
+                </div>
+
+                <h3>Shebang варианты</h3>
+                <table>
+                    <tr>
+                        <th>Shebang</th>
+                        <th>Описание</th>
+                    </tr>
+                    <tr>
+                        <td><code>#!/bin/bash</code></td>
+                        <td>Использовать bash (рекомендуется)</td>
+                    </tr>
+                    <tr>
+                        <td><code>#!/bin/sh</code></td>
+                        <td>Использовать sh (более совместимо, меньше функций)</td>
+                    </tr>
+                    <tr>
+                        <td><code>#!/usr/bin/env bash</code></td>
+                        <td>Найти bash в PATH (более переносимо)</td>
+                    </tr>
+                    <tr>
+                        <td><code>#!/bin/zsh</code></td>
+                        <td>Использовать zsh</td>
+                    </tr>
+                </table>
+
+                <h3>Комментарии</h3>
+                <div class="example">
+                    <strong>📖 Типы комментариев:</strong>
+                    <pre>#!/bin/bash
+
+# Однострочный комментарий
+
+echo "Привет" # Комментарий после команды
+
+: '
+Многострочный комментарий
+Всё между этими символами
+игнорируется
+'
+
+echo "Конец"</pre>
+                </div>
+
+                <h3>Отладка скриптов</h3>
+                <div class="command">bash -x script.sh<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Запуск с выводом отладочной информации</div>
+
+                <div class="example">
+                    <strong>📖 Отладка внутри скрипта:</strong>
+                    <pre>#!/bin/bash
+
+# Включить отладку
+set -x
+
+echo "Эта строка будет показана с отладкой"
+
+# Выключить отладку
+set +x
+
+echo "Эта строка без отладки"
+
+# Остановить при ошибке
+set -e
+
+# Показывать выполняемые команды
+set -v</pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Полезные опции set:</strong>
+                    <ul>
+                        <li><code>set -e</code> - остановить скрипт при любой ошибке</li>
+                        <li><code>set -u</code> - ошибка при использовании неопределённых переменных</li>
+                        <li><code>set -x</code> - показывать выполняемые команды</li>
+                        <li><code>set -o pipefail</code> - ошибка если любая команда в pipeline упала</li>
+                        <li><code>set -euxo pipefail</code> - комбинация всех опций для строгого режима</li>
+                    </ul>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="variables" class="section">
+                <h2>📦 Переменные</h2>
+                
+                <h3>Объявление и использование переменных</h3>
+                <div class="example">
+                    <strong>📖 Работа с переменными:</strong>
+                    <pre>#!/bin/bash
+
+# Объявление переменных (БЕЗ пробелов!)
+NAME="Иван"
+AGE=25
+PI=3.14
+
+# Использование переменных
+echo "Меня зовут $NAME"
+echo "Мне $AGE лет"
+echo "Значение PI: $PI"
+
+# Рекомендуется использовать фигурные скобки
+echo "Меня зовут ${NAME}"
+echo "${NAME}ович"  # Объединение с текстом
+
+# Переменные только для чтения
+readonly CONSTANT="Нельзя изменить"
+declare -r ANOTHER_CONSTANT="Тоже нельзя"</pre>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Важно:</strong>
+                    <ul>
+                        <li>НЕ СТАВЬТЕ пробелы вокруг знака <code>=</code></li>
+                        <li><code>NAME="Иван"</code> ✅ правильно</li>
+                        <li><code>NAME = "Иван"</code> ❌ ошибка</li>
+                        <li>Имена переменных чувствительны к регистру: <code>name</code> ≠ <code>NAME</code></li>
+                    </ul>
+                </div>
+
+                <h3>Специальные переменные</h3>
+                <table>
+                    <tr>
+                        <th>Переменная</th>
+                        <th>Описание</th>
+                        <th>Пример</th>
+                    </tr>
+                    <tr>
+                        <td><code>$0</code></td>
+                        <td>Имя скрипта</td>
+                        <td>./script.sh</td>
+                    </tr>
+                    <tr>
+                        <td><code>$1, $2, ...</code></td>
+                        <td>Аргументы скрипта</td>
+                        <td>./script.sh arg1 arg2</td>
+                    </tr>
+                    <tr>
+                        <td><code>$#</code></td>
+                        <td>Количество аргументов</td>
+                        <td>2</td>
+                    </tr>
+                    <tr>
+                        <td><code>$@</code></td>
+                        <td>Все аргументы (массив)</td>
+                        <td>"arg1" "arg2"</td>
+                    </tr>
+                    <tr>
+                        <td><code>$*</code></td>
+                        <td>Все аргументы (строка)</td>
+                        <td>"arg1 arg2"</td>
+                    </tr>
+                    <tr>
+                        <td><code>$?</code></td>
+                        <td>Код возврата последней команды</td>
+                        <td>0 = успех, >0 = ошибка</td>
+                    </tr>
+                    <tr>
+                        <td><code>$$</code></td>
+                        <td>PID текущего скрипта</td>
+                        <td>12345</td>
+                    </tr>
+                    <tr>
+                        <td><code>$!</code></td>
+                        <td>PID последнего фонового процесса</td>
+                        <td>12346</td>
+                    </tr>
+                    <tr>
+                        <td><code>$USER</code></td>
+                        <td>Текущий пользователь</td>
+                        <td>timur</td>
+                    </tr>
+                    <tr>
+                        <td><code>$HOME</code></td>
+                        <td>Домашний каталог</td>
+                        <td>/home/timur</td>
+                    </tr>
+                    <tr>
+                        <td><code>$PWD</code></td>
+                        <td>Текущий каталог</td>
+                        <td>/home/timur/scripts</td>
+                    </tr>
+                    <tr>
+                        <td><code>$RANDOM</code></td>
+                        <td>Случайное число 0-32767</td>
+                        <td>15823</td>
+                    </tr>
+                </table>
+
+                <h3>Подстановка команд</h3>
+                <div class="example">
+                    <strong>📖 Сохранение результата команды в переменную:</strong>
+                    <pre>#!/bin/bash
+
+# Старый способ (обратные кавычки)
+CURRENT_DATE=`date`
+echo "Дата: $CURRENT_DATE"
+
+# Новый способ (рекомендуется)
+CURRENT_DATE=$(date)
+echo "Дата: $CURRENT_DATE"
+
+# Примеры
+FILES_COUNT=$(ls | wc -l)
+echo "Файлов в каталоге: $FILES_COUNT"
+
+CURRENT_USER=$(whoami)
+echo "Вы: $CURRENT_USER"
+
+DISK_USAGE=$(df -h / | tail -1 | awk '{print $5}')
+echo "Занято диска: $DISK_USAGE"</pre>
+                </div>
+
+                <h3>Арифметические операции</h3>
+                <div class="example">
+                    <strong>📖 Вычисления с переменными:</strong>
+                    <pre>#!/bin/bash
+
+# Метод 1: $(( ))
+A=10
+B=5
+SUM=$((A + B))
+DIFF=$((A - B))
+MULT=$((A * B))
+DIV=$((A / B))
+MOD=$((A % B))
+
+echo "Сумма: $SUM"
+echo "Разность: $DIFF"
+echo "Произведение: $MULT"
+echo "Деление: $DIV"
+echo "Остаток: $MOD"
+
+# Инкремент и декремент
+COUNT=0
+((COUNT++))  # COUNT = COUNT + 1
+echo "COUNT: $COUNT"
+
+# Метод 2: let
+let RESULT=A+B
+let "RESULT = A + B"  # с пробелами нужны кавычки
+
+# Метод 3: expr (старый способ)
+RESULT=$(expr $A + $B)
+
+# Для дробных чисел используйте bc
+PI=$(echo "scale=2; 22/7" | bc)
+echo "PI ≈ $PI"</pre>
+                </div>
+
+                <h3>Переменные окружения</h3>
+                <div class="example">
+                    <strong>📖 Экспорт переменных:</strong>
+                    <pre>#!/bin/bash
+
+# Локальная переменная (только в этом скрипте)
+LOCAL_VAR="локальная"
+
+# Экспорт переменной (доступна дочерним процессам)
+export GLOBAL_VAR="глобальная"
+
+# Или так
+export MY_VAR="значение"
+
+# Просмотр всех переменных окружения
+env
+
+# Просмотр конкретной переменной
+echo $PATH
+echo $HOME
+echo $USER</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="conditions" class="section">
+                <h2>🔀 Условные операторы</h2>
+                
+                <h3>Оператор if</h3>
+                <div class="example">
+                    <strong>📖 Базовый синтаксис if:</strong>
+                    <pre>#!/bin/bash
+
+AGE=18
+
+# Простой if
+if [ $AGE -ge 18 ]; then
+    echo "Вы совершеннолетний"
+fi
+
+# if-else
+if [ $AGE -ge 18 ]; then
+    echo "Вы совершеннолетний"
+else
+    echo "Вы несовершеннолетний"
+fi
+
+# if-elif-else
+if [ $AGE -lt 13 ]; then
+    echo "Ребёнок"
+elif [ $AGE -lt 18 ]; then
+    echo "Подросток"
+elif [ $AGE -lt 65 ]; then
+    echo "Взрослый"
+else
+    echo "Пенсионер"
+fi</pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Важные моменты синтаксиса:</strong>
+                    <ul>
+                        <li>Обязательны пробелы после <code>[</code> и перед <code>]</code></li>
+                        <li><code>[ $AGE -ge 18 ]</code> ✅ правильно</li>
+                        <li><code>[$AGE -ge 18]</code> ❌ ошибка</li>
+                        <li><code>then</code> может быть на той же строке с <code>;</code> или на новой</li>
+                        <li>Закрывающее <code>fi</code> обязательно</li>
+                    </ul>
+                </div>
+
+                <h3>Операторы сравнения чисел</h3>
+                <table>
+                    <tr>
+                        <th>Оператор</th>
+                        <th>Описание</th>
+                        <th>Пример</th>
+                    </tr>
+                    <tr>
+                        <td><code>-eq</code></td>
+                        <td>Равно (equal)</td>
+                        <td>[ $A -eq $B ]</td>
+                    </tr>
+                    <tr>
+                        <td><code>-ne</code></td>
+                        <td>Не равно (not equal)</td>
+                        <td>[ $A -ne $B ]</td>
+                    </tr>
+                    <tr>
+                        <td><code>-gt</code></td>
+                        <td>Больше (greater than)</td>
+                        <td>[ $A -gt $B ]</td>
+                    </tr>
+                    <tr>
+                        <td><code>-ge</code></td>
+                        <td>Больше или равно</td>
+                        <td>[ $A -ge $B ]</td>
+                    </tr>
+                    <tr>
+                        <td><code>-lt</code></td>
+                        <td>Меньше (less than)</td>
+                        <td>[ $A -lt $B ]</td>
+                    </tr>
+                    <tr>
+                        <td><code>-le</code></td>
+                        <td>Меньше или равно</td>
+                        <td>[ $A -le $B ]</td>
+                    </tr>
+                </table>
+
+                <h3>Операторы сравнения строк</h3>
+                <table>
+                    <tr>
+                        <th>Оператор</th>
+                        <th>Описание</th>
+                        <th>Пример</th>
+                    </tr>
+                    <tr>
+                        <td><code>=</code> или <code>==</code></td>
+                        <td>Строки равны</td>
+                        <td>[ "$A" = "$B" ]</td>
+                    </tr>
+                    <tr>
+                        <td><code>!=</code></td>
+                        <td>Строки не равны</td>
+                        <td>[ "$A" != "$B" ]</td>
+                    </tr>
+                    <tr>
+                        <td><code>&lt;</code></td>
+                        <td>Меньше (лексикографически)</td>
+                        <td>[[ "$A" &lt; "$B" ]]</td>
+                    </tr>
+                    <tr>
+                        <td><code>&gt;</code></td>
+                        <td>Больше (лексикографически)</td>
+                        <td>[[ "$A" &gt; "$B" ]]</td>
+                    </tr>
+                    <tr>
+                        <td><code>-z</code></td>
+                        <td>Строка пустая</td>
+                        <td>[ -z "$STR" ]</td>
+                    </tr>
+                    <tr>
+                        <td><code>-n</code></td>
+                        <td>Строка не пустая</td>
+                        <td>[ -n "$STR" ]</td>
+                    </tr>
+                </table>
+
+                <div class="example">
+                    <strong>📖 Примеры сравнения строк:</strong>
+                    <pre>#!/bin/bash
+
+NAME="Иван"
+
+# Проверка равенства
+if [ "$NAME" = "Иван" ]; then
+    echo "Привет, Иван!"
+fi
+
+# Проверка на пустоту
+if [ -z "$NAME" ]; then
+    echo "Имя не задано"
+else
+    echo "Имя: $NAME"
+fi
+
+# Проверка на непустоту
+if [ -n "$NAME" ]; then
+    echo "Имя задано: $NAME"
+fi</pre>
+                </div>
+
+                <h3>Проверка файлов и каталогов</h3>
+                <table>
+                    <tr>
+                        <th>Оператор</th>
+                        <th>Описание</th>
+                    </tr>
+                    <tr>
+                        <td><code>-e</code></td>
+                        <td>Файл существует</td>
+                    </tr>
+                    <tr>
+                        <td><code>-f</code></td>
+                        <td>Обычный файл существует</td>
+                    </tr>
+                    <tr>
+                        <td><code>-d</code></td>
+                        <td>Каталог существует</td>
+                    </tr>
+                    <tr>
+                        <td><code>-s</code></td>
+                        <td>Файл не пустой</td>
+                    </tr>
+                    <tr>
+                        <td><code>-r</code></td>
+                        <td>Файл читаемый</td>
+                    </tr>
+                    <tr>
+                        <td><code>-w</code></td>
+                        <td>Файл доступен для записи</td>
+                    </tr>
+                    <tr>
+                        <td><code>-x</code></td>
+                        <td>Файл исполняемый</td>
+                    </tr>
+                    <tr>
+                        <td><code>-L</code></td>
+                        <td>Файл - символическая ссылка</td>
+                    </tr>
+                </table>
+
+                <div class="example">
+                    <strong>📖 Примеры проверки файлов:</strong>
+                    <pre>#!/bin/bash
+
+FILE="test.txt"
+
+# Проверка существования файла
+if [ -f "$FILE" ]; then
+    echo "Файл $FILE существует"
+else
+    echo "Файл $FILE не найден"
+fi
+
+# Проверка каталога
+if [ -d "/home/user" ]; then
+    echo "Каталог существует"
+fi
+
+# Проверка прав
+if [ -r "$FILE" ]; then
+    echo "Файл читаемый"
+fi
+
+if [ -w "$FILE" ]; then
+    echo "Файл доступен для записи"
+fi
+
+if [ -x "script.sh" ]; then
+    echo "Скрипт исполняемый"
+fi</pre>
+                </div>
+
+                <h3>Логические операторы</h3>
+                <div class="example">
+                    <strong>📖 AND, OR, NOT:</strong>
+                    <pre>#!/bin/bash
+
+AGE=25
+NAME="Иван"
+
+# AND (&&)
+if [ $AGE -ge 18 ] && [ "$NAME" = "Иван" ]; then
+    echo "Совершеннолетний Иван"
+fi
+
+# OR (||)
+if [ $AGE -lt 18 ] || [ $AGE -gt 65 ]; then
+    echo "Льготный возраст"
+fi
+
+# NOT (!)
+if [ ! -f "file.txt" ]; then
+    echo "Файл не существует"
+fi
+
+# Внутри [ ] используйте -a и -o
+if [ $AGE -ge 18 -a "$NAME" = "Иван" ]; then
+    echo "AND внутри скобок"
+fi
+
+# В [[ ]] можно использовать && и ||
+if [[ $AGE -ge 18 && "$NAME" = "Иван" ]]; then
+    echo "Двойные скобки поддерживают &&"
+fi</pre>
+                </div>
+
+                <h3>Оператор case</h3>
+                <div class="example">
+                    <strong>📖 Множественный выбор:</strong>
+                    <pre>#!/bin/bash
+
+read -p "Введите команду: " COMMAND
+
+case $COMMAND in
+    start)
+        echo "Запуск сервиса..."
+        ;;
+    stop)
+        echo "Остановка сервиса..."
+        ;;
+    restart)
+        echo "Перезапуск сервиса..."
+        ;;
+    status)
+        echo "Проверка статуса..."
+        ;;
+    *)
+        echo "Неизвестная команда: $COMMAND"
+        echo "Используйте: start, stop, restart, status"
+        ;;
+esac
+
+# Пример с несколькими вариантами
+case $1 in
+    -h|--help)
+        echo "Справка по использованию"
+        ;;
+    -v|--version)
+        echo "Версия 1.0"
+        ;;
+    -d|--debug)
+        echo "Режим отладки"
+        ;;
+    *)
+        echo "Неизвестная опция"
+        ;;
+esac</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="loops" class="section">
+                <h2>🔄 Циклы</h2>
+                
+                <h3>Цикл for</h3>
+                <div class="example">
+                    <strong>📖 Различные варианты for:</strong>
+                    <pre>#!/bin/bash
+
+# Перебор списка
+for NAME in Иван Пётр Мария Анна
+do
+    echo "Привет, $NAME"
+done
+
+# Перебор чисел (последовательность)
+for i in 1 2 3 4 5
+do
+    echo "Число: $i"
+done
+
+# С использованием seq
+for i in $(seq 1 10)
+do
+    echo "Число: $i"
+done
+
+# Диапазон (brace expansion)
+for i in {1..10}
+do
+    echo "Число: $i"
+done
+
+# С шагом
+for i in {0..100..10}  # от 0 до 100 с шагом 10
+do
+    echo "Число: $i"
+done
+
+# C-style for loop
+for ((i=1; i<=10; i++))
+do
+    echo "Итерация $i"
+done
+
+# Перебор файлов
+for FILE in *.txt
+do
+    echo "Файл: $FILE"
+done
+
+# Перебор результата команды
+for USER in $(cat /etc/passwd | cut -d: -f1)
+do
+    echo "Пользователь: $USER"
+done</pre>
+                </div>
+
+                <h3>Цикл while</h3>
+                <div class="example">
+                    <strong>📖 Цикл while:</strong>
+                    <pre>#!/bin/bash
+
+# Простой цикл while
+COUNT=1
+while [ $COUNT -le 5 ]
+do
+    echo "Счётчик: $COUNT"
+    ((COUNT++))
+done
+
+# Бесконечный цикл
+while true
+do
+    echo "Бесконечный цикл (Ctrl+C для выхода)"
+    sleep 1
+done
+
+# Чтение файла построчно
+while IFS= read -r LINE
+do
+    echo "Строка: $LINE"
+done < file.txt
+
+# Цикл с условием
+while [ ! -f "ready.flag" ]
+do
+    echo "Ожидание файла ready.flag..."
+    sleep 5
+done
+echo "Файл появился!"</pre>
+                </div>
+
+                <h3>Цикл until</h3>
+                <div class="example">
+                    <strong>📖 Цикл until (пока условие НЕ истинно):</strong>
+                    <pre>#!/bin/bash
+
+# until - противоположность while
+COUNT=1
+until [ $COUNT -gt 5 ]
+do
+    echo "Счётчик: $COUNT"
+    ((COUNT++))
+done
+
+# Ожидание появления файла
+until [ -f "ready.flag" ]
+do
+    echo "Ожидание..."
+    sleep 5
+done
+
+# Ожидание успешного выполнения команды
+until ping -c 1 google.com &> /dev/null
+do
+    echo "Нет соединения, повтор через 5 сек..."
+    sleep 5
+done
+echo "Соединение восстановлено!"</pre>
+                </div>
+
+                <h3>Управление циклами</h3>
+                <div class="example">
+                    <strong>📖 break и continue:</strong>
+                    <pre>#!/bin/bash
+
+# break - выход из цикла
+for i in {1..10}
+do
+    if [ $i -eq 5 ]; then
+        echo "Прерываем цикл на 5"
+        break
+    fi
+    echo "Число: $i"
+done
+
+# continue - пропустить текущую итерацию
+for i in {1..10}
+do
+    if [ $((i % 2)) -eq 0 ]; then
+        continue  # пропускаем чётные
+    fi
+    echo "Нечётное: $i"
+done
+
+# Вложенные циклы с break
+for i in {1..3}
+do
+    for j in {1..3}
+    do
+        if [ $j -eq 2 ]; then
+            break  # выход из внутреннего цикла
+        fi
+        echo "i=$i, j=$j"
+    done
+done</pre>
+                </div>
+
+                <h3>Цикл select (интерактивное меню)</h3>
+                <div class="example">
+                    <strong>📖 Создание меню выбора:</strong>
+                    <pre>#!/bin/bash
+
+echo "Выберите действие:"
+select ACTION in "Запустить" "Остановить" "Перезапустить" "Выход"
+do
+    case $ACTION in
+        "Запустить")
+            echo "Запуск сервиса..."
+            ;;
+        "Остановить")
+            echo "Остановка сервиса..."
+            ;;
+        "Перезапустить")
+            echo "Перезапуск сервиса..."
+            ;;
+        "Выход")
+            echo "До свидания!"
+            break
+            ;;
+        *)
+            echo "Неверный выбор"
+            ;;
+    esac
+done</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="functions" class="section">
+                <h2>⚙️ Функции</h2>
+                
+                <h3>Объявление и вызов функций</h3>
+                <div class="example">
+                    <strong>📖 Базовый синтаксис функций:</strong>
+                    <pre>#!/bin/bash
+
+# Способ 1: с ключевым словом function
+function hello() {
+    echo "Привет, мир!"
+}
+
+# Способ 2: без function (рекомендуется)
+goodbye() {
+    echo "До свидания!"
+}
+
+# Вызов функций
+hello
+goodbye
+
+# Функция с параметрами
+greet() {
+    echo "Привет, $1!"
+}
+
+greet "Иван"
+greet "Мария"
+
+# Множественные параметры
+full_greet() {
+    echo "Привет, $1 $2!"
+}
+
+full_greet "Иван" "Иванов"</pre>
+                </div>
+
+                <h3>Параметры функций</h3>
+                <div class="example">
+                    <strong>📖 Работа с параметрами:</strong>
+                    <pre>#!/bin/bash
+
+show_info() {
+    echo "Функция: ${FUNCNAME}"
+    echo "Всего параметров: $#"
+    echo "Все параметры: $@"
+    echo "Первый параметр: $1"
+    echo "Второй параметр: $2"
+}
+
+show_info "раз" "два" "три"
+
+# Проверка количества параметров
+add() {
+    if [ $# -ne 2 ]; then
+        echo "Ошибка: требуется 2 числа"
+        return 1
+    fi
+    
+    local result=$(($1 + $2))
+    echo $result
+}
+
+add 5 3
+add 10    # выдаст ошибку</pre>
+                </div>
+
+                <h3>Возвращаемые значения</h3>
+                <div class="example">
+                    <strong>📖 Return и echo:</strong>
+                    <pre>#!/bin/bash
+
+# return возвращает код (0-255)
+is_even() {
+    if [ $(($1 % 2)) -eq 0 ]; then
+        return 0  # успех (истина)
+    else
+        return 1  # неудача (ложь)
+    fi
+}
+
+if is_even 4; then
+    echo "4 - чётное"
+fi
+
+# echo для возврата значений
+multiply() {
+    local result=$(($1 * $2))
+    echo $result
+}
+
+RESULT=$(multiply 5 3)
+echo "5 * 3 = $RESULT"
+
+# Возврат нескольких значений
+get_datetime() {
+    echo "$(date +%Y-%m-%d)"
+    echo "$(date +%H:%M:%S)"
+}
+
+# Чтение в массив
+read DATE TIME <<< "$(get_datetime)"
+echo "Дата: $DATE"
+echo "Время: $TIME"</pre>
+                </div>
+
+                <h3>Локальные переменные</h3>
+                <div class="example">
+                    <strong>📖 Local vs Global:</strong>
+                    <pre>#!/bin/bash
+
+GLOBAL_VAR="глобальная"
+
+test_scope() {
+    local LOCAL_VAR="локальная"
+    GLOBAL_VAR="изменённая в функции"
+    
+    echo "Внутри функции:"
+    echo "  LOCAL_VAR: $LOCAL_VAR"
+    echo "  GLOBAL_VAR: $GLOBAL_VAR"
+}
+
+echo "До вызова функции:"
+echo "  GLOBAL_VAR: $GLOBAL_VAR"
+
+test_scope
+
+echo "После вызова функции:"
+echo "  GLOBAL_VAR: $GLOBAL_VAR"
+echo "  LOCAL_VAR: $LOCAL_VAR"  # пусто</pre>
+                </div>
+
+                <h3>Рекурсивные функции</h3>
+                <div class="example">
+                    <strong>📖 Факториал (рекурсия):</strong>
+                    <pre>#!/bin/bash
+
+factorial() {
+    local n=$1
+    
+    if [ $n -le 1 ]; then
+        echo 1
+    else
+        local prev=$(factorial $((n - 1)))
+        echo $((n * prev))
+    fi
+}
+
+echo "5! = $(factorial 5)"
+echo "10! = $(factorial 10)"
+
+# Числа Фибоначчи
+fibonacci() {
+    local n=$1
+    
+    if [ $n -le 1 ]; then
+        echo $n
+    else
+        local a=$(fibonacci $((n - 1)))
+        local b=$(fibonacci $((n - 2)))
+        echo $((a + b))
+    fi
+}
+
+echo "Fibonacci(10) = $(fibonacci 10)"</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="arrays" class="section">
+                <h2>📚 Массивы</h2>
+                
+                <h3>Создание массивов</h3>
+                <div class="example">
+                    <strong>📖 Объявление и инициализация:</strong>
+                    <pre>#!/bin/bash
+
+# Способ 1: перечисление элементов
+FRUITS=("яблоко" "банан" "апельсин" "груша")
+
+# Способ 2: declare
+declare -a NUMBERS
+
+# Способ 3: присвоение по индексу
+COLORS[0]="красный"
+COLORS[1]="синий"
+COLORS[2]="зелёный"
+
+# Создание массива из вывода команды
+FILES=($(ls *.txt))
+
+# Пустой массив
+EMPTY_ARRAY=()</pre>
+                </div>
+
+                <h3>Доступ к элементам</h3>
+                <div class="example">
+                    <strong>📖 Чтение элементов массива:</strong>
+                    <pre>#!/bin/bash
+
+FRUITS=("яблоко" "банан" "апельсин" "груша")
+
+# Доступ по индексу (начинается с 0)
+echo "Первый фрукт: ${FRUITS[0]}"
+echo "Второй фрукт: ${FRUITS[1]}"
+
+# Последний элемент
+echo "Последний: ${FRUITS[-1]}"
+
+# Все элементы
+echo "Все фрукты: ${FRUITS[@]}"
+echo "Все фрукты: ${FRUITS[*]}"
+
+# Количество элементов
+echo "Всего фруктов: ${#FRUITS[@]}"
+
+# Длина элемента
+echo "Длина первого: ${#FRUITS[0]}"
+
+# Индексы массива
+echo "Индексы: ${!FRUITS[@]}"</pre>
+                </div>
+
+                <h3>Изменение массива</h3>
+                <div class="example">
+                    <strong>📖 Добавление и удаление элементов:</strong>
+                    <pre>#!/bin/bash
+
+FRUITS=("яблоко" "банан")
+
+# Добавление элемента
+FRUITS+=("апельсин")
+FRUITS+=("груша" "киви")
+
+echo "Фрукты: ${FRUITS[@]}"
+
+# Изменение элемента
+FRUITS[1]="манго"
+echo "После изменения: ${FRUITS[@]}"
+
+# Удаление элемента
+unset FRUITS[2]
+echo "После удаления: ${FRUITS[@]}"
+
+# Очистка всего массива
+unset FRUITS
+echo "После очистки: ${FRUITS[@]}"</pre>
+                </div>
+
+                <h3>Перебор массива</h3>
+                <div class="example">
+                    <strong>📖 Циклы по массивам:</strong>
+                    <pre>#!/bin/bash
+
+FRUITS=("яблоко" "банан" "апельсин" "груша")
+
+# Перебор элементов
+for FRUIT in "${FRUITS[@]}"
+do
+    echo "Фрукт: $FRUIT"
+done
+
+# Перебор с индексами
+for i in "${!FRUITS[@]}"
+do
+    echo "Индекс $i: ${FRUITS[$i]}"
+done
+
+# C-style loop
+for ((i=0; i<${#FRUITS[@]}; i++))
+do
+    echo "Элемент $i: ${FRUITS[$i]}"
+done</pre>
+                </div>
+
+                <h3>Срезы массива</h3>
+                <div class="example">
+                    <strong>📖 Извлечение части массива:</strong>
+                    <pre>#!/bin/bash
+
+NUMBERS=(0 1 2 3 4 5 6 7 8 9)
+
+# Элементы с индекса 2, количество 3
+echo "Срез: ${NUMBERS[@]:2:3}"  # 2 3 4
+
+# Элементы с индекса 5 до конца
+echo "От 5: ${NUMBERS[@]:5}"    # 5 6 7 8 9
+
+# Последние 3 элемента
+echo "Последние 3: ${NUMBERS[@]: -3}"  # 7 8 9</pre>
+                </div>
+
+                <h3>Ассоциативные массивы (словари)</h3>
+                <div class="example">
+                    <strong>📖 Массивы с ключами-строками:</strong>
+                    <pre>#!/bin/bash
+
+# Объявление ассоциативного массива
+declare -A PERSON
+
+# Присвоение значений
+PERSON[name]="Иван"
+PERSON[age]=25
+PERSON[city]="Москва"
+
+# Доступ по ключу
+echo "Имя: ${PERSON[name]}"
+echo "Возраст: ${PERSON[age]}"
+echo "Город: ${PERSON[city]}"
+
+# Все значения
+echo "Все значения: ${PERSON[@]}"
+
+# Все ключи
+echo "Все ключи: ${!PERSON[@]}"
+
+# Перебор
+for KEY in "${!PERSON[@]}"
+do
+    echo "$KEY = ${PERSON[$KEY]}"
+done
+
+# Инициализация при объявлении
+declare -A COLORS=(
+    [red]="#FF0000"
+    [green]="#00FF00"
+    [blue]="#0000FF"
+)
+
+echo "Красный: ${COLORS[red]}"</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="strings" class="section">
+                <h2>📝 Работа со строками</h2>
+                
+                <h3>Длина строки</h3>
+                <div class="example">
+                    <strong>📖 Измерение длины:</strong>
+                    <pre>#!/bin/bash
+
+TEXT="Hello, World!"
+LENGTH=${#TEXT}
+echo "Длина строки: $LENGTH"
+
+# С переменной
+NAME="Иван"
+echo "Длина имени: ${#NAME}"</pre>
+                </div>
+
+                <h3>Извлечение подстроки</h3>
+                <div class="example">
+                    <strong>📖 Substring:</strong>
+                    <pre>#!/bin/bash
+
+TEXT="Hello, World!"
+
+# С позиции 7 до конца
+echo ${TEXT:7}           # World!
+
+# С позиции 7, длина 5
+echo ${TEXT:7:5}         # World
+
+# Последние 6 символов
+echo ${TEXT: -6}         # World!
+
+# Примеры
+FILENAME="document.txt"
+echo ${FILENAME:0:8}     # document
+echo ${FILENAME: -3}     # txt</pre>
+                </div>
+
+                <h3>Замена подстроки</h3>
+                <div class="example">
+                    <strong>📖 Поиск и замена:</strong>
+                    <pre>#!/bin/bash
+
+TEXT="Hello World, Hello Universe"
+
+# Замена первого вхождения
+echo ${TEXT/Hello/Hi}           # Hi World, Hello Universe
+
+# Замена всех вхождений
+echo ${TEXT//Hello/Hi}          # Hi World, Hi Universe
+
+# Удаление подстроки (замена на пустоту)
+echo ${TEXT//Hello/}            #  World,  Universe
+
+# Замена в начале строки
+echo ${TEXT/#Hello/Hi}          # Hi World, Hello Universe
+
+# Замена в конце строки
+TEXT2="file.txt"
+echo ${TEXT2/%txt/md}           # file.md</pre>
+                </div>
+
+                <h3>Удаление части строки</h3>
+                <div class="example">
+                    <strong>📖 Удаление с начала или конца:</strong>
+                    <pre>#!/bin/bash
+
+FILENAME="path/to/file.tar.gz"
+
+# Удалить минимальное с начала (до /)
+echo ${FILENAME#*/}              # to/file.tar.gz
+
+# Удалить максимальное с начала (до последнего /)
+echo ${FILENAME##*/}             # file.tar.gz
+
+# Удалить минимальное с конца (от последней точки)
+echo ${FILENAME%.*}              # path/to/file.tar
+
+# Удалить максимальное с конца (от первой точки)
+echo ${FILENAME%%.*}             # path/to/file
+
+# Практические примеры
+FILE="document.pdf"
+BASENAME=${FILE%.*}              # document
+EXTENSION=${FILE##*.}            # pdf
+echo "Имя: $BASENAME"
+echo "Расширение: $EXTENSION"</pre>
+                </div>
+
+                <h3>Изменение регистра</h3>
+                <div class="example">
+                    <strong>📖 Upper/Lower case:</strong>
+                    <pre>#!/bin/bash
+
+TEXT="Hello World"
+
+# В верхний регистр
+echo ${TEXT^^}                   # HELLO WORLD
+
+# В нижний регистр
+echo ${TEXT,,}                   # hello world
+
+# Первая буква в верхний регистр
+echo ${TEXT^}                    # Hello world
+
+# Первая буква в нижний регистр
+echo ${TEXT,}                    # hello World
+
+# Инвертировать регистр
+echo ${TEXT~~}                   # hELLO wORLD</pre>
+                </div>
+
+                <h3>Конкатенация строк</h3>
+                <div class="example">
+                    <strong>📖 Объединение строк:</strong>
+                    <pre>#!/bin/bash
+
+FIRST="Hello"
+LAST="World"
+
+# Простая конкатенация
+FULL="$FIRST $LAST"
+echo $FULL                       # Hello World
+
+# Без пробела
+COMBINED="$FIRST$LAST"
+echo $COMBINED                   # HelloWorld
+
+# Множественная
+PREFIX="Mr."
+NAME="Smith"
+FULL_NAME="$PREFIX $FIRST $LAST"
+echo $FULL_NAME                  # Mr. Hello World
+
+# С +=
+MESSAGE="Hello"
+MESSAGE+=" World"
+MESSAGE+="!"
+echo $MESSAGE                    # Hello World!</pre>
+                </div>
+
+                <h3>Проверка содержимого</h3>
+                <div class="example">
+                    <strong>📖 Поиск подстроки:</strong>
+                    <pre>#!/bin/bash
+
+TEXT="Hello, World!"
+
+# Содержит ли подстроку
+if [[ $TEXT == *"World"* ]]; then
+    echo "Содержит 'World'"
+fi
+
+# Начинается с
+if [[ $TEXT == "Hello"* ]]; then
+    echo "Начинается с 'Hello'"
+fi
+
+# Заканчивается на
+if [[ $TEXT == *"!" ]]; then
+    echo "Заканчивается на '!'"
+fi
+
+# С использованием grep
+if echo "$TEXT" | grep -q "World"; then
+    echo "grep нашёл 'World'"
+fi
+
+# Регулярные выражения
+if [[ $TEXT =~ ^Hello ]]; then
+    echo "Regex: начинается с Hello"
+fi</pre>
+                </div>
+
+                <h3>Разделение строки</h3>
+                <div class="example">
+                    <strong>📖 Split строки:</strong>
+                    <pre>#!/bin/bash
+
+# Разделение по пробелам в массив
+TEXT="один два три четыре"
+read -ra WORDS <<< "$TEXT"
+for WORD in "${WORDS[@]}"; do
+    echo $WORD
+done
+
+# Разделение по разделителю
+CSV="яблоко,банан,апельсин"
+IFS=',' read -ra FRUITS <<< "$CSV"
+for FRUIT in "${FRUITS[@]}"; do
+    echo $FRUIT
+done
+
+# Построчное разделение
+LINES="строка1
+строка2
+строка3"
+while IFS= read -r LINE; do
+    echo "Строка: $LINE"
+done <<< "$LINES"</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="files" class="section">
+                <h2>📁 Работа с файлами</h2>
+                
+                <h3>Чтение файлов</h3>
+                <div class="example">
+                    <strong>📖 Способы чтения:</strong>
+                    <pre>#!/bin/bash
+
+# Построчное чтение
+while IFS= read -r LINE
+do
+    echo "Строка: $LINE"
+done < file.txt
+
+# Чтение с номерами строк
+COUNTER=1
+while IFS= read -r LINE
+do
+    echo "$COUNTER: $LINE"
+    ((COUNTER++))
+done < file.txt
+
+# Чтение всего файла в переменную
+CONTENT=$(cat file.txt)
+echo "$CONTENT"
+
+# Чтение в массив
+mapfile -t LINES < file.txt
+# или
+readarray -t LINES < file.txt
+
+for LINE in "${LINES[@]}"; do
+    echo $LINE
+done
+
+# Чтение с пропуском пустых строк
+while IFS= read -r LINE
+do
+    [[ -z "$LINE" ]] && continue
+    echo $LINE
+done < file.txt</pre>
+                </div>
+
+                <h3>Запись в файлы</h3>
+                <div class="example">
+                    <strong>📖 Создание и запись:</strong>
+                    <pre>#!/bin/bash
+
+# Перезаписать файл (>)
+echo "Первая строка" > output.txt
+echo "Вторая строка" > output.txt  # перезапишет
+
+# Добавить в конец (>>)
+echo "Первая строка" > output.txt
+echo "Вторая строка" >> output.txt  # добавит
+
+# Множественная запись
+cat > file.txt << EOF
+Строка 1
+Строка 2
+Строка 3
+EOF
+
+# Запись переменной
+TEXT="Hello, World!"
+echo "$TEXT" > file.txt
+
+# Запись массива
+LINES=("строка1" "строка2" "строка3")
+printf "%s\n" "${LINES[@]}" > file.txt
+
+# Создать пустой файл
+> empty.txt
+# или
+touch empty.txt</pre>
+                </div>
+
+                <h3>Проверка файлов</h3>
+                <div class="example">
+                    <strong>📖 Тесты файлов:</strong>
+                    <pre>#!/bin/bash
+
+FILE="test.txt"
+
+# Существует ли файл
+if [ -e "$FILE" ]; then
+    echo "Файл существует"
+fi
+
+# Обычный файл
+if [ -f "$FILE" ]; then
+    echo "Это обычный файл"
+fi
+
+# Каталог
+if [ -d "/home/user" ]; then
+    echo "Это каталог"
+fi
+
+# Пустой ли файл
+if [ -s "$FILE" ]; then
+    echo "Файл не пустой"
+else
+    echo "Файл пустой"
+fi
+
+# Права доступа
+if [ -r "$FILE" ]; then echo "Читаемый"; fi
+if [ -w "$FILE" ]; then echo "Записываемый"; fi
+if [ -x "$FILE" ]; then echo "Исполняемый"; fi
+
+# Символическая ссылка
+if [ -L "$FILE" ]; then
+    echo "Это симлинк"
+fi
+
+# Сравнение времени изменения
+if [ file1.txt -nt file2.txt ]; then
+    echo "file1 новее file2"
+fi
+
+if [ file1.txt -ot file2.txt ]; then
+    echo "file1 старше file2"
+fi</pre>
+                </div>
+
+                <h3>Операции с файлами</h3>
+                <div class="example">
+                    <strong>📖 Копирование, перемещение, удаление:</strong>
+                    <pre>#!/bin/bash
+
+# Копирование
+cp source.txt destination.txt
+cp -r /source/dir /dest/dir        # рекурсивно
+
+# Перемещение/переименование
+mv old.txt new.txt
+mv file.txt /new/location/
+
+# Удаление
+rm file.txt
+rm -f file.txt                     # принудительно
+rm -r directory/                   # каталог рекурсивно
+rm -rf directory/                  # принудительно и рекурсивно
+
+# Создание каталогов
+mkdir newdir
+mkdir -p path/to/newdir            # создать родительские
+
+# Удаление пустых каталогов
+rmdir emptydir
+
+# Создание символической ссылки
+ln -s /path/to/file linkname
+
+# Изменение прав
+chmod +x script.sh                 # сделать исполняемым
+chmod 755 script.sh                # rwxr-xr-x
+chmod 644 file.txt                 # rw-r--r--
+
+# Изменение владельца
+chown user:group file.txt
+chown -R user:group directory/</pre>
+                </div>
+
+                <h3>Информация о файле</h3>
+                <div class="example">
+                    <strong>📖 Получение свойств файла:</strong>
+                    <pre>#!/bin/bash
+
+FILE="test.txt"
+
+# Размер файла
+SIZE=$(stat -c%s "$FILE")
+echo "Размер: $SIZE байт"
+
+# Или через wc
+SIZE=$(wc -c < "$FILE")
+
+# Количество строк
+LINES=$(wc -l < "$FILE")
+echo "Строк: $LINES"
+
+# Время модификации
+MTIME=$(stat -c%y "$FILE")
+echo "Изменён: $MTIME"
+
+# Права в восьмеричном виде
+PERMS=$(stat -c%a "$FILE")
+echo "Права: $PERMS"
+
+# Владелец
+OWNER=$(stat -c%U "$FILE")
+echo "Владелец: $OWNER"
+
+# Все данные
+stat "$FILE"
+
+# Тип файла
+file "$FILE"</pre>
+                </div>
+
+                <h3>Поиск файлов</h3>
+                <div class="example">
+                    <strong>📖 Команда find:</strong>
+                    <pre>#!/bin/bash
+
+# Найти все .txt файлы
+find . -name "*.txt"
+
+# Найти файлы и выполнить команду
+find . -name "*.log" -delete
+
+# Найти по размеру
+find . -size +100M                 # больше 100 МБ
+find . -size -1k                   # меньше 1 КБ
+
+# Найти по времени модификации
+find . -mtime -7                   # изменённые за последние 7 дней
+find . -mtime +30                  # изменённые более 30 дней назад
+
+# Найти каталоги
+find . -type d
+
+# Найти и выполнить команду
+find . -name "*.txt" -exec cat {} \;
+
+# С правами
+find . -perm 755
+
+# Поиск по содержимому
+grep -r "искомый текст" .
+grep -r "pattern" . --include="*.txt"</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="input-output" class="section">
+                <h2>⌨️ Ввод/Вывод и перенаправление</h2>
+                
+                <h3>Вывод на экран</h3>
+                <div class="example">
+                    <strong>📖 Echo и printf:</strong>
+                    <pre>#!/bin/bash
+
+# echo - простой вывод
+echo "Hello, World!"
+echo Можно без кавычек
+
+# Без перевода строки
+echo -n "Без перевода строки"
+
+# Интерпретация escape-последовательностей
+echo -e "Строка1\nСтрока2\tТабуляция"
+
+# printf - форматированный вывод
+printf "Имя: %s, Возраст: %d\n" "Иван" 25
+printf "%.2f\n" 3.14159            # 3.14
+printf "%10s\n" "текст"            # выравнивание
+
+# Цветной вывод
+echo -e "\e[31mКрасный текст\e[0m"
+echo -e "\e[32mЗелёный текст\e[0m"
+echo -e "\e[33mЖёлтый текст\e[0m"
+echo -e "\e[34mСиний текст\e[0m"
+
+# Жирный шрифт
+echo -e "\e[1mЖирный текст\e[0m"</pre>
+                </div>
+
+                <h3>Ввод от пользователя</h3>
+                <div class="example">
+                    <strong>📖 Read команда:</strong>
+                    <pre>#!/bin/bash
+
+# Простой ввод
+read NAME
+echo "Привет, $NAME"
+
+# С приглашением
+read -p "Введите имя: " NAME
+echo "Привет, $NAME"
+
+# Несколько переменных
+read -p "Имя и фамилия: " FIRST LAST
+echo "Имя: $FIRST, Фамилия: $LAST"
+
+# Скрытый ввод (для паролей)
+read -sp "Введите пароль: " PASSWORD
+echo
+echo "Пароль сохранён"
+
+# С таймаутом (5 секунд)
+if read -t 5 -p "Ответьте за 5 секунд: " ANSWER; then
+    echo "Ответ: $ANSWER"
+else
+    echo "Время вышло!"
+fi
+
+# Чтение одного символа
+read -n 1 -p "Нажмите любую клавишу"
+echo
+
+# Значение по умолчанию
+read -p "Имя [Гость]: " NAME
+NAME=${NAME:-Гость}
+echo "Привет, $NAME"</pre>
+                </div>
+
+                <h3>Перенаправление вывода</h3>
+                <div class="example">
+                    <strong>📖 Redirect операторы:</strong>
+                    <pre>#!/bin/bash
+
+# Запись в файл (перезапись)
+echo "Hello" > file.txt
+
+# Добавление в файл
+echo "World" >> file.txt
+
+# Перенаправление ошибок
+command 2> errors.txt              # только ошибки
+command > output.txt 2>&1          # вывод и ошибки в один файл
+command &> all.txt                 # то же самое (короче)
+
+# Отдельные файлы для вывода и ошибок
+command > output.txt 2> errors.txt
+
+# Подавить вывод
+command > /dev/null                # без стандартного вывода
+command 2> /dev/null               # без ошибок
+command &> /dev/null               # без всего
+
+# Here document
+cat > file.txt << EOF
+Строка 1
+Строка 2
+EOF
+
+# Here string
+grep "pattern" <<< "строка для поиска"</pre>
+                </div>
+
+                <h3>Конвейеры (Pipes)</h3>
+                <div class="example">
+                    <strong>📖 Использование | :</strong>
+                    <pre>#!/bin/bash
+
+# Базовый конвейер
+ls -l | grep ".txt"
+
+# Множественные pipe
+cat file.txt | grep "pattern" | wc -l
+
+# С сортировкой
+cat names.txt | sort | uniq
+
+# Подсчёт
+ps aux | grep "firefox" | wc -l
+
+# С head и tail
+cat large.txt | head -n 100 | tail -n 10
+
+# С awk
+cat data.txt | awk '{print $1, $3}'
+
+# С sed
+cat file.txt | sed 's/old/new/g'
+
+# Tee - вывод и в файл, и на экран
+echo "test" | tee output.txt
+
+# Tee с добавлением
+echo "test" | tee -a output.txt</pre>
+                </div>
+
+                <h3>Перенаправление ввода</h3>
+                <div class="example">
+                    <strong>📖 Input redirect:</strong>
+                    <pre>#!/bin/bash
+
+# Чтение из файла
+while read LINE
+do
+    echo $LINE
+done < input.txt
+
+# Использование файла как stdin
+sort < unsorted.txt > sorted.txt
+
+# Комбинация
+tr '[:lower:]' '[:upper:]' < input.txt > output.txt
+
+# Process substitution
+diff <(ls dir1) <(ls dir2)
+
+# Command substitution в read
+read VAR < <(echo "value")</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="operators" class="section">
+                <h2>🔢 Операторы и выражения</h2>
+                
+                <h3>Арифметические операторы</h3>
+                <table>
+                    <tr>
+                        <th>Оператор</th>
+                        <th>Операция</th>
+                        <th>Пример</th>
+                    </tr>
+                    <tr>
+                        <td>+</td>
+                        <td>Сложение</td>
+                        <td>$((5 + 3)) → 8</td>
+                    </tr>
+                    <tr>
+                        <td>-</td>
+                        <td>Вычитание</td>
+                        <td>$((5 - 3)) → 2</td>
+                    </tr>
+                    <tr>
+                        <td>*</td>
+                        <td>Умножение</td>
+                        <td>$((5 * 3)) → 15</td>
+                    </tr>
+                    <tr>
+                        <td>/</td>
+                        <td>Деление</td>
+                        <td>$((10 / 3)) → 3</td>
+                    </tr>
+                    <tr>
+                        <td>%</td>
+                        <td>Остаток от деления</td>
+                        <td>$((10 % 3)) → 1</td>
+                    </tr>
+                    <tr>
+                        <td>**</td>
+                        <td>Возведение в степень</td>
+                        <td>$((2 ** 3)) → 8</td>
+                    </tr>
+                    <tr>
+                        <td>++</td>
+                        <td>Инкремент</td>
+                        <td>((i++)) или ((++i))</td>
+                    </tr>
+                    <tr>
+                        <td>--</td>
+                        <td>Декремент</td>
+                        <td>((i--)) или ((--i))</td>
+                    </tr>
+                </table>
+
+                <div class="example">
+                    <strong>📖 Примеры арифметики:</strong>
+                    <pre>#!/bin/bash
+
+A=10
+B=3
+
+# Базовые операции
+echo "A + B = $((A + B))"          # 13
+echo "A - B = $((A - B))"          # 7
+echo "A * B = $((A * B))"          # 30
+echo "A / B = $((A / B))"          # 3
+echo "A % B = $((A % B))"          # 1
+echo "A ** B = $((A ** B))"        # 1000
+
+# Инкремент
+COUNT=0
+((COUNT++))
+echo $COUNT                         # 1
+
+# Декремент
+((COUNT--))
+echo $COUNT                         # 0
+
+# Сложные выражения
+RESULT=$(( (A + B) * 2 ))
+echo $RESULT                        # 26
+
+# Присваивание с операцией
+((A += 5))                          # A = A + 5
+((B *= 2))                          # B = B * 2</pre>
+                </div>
+
+                <h3>Битовые операторы</h3>
+                <table>
+                    <tr>
+                        <th>Оператор</th>
+                        <th>Операция</th>
+                        <th>Пример</th>
+                    </tr>
+                    <tr>
+                        <td>&</td>
+                        <td>Побитовое И</td>
+                        <td>$((5 & 3)) → 1</td>
+                    </tr>
+                    <tr>
+                        <td>|</td>
+                        <td>Побитовое ИЛИ</td>
+                        <td>$((5 | 3)) → 7</td>
+                    </tr>
+                    <tr>
+                        <td>^</td>
+                        <td>Побитовое исключающее ИЛИ</td>
+                        <td>$((5 ^ 3)) → 6</td>
+                    </tr>
+                    <tr>
+                        <td>~</td>
+                        <td>Побитовое НЕ</td>
+                        <td>$((~5))</td>
+                    </tr>
+                    <tr>
+                        <td>&lt;&lt;</td>
+                        <td>Сдвиг влево</td>
+                        <td>$((5 &lt;&lt; 1)) → 10</td>
+                    </tr>
+                    <tr>
+                        <td>&gt;&gt;</td>
+                        <td>Сдвиг вправо</td>
+                        <td>$((5 &gt;&gt; 1)) → 2</td>
+                    </tr>
+                </table>
+
+                <h3>Логические операторы</h3>
+                <div class="example">
+                    <strong>📖 AND, OR, NOT:</strong>
+                    <pre>#!/bin/bash
+
+A=5
+B=10
+
+# AND (&&)
+if [ $A -lt 10 ] && [ $B -gt 5 ]; then
+    echo "Оба условия истинны"
+fi
+
+# OR (||)
+if [ $A -eq 5 ] || [ $B -eq 5 ]; then
+    echo "Хотя бы одно условие истинно"
+fi
+
+# NOT (!)
+if [ ! $A -eq 0 ]; then
+    echo "A не равно 0"
+fi
+
+# В (( ))
+if (( A < 10 && B > 5 )); then
+    echo "Оба условия истинны"
+fi
+
+# Комбинированные
+if [[ $A -lt 10 && ( $B -gt 5 || $B -eq 0 ) ]]; then
+    echo "Сложное условие"
+fi</pre>
+                </div>
+
+                <h3>Тернарный оператор</h3>
+                <div class="example">
+                    <strong>📖 Условное присваивание:</strong>
+                    <pre>#!/bin/bash
+
+A=5
+
+# Тернарный оператор в (( ))
+RESULT=$(( A > 0 ? 1 : -1 ))
+echo $RESULT                        # 1
+
+# Эмуляция тернарного
+AGE=17
+STATUS=$( [ $AGE -ge 18 ] && echo "взрослый" || echo "ребёнок" )
+echo $STATUS                        # ребёнок
+
+# С переменными
+MAX=$(( A > B ? A : B ))
+MIN=$(( A < B ? A : B ))</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="arguments" class="section">
+                <h2>🎯 Обработка аргументов командной строки</h2>
+                
+                <h3>Позиционные параметры</h3>
+                <div class="example">
+                    <strong>📖 Доступ к аргументам:</strong>
+                    <pre>#!/bin/bash
+
+# Скрипт: script.sh arg1 arg2 arg3
+
+echo "Имя скрипта: $0"
+echo "Первый аргумент: $1"
+echo "Второй аргумент: $2"
+echo "Третий аргумент: $3"
+echo "Всего аргументов: $#"
+echo "Все аргументы: $@"
+echo "Все аргументы (строка): $*"
+echo "PID скрипта: $$"
+
+# Проверка количества аргументов
+if [ $# -eq 0 ]; then
+    echo "Ошибка: аргументы не переданы"
+    exit 1
+fi
+
+# Сдвиг аргументов
+echo "Первый: $1"
+shift
+echo "Теперь первый: $1"  # был второй
+shift 2
+echo "Теперь первый: $1"  # был четвёртый</pre>
+                </div>
+
+                <h3>Обработка опций</h3>
+                <div class="example">
+                    <strong>📖 Разбор флагов и опций:</strong>
+                    <pre>#!/bin/bash
+
+# Простой способ
+while [ $# -gt 0 ]; do
+    case $1 in
+        -h|--help)
+            echo "Справка"
+            exit 0
+            ;;
+        -v|--version)
+            echo "Версия 1.0"
+            exit 0
+            ;;
+        -f|--file)
+            FILE="$2"
+            shift 2
+            ;;
+        -d|--debug)
+            DEBUG=true
+            shift
+            ;;
+        *)
+            echo "Неизвестная опция: $1"
+            exit 1
+            ;;
+    esac
+done
+
+# С getopts (только короткие опции)
+while getopts "hvf:d" OPT; do
+    case $OPT in
+        h)
+            echo "Справка"
+            exit 0
+            ;;
+        v)
+            echo "Версия 1.0"
+            exit 0
+            ;;
+        f)
+            FILE="$OPTARG"
+            ;;
+        d)
+            DEBUG=true
+            ;;
+        \?)
+            echo "Неверная опция: -$OPTARG"
+            exit 1
+            ;;
+    esac
+done
+shift $((OPTIND-1))</pre>
+                </div>
+
+                <h3>Полный пример обработки аргументов</h3>
+                <div class="example">
+                    <strong>📖 Универсальный шаблон:</strong>
+                    <pre>#!/bin/bash
+
+# Значения по умолчанию
+VERBOSE=false
+OUTPUT=""
+MODE="normal"
+
+# Функция справки
+usage() {
+    cat << EOF
+Использование: $0 [ОПЦИИ] файл
+
+Опции:
+    -h, --help          Показать справку
+    -v, --verbose       Подробный вывод
+    -o, --output FILE   Выходной файл
+    -m, --mode MODE     Режим: normal|fast|safe
+    
+Примеры:
+    $0 input.txt
+    $0 -v -o output.txt input.txt
+    $0 --mode fast --verbose input.txt
+EOF
+    exit 0
+}
+
+# Обработка аргументов
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            usage
+            ;;
+        -v|--verbose)
+            VERBOSE=true
+            shift
+            ;;
+        -o|--output)
+            OUTPUT="$2"
+            shift 2
+            ;;
+        -m|--mode)
+            MODE="$2"
+            if [[ ! "$MODE" =~ ^(normal|fast|safe)$ ]]; then
+                echo "Ошибка: неверный режим '$MODE'"
+                exit 1
+            fi
+            shift 2
+            ;;
+        -*)
+            echo "Ошибка: неизвестная опция $1"
+            usage
+            ;;
+        *)
+            INPUT_FILE="$1"
+            shift
+            ;;
+    esac
+done
+
+# Проверка обязательных аргументов
+if [ -z "$INPUT_FILE" ]; then
+    echo "Ошибка: не указан входной файл"
+    usage
+fi
+
+# Использование
+if [ "$VERBOSE" = true ]; then
+    echo "Входной файл: $INPUT_FILE"
+    echo "Выходной файл: ${OUTPUT:-не указан}"
+    echo "Режим: $MODE"
+fi</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="examples" class="section">
+                <h2>💡 Практические примеры скриптов</h2>
+                
+                <h3>1. Резервное копирование</h3>
+                <div class="example">
+                    <strong>📖 Скрипт backup.sh:</strong>
+                    <pre>#!/bin/bash
+
+# Настройки
+SOURCE_DIR="/home/user/documents"
+BACKUP_DIR="/backup"
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_FILE="backup_$DATE.tar.gz"
+
+# Создание каталога для бэкапов
+mkdir -p "$BACKUP_DIR"
+
+# Создание архива
+echo "Создание резервной копии..."
+tar -czf "$BACKUP_DIR/$BACKUP_FILE" "$SOURCE_DIR"
+
+# Проверка успешности
+if [ $? -eq 0 ]; then
+    echo "✓ Резервная копия создана: $BACKUP_FILE"
+    SIZE=$(du -h "$BACKUP_DIR/$BACKUP_FILE" | cut -f1)
+    echo "  Размер: $SIZE"
+else
+    echo "✗ Ошибка создания резервной копии"
+    exit 1
+fi
+
+# Удаление старых бэкапов (старше 7 дней)
+echo "Удаление старых копий..."
+find "$BACKUP_DIR" -name "backup_*.tar.gz" -mtime +7 -delete
+echo "✓ Готово"</pre>
+                </div>
+
+                <h3>2. Мониторинг системы</h3>
+                <div class="example">
+                    <strong>📖 Скрипт system_monitor.sh:</strong>
+                    <pre>#!/bin/bash
+
+# Цвета
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+echo "=== Мониторинг системы ==="
+echo
+
+# Использование CPU
+echo "CPU:"
+CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1)
+echo "  Использование: ${CPU_USAGE}%"
+
+# Использование памяти
+echo "Память:"
+MEM_TOTAL=$(free -h | awk '/^Mem:/ {print $2}')
+MEM_USED=$(free -h | awk '/^Mem:/ {print $3}')
+MEM_PERCENT=$(free | awk '/^Mem:/ {printf "%.1f", $3/$2 * 100}')
+echo "  Всего: $MEM_TOTAL"
+echo "  Использовано: $MEM_USED ($MEM_PERCENT%)"
+
+# Использование диска
+echo "Диск:"
+DISK_USAGE=$(df -h / | tail -1 | awk '{print $5}' | cut -d'%' -f1)
+DISK_AVAIL=$(df -h / | tail -1 | awk '{print $4}')
+echo "  Использовано: ${DISK_USAGE}%"
+echo "  Доступно: $DISK_AVAIL"
+
+# Предупреждения
+if [ $DISK_USAGE -gt 90 ]; then
+    echo -e "${RED}⚠ ВНИМАНИЕ: Диск заполнен более чем на 90%${NC}"
+fi
+
+if (( $(echo "$MEM_PERCENT > 90" | bc -l) )); then
+    echo -e "${RED}⚠ ВНИМАНИЕ: Память заполнена более чем на 90%${NC}"
+fi
+
+# Uptime
+echo
+echo "Uptime: $(uptime -p)"</pre>
+                </div>
+
+                <h3>3. Массовое переименование файлов</h3>
+                <div class="example">
+                    <strong>📖 Скрипт rename_files.sh:</strong>
+                    <pre>#!/bin/bash
+
+# Переименование всех .jpeg в .jpg
+
+COUNT=0
+
+for FILE in *.jpeg
+do
+    # Проверка существования файлов
+    [ -e "$FILE" ] || continue
+    
+    # Новое имя
+    NEWNAME="${FILE%.jpeg}.jpg"
+    
+    # Переименование
+    mv "$FILE" "$NEWNAME"
+    echo "Переименован: $FILE → $NEWNAME"
+    ((COUNT++))
+done
+
+echo "Всего переименовано: $COUNT файлов"
+
+# Вариант 2: добавление префикса
+PREFIX="photo_"
+for FILE in *.jpg
+do
+    [ -e "$FILE" ] || continue
+    NEWNAME="${PREFIX}${FILE}"
+    mv "$FILE" "$NEWNAME"
+done
+
+# Вариант 3: замена пробелов на подчёркивания
+for FILE in *\ *
+do
+    [ -e "$FILE" ] || continue
+    NEWNAME="${FILE// /_}"
+    mv "$FILE" "$NEWNAME"
+done</pre>
+                </div>
+
+                <h3>4. Проверка доступности сервисов</h3>
+                <div class="example">
+                    <strong>📖 Скрипт check_services.sh:</strong>
+                    <pre>#!/bin/bash
+
+# Список хостов для проверки
+HOSTS=(
+    "google.com"
+    "github.com"
+    "example.com"
+)
+
+# Порты для проверки
+declare -A PORTS=(
+    ["google.com"]="80"
+    ["github.com"]="443"
+    ["example.com"]="80"
+)
+
+echo "=== Проверка доступности ==="
+echo
+
+for HOST in "${HOSTS[@]}"
+do
+    echo -n "Проверка $HOST ... "
+    
+    # Ping
+    if ping -c 1 -W 2 "$HOST" &> /dev/null; then
+        echo -n "✓ ping "
+    else
+        echo "✗ недоступен"
+        continue
+    fi
+    
+    # Проверка порта
+    PORT=${PORTS[$HOST]}
+    if nc -z -w 2 "$HOST" "$PORT" 2>/dev/null; then
+        echo "✓ port $PORT"
+    else
+        echo "✗

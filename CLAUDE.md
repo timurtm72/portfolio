@@ -208,7 +208,35 @@ ssh root@103.106.3.98 'bash /opt/portfolio/run-deploy.sh'
 
 Проект поддерживает Docker с оптимизацией для ARM64 (Orange Pi).
 
-### Быстрый старт
+### 🔒 Защита с Caddy Reverse Proxy (РЕКОМЕНДУЕТСЯ)
+
+**Архитектура:**
+```
+Интернет (порт 80/443) → [Caddy] → [Frontend:80] → [Backend:8080] → [PostgreSQL:5432]
+                          ↑ SSL        ↑ внутренний   ↑ внутренний     ↑ внутренний
+                          ↑ Rate Limit
+                          ↑ Security Headers
+```
+
+**Что защищено:**
+- ✅ Автоматический HTTPS (Let's Encrypt)
+- ✅ Rate Limiting (100 запросов/минуту)
+- ✅ Security Headers (XSS, Clickjacking защита)
+- ✅ Порты 3000/8080/5432 закрыты от интернета
+- ✅ Блокировка ботов и сканеров
+
+**Быстрый деплой через GitHub:**
+```bash
+# На Orange Pi / сервере
+git pull origin main
+bash deploy/caddy-deploy.sh
+```
+
+**Полные инструкции:**
+- Быстрый старт: [deploy/GITHUB-DEPLOY-CADDY.md](deploy/GITHUB-DEPLOY-CADDY.md)
+- Подробная настройка: [deploy/CADDY-SETUP.md](deploy/CADDY-SETUP.md)
+
+### Быстрый старт (БЕЗ Caddy, только для разработки)
 ```bash
 # Создать .env файлы
 cp backend/env.example backend/.env
@@ -218,6 +246,8 @@ cp frontend/env.example frontend/.env
 docker compose build
 docker compose up -d
 ```
+
+⚠️ **БЕЗ Caddy порты 3000/8080/5432 будут открыты в интернет!** Используйте только для локальной разработки.
 
 ### Управление Docker
 ```bash
@@ -249,6 +279,41 @@ docker stats
 - Автоматическое применение схемы БД
 - Alpine образы для минимального размера (где возможно)
 - Изолированная сеть `portfolio-network`
+- Caddy Reverse Proxy для защиты (автоматический HTTPS, rate limiting, security headers)
+
+### Конфигурация Caddy
+
+**Файл:** [Caddyfile](Caddyfile)
+
+**ВАЖНО:** Перед деплоем измените в Caddyfile:
+```caddyfile
+# Email для Let's Encrypt уведомлений
+{
+    email ваш-email@example.com  # Замените!
+}
+
+# Ваш домен
+portfolio.timurtm72.ru {  # Замените на ваш реальный домен!
+    # ... остальное оставьте как есть
+}
+```
+
+**Опциональная защита админки (IP whitelist):**
+```caddyfile
+# Раскомментируйте и укажите ваш IP:
+handle @admin_paths {
+    @allowed {
+        remote_ip 203.0.113.1  # Ваш реальный IP
+    }
+    handle @allowed {
+        reverse_proxy frontend:80
+    }
+    respond "Forbidden" 403
+}
+```
+
+**Если домена нет (только IP):**
+Раскомментируйте секцию `http://103.106.3.98` в Caddyfile (без автоматического SSL).
 
 ### ARM64 специфика (Orange Pi, Raspberry Pi)
 

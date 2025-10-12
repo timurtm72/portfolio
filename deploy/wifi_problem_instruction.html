@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Решение проблемы с Wi-Fi на Orange Pi Zero 3 - Debian 11</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+        header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .section h2 {
+            color: #5a67d8;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+        .section h3 {
+            color: #6b46c1;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .command {
+            background: #2d3748;
+            color: #00ff00;
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            overflow-x: auto;
+            border: 1px solid #4a5568;
+            position: relative;
+            padding-right: 100px;
+        }
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .copy-btn:hover {
+            background: #764ba2;
+            transform: translateY(-50%) scale(1.05);
+        }
+        .copy-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        .copy-btn.copied {
+            background: #28a745;
+        }
+        .description {
+            color: #555;
+            margin: 8px 0;
+            padding-left: 10px;
+        }
+        .note {
+            background: #dfe6ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .note strong {
+            color: #5a67d8;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .warning strong {
+            color: #856404;
+        }
+        .danger {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .danger strong {
+            color: #721c24;
+        }
+        .example {
+            background: #e8eeff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .example strong {
+            color: #5a67d8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .example pre {
+            background: #2d3748;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.4;
+        }
+        ul {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+        ul li {
+            margin: 8px 0;
+        }
+        footer {
+            background: #5a67d8;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+        .toc {
+            background: #f8f9fa;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+        }
+        .toc h2 {
+            color: #5a67d8;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8em;
+        }
+        .toc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .toc-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #5a67d8;
+            display: block;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .toc-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            border-left-color: #764ba2;
+        }
+        .toc-item span {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        .back-to-top {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        .back-to-top:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        table th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        table tr:hover {
+            background: #e8eeff;
+        }
+    </style>
+    <script>
+        function copyCommand(button) {
+            const commandDiv = button.parentElement;
+            const commandText = commandDiv.childNodes[0].textContent.trim();
+            
+            navigator.clipboard.writeText(commandText).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Скопировано!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Ошибка копирования: ', err);
+                button.textContent = 'Ошибка!';
+                setTimeout(() => {
+                    button.textContent = 'Копировать';
+                }, 2000);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📡 Решение проблемы с Wi-Fi на Orange Pi Zero 3</h1>
+            <p>Полное руководство по устранению отключений Wi-Fi под Debian 11</p>
+        </header>
+
+        <div class="content">
+            <div id="toc" class="toc">
+                <h2>📑 Содержание</h2>
+                <div class="toc-grid">
+                    <a href="#problem" class="toc-item">
+                        <span>❌</span>
+                        <strong>Описание проблемы</strong>
+                    </a>
+                    <a href="#diagnosis" class="toc-item">
+                        <span>🔍</span>
+                        <strong>Диагностика</strong>
+                    </a>
+                    <a href="#static-ip" class="toc-item">
+                        <span>🔢</span>
+                        <strong>Статический IP</strong>
+                    </a>
+                    <a href="#watchdog" class="toc-item">
+                        <span>🤖</span>
+                        <strong>Watchdog скрипт</strong>
+                    </a>
+                    <a href="#router" class="toc-item">
+                        <span>📡</span>
+                        <strong>Настройки роутера</strong>
+                    </a>
+                    <a href="#alternative" class="toc-item">
+                        <span>🔌</span>
+                        <strong>Альтернативные решения</strong>
+                    </a>
+                </div>
+            </div>
+
+            <div id="problem" class="section">
+                <h2>❌ Описание проблемы</h2>
+                
+                <div class="danger">
+                    <strong>🚨 Симптомы проблемы:</strong>
+                    <ul>
+                        <li>Wi-Fi периодически отключается через несколько минут после загрузки</li>
+                        <li>Приходится вручную переподключаться командой <code>nmcli connection up "ИМЯ_СОЕДИНЕНИЯ"</code></li>
+                        <li>Проблема повторяется регулярно каждые 3-5 минут</li>
+                        <li>В логах видны разрывы соединения во время 4-way handshake</li>
+                    </ul>
+                </div>
+
+                <h3>Причина проблемы</h3>
+                <p>Orange Pi Zero 3 использует встроенный Wi-Fi модуль <strong>Unisoc UWE5622</strong>, который имеет нестабильный драйвер под Linux. Драйвер не может корректно обрабатывать повторную аутентификацию WPA (4-way handshake), что приводит к регулярным разрывам соединения.</p>
+
+                <div class="example">
+                    <strong>📖 Типичная запись в логах:</strong>
+                    <pre>device (wlan0): supplicant interface state: 4way_handshake -> disconnected
+device (wlan0): Activation: (wifi) disconnected during association</pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Техническая информация:</strong>
+                    <ul>
+                        <li><strong>Платформа:</strong> Orange Pi Zero 3</li>
+                        <li><strong>ОС:</strong> Debian 11 (Bullseye)</li>
+                        <li><strong>Wi-Fi чип:</strong> Unisoc UWE5622</li>
+                        <li><strong>Прошивка:</strong> wifi_2355b001_1ant.ini</li>
+                        <li><strong>Тип проблемы:</strong> Нестабильность драйвера</li>
+                    </ul>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="diagnosis" class="section">
+                <h2>🔍 Диагностика проблемы</h2>
+                
+                <h3>Шаг 1: Установка необходимых утилит</h3>
+                <div class="command">sudo apt update && sudo apt install wireless-tools iw<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает утилиты для диагностики Wi-Fi</div>
+
+                <h3>Шаг 2: Проверка энергосбережения</h3>
+                <div class="command">sudo iw dev wlan0 get power_save<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Проверяет, включено ли энергосбережение (должно быть выключено)</div>
+
+                <div class="note">
+                    <strong>💡 Если показывает "Power save: on":</strong>
+                    <div class="command" style="margin-top: 10px;">sudo iw dev wlan0 set power_save off<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                    <p style="margin-top: 10px;">Однако в нашем случае энергосбережение уже выключено, поэтому проблема не в этом.</p>
+                </div>
+
+                <h3>Шаг 3: Проверка силы сигнала</h3>
+                <div class="command">sudo iw dev wlan0 link<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию о текущем соединении</div>
+
+                <div class="example">
+                    <strong>📖 Пример вывода (хороший сигнал):</strong>
+                    <pre>Connected to b0:fe:e5:c8:08:74 (on wlan0)
+    SSID: HUAWEI-R1FUY4
+    freq: 2412
+    signal: -52 dBm  ← Отличный уровень сигнала
+    tx bitrate: 52.0 MBit/s MCS 5</pre>
+                </div>
+
+                <table>
+                    <tr>
+                        <th>Уровень сигнала (dBm)</th>
+                        <th>Качество</th>
+                        <th>Описание</th>
+                    </tr>
+                    <tr>
+                        <td>-30 до -50</td>
+                        <td>Отлично</td>
+                        <td>Идеальный сигнал</td>
+                    </tr>
+                    <tr>
+                        <td>-50 до -60</td>
+                        <td>Хорошо</td>
+                        <td>Стабильное соединение</td>
+                    </tr>
+                    <tr>
+                        <td>-60 до -70</td>
+                        <td>Удовлетворительно</td>
+                        <td>Возможны небольшие задержки</td>
+                    </tr>
+                    <tr>
+                        <td>-70 до -80</td>
+                        <td>Слабо</td>
+                        <td>Нестабильное соединение</td>
+                    </tr>
+                    <tr>
+                        <td>ниже -80</td>
+                        <td>Очень слабо</td>
+                        <td>Постоянные разрывы</td>
+                    </tr>
+                </table>
+
+                <h3>Шаг 4: Просмотр логов NetworkManager</h3>
+                <div class="command">sudo journalctl -u NetworkManager -n 50<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает последние 50 записей NetworkManager</div>
+
+                <h3>Шаг 5: Мониторинг в реальном времени</h3>
+                <div class="command">sudo journalctl -u NetworkManager -f<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Следит за логами в реальном времени (Ctrl+C для выхода)</div>
+
+                <h3>Шаг 6: Проверка драйвера Wi-Fi</h3>
+                <div class="command">sudo dmesg | grep -E "wlan|wifi|unisoc"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает информацию о драйвере Wi-Fi</div>
+
+                <div class="example">
+                    <strong>📖 Вывод подтверждает использование Unisoc:</strong>
+                    <pre>wifi ini path = /lib/firmware/wifi_2355b001_1ant.ini
+unisoc_wifi unisoc_wifi wlan0: mixed HW and IP checksum settings.</pre>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="static-ip" class="section">
+                <h2>🔢 Попытка решения: Статический IP</h2>
+                
+                <p>Первая попытка - установка статического IP для исключения проблем с DHCP lease renewal.</p>
+
+                <h3>Шаг 1: Определение текущих настроек</h3>
+                <div class="command">ip addr show wlan0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает текущий IP адрес и маску сети</div>
+
+                <div class="command">nmcli connection show<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает имена Wi-Fi подключений</div>
+
+                <h3>Шаг 2: Настройка статического IP</h3>
+                <div class="command">sudo nmcli connection modify "HUAWEI-R1FUY4" ipv4.method manual ipv4.addresses 192.168.3.100/24 ipv4.gateway 192.168.3.1 ipv4.dns "8.8.8.8,8.8.4.4"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Устанавливает статический IP вместо DHCP</div>
+
+                <div class="note">
+                    <strong>💡 Параметры команды:</strong>
+                    <ul>
+                        <li><strong>ipv4.method manual</strong> - использовать статический IP (не DHCP)</li>
+                        <li><strong>ipv4.addresses 192.168.3.100/24</strong> - ваш IP адрес и маска сети</li>
+                        <li><strong>/24</strong> означает маску 255.255.255.0 (254 устройства в сети)</li>
+                        <li><strong>ipv4.gateway 192.168.3.1</strong> - адрес роутера</li>
+                        <li><strong>ipv4.dns</strong> - DNS серверы (Google DNS)</li>
+                    </ul>
+                </div>
+
+                <h3>Шаг 3: Применение изменений</h3>
+                <div class="command">sudo nmcli connection down "HUAWEI-R1FUY4"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отключает соединение</div>
+
+                <div class="command">sudo nmcli connection up "HUAWEI-R1FUY4"<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Подключается с новыми настройками</div>
+
+                <h3>Шаг 4: Проверка настроек</h3>
+                <div class="command">ip addr show wlan0<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Проверяет, что IP установлен правильно</div>
+
+                <div class="example">
+                    <strong>📖 Правильный вывод со статическим IP:</strong>
+                    <pre>13: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500
+    inet 192.168.3.100/24 brd 192.168.3.255 scope global noprefixroute wlan0
+       valid_lft forever preferred_lft forever  ← Статический IP</pre>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Результат:</strong>
+                    <p>К сожалению, статический IP <strong>не решил проблему</strong>. Wi-Fi продолжает отключаться, потому что проблема именно в драйвере Unisoc, который некорректно обрабатывает повторную аутентификацию WPA.</p>
+                </div>
+
+                <h3>Возврат к DHCP (если нужно)</h3>
+                <div class="command">sudo nmcli connection modify "HUAWEI-R1FUY4" ipv4.method auto<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Возвращает настройки DHCP</div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="watchdog" class="section">
+                <h2>🤖 Решение: Watchdog скрипт для автоматического переподключения</h2>
+                
+                <p>Поскольку проблема в драйвере и исправить её невозможно, создаём скрипт для автоматического обнаружения разрыва соединения и переподключения.</p>
+
+                <h3>Шаг 1: Создание скрипта watchdog</h3>
+                <div class="command">sudo nano /usr/local/bin/wifi-watchdog.sh<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаём файл скрипта</div>
+
+                <div class="example">
+                    <strong>📖 Содержимое скрипта:</strong>
+                    <pre>#!/bin/bash
+WIFI_INTERFACE="wlan0"
+CONNECTION_NAME="HUAWEI-R1FUY4"
+PING_TARGET="192.168.3.1"  # Адрес вашего роутера
+
+while true; do
+    # Проверяем связь с роутером
+    if ! ping -c 1 -W 2 -I $WIFI_INTERFACE $PING_TARGET > /dev/null 2>&1; then
+        logger "WiFi watchdog: Connection lost, reconnecting..."
+        nmcli connection down "$CONNECTION_NAME" 2>/dev/null
+        sleep 2
+        nmcli connection up "$CONNECTION_NAME"
+        sleep 5
+    fi
+    sleep 10  # Проверка каждые 10 секунд
+done</pre>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Как работает скрипт:</strong>
+                    <ul>
+                        <li>Каждые 10 секунд проверяет связь с роутером командой ping</li>
+                        <li>Если ping не проходит - соединение разорвано</li>
+                        <li>Отключает Wi-Fi соединение</li>
+                        <li>Ждёт 2 секунды</li>
+                        <li>Подключается заново</li>
+                        <li>Записывает событие в системный лог</li>
+                    </ul>
+                </div>
+
+                <h3>Шаг 2: Делаем скрипт исполняемым</h3>
+                <div class="command">sudo chmod +x /usr/local/bin/wifi-watchdog.sh<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Даёт права на выполнение</div>
+
+                <h3>Шаг 3: Создание systemd сервиса</h3>
+                <div class="command">sudo nano /etc/systemd/system/wifi-watchdog.service<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Создаём файл сервиса</div>
+
+                <div class="example">
+                    <strong>📖 Содержимое сервиса:</strong>
+                    <pre>[Unit]
+Description=WiFi Watchdog
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/wifi-watchdog.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target</pre>
+                </div>
+
+                <h3>Шаг 4: Запуск и включение сервиса</h3>
+                <div class="command">sudo systemctl daemon-reload<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Обновляет конфигурацию systemd</div>
+
+                <div class="command">sudo systemctl enable wifi-watchdog<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Включает автозапуск при загрузке</div>
+
+                <div class="command">sudo systemctl start wifi-watchdog<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Запускает сервис немедленно</div>
+
+                <h3>Шаг 5: Проверка работы</h3>
+                <div class="command">sudo systemctl status wifi-watchdog<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Проверяет статус сервиса</div>
+
+                <div class="example">
+                    <strong>📖 Правильный вывод:</strong>
+                    <pre>● wifi-watchdog.service - WiFi Watchdog
+     Loaded: loaded (/etc/systemd/system/wifi-watchdog.service; enabled)
+     Active: active (running) since Sun 2025-10-12 10:05:44 UTC
+   Main PID: 15499 (wifi-watchdog.s)
+      Tasks: 2
+     Memory: 1.4M</pre>
+                </div>
+
+                <h3>Просмотр логов watchdog</h3>
+                <div class="command">sudo journalctl -u wifi-watchdog -f<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Следит за логами в реальном времени</div>
+
+                <div class="command">sudo journalctl -u wifi-watchdog -n 20<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Показывает последние 20 записей</div>
+
+                <h3>Управление сервисом</h3>
+                <div class="command">sudo systemctl stop wifi-watchdog<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Останавливает watchdog</div>
+
+                <div class="command">sudo systemctl restart wifi-watchdog<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Перезапускает watchdog</div>
+
+                <div class="command">sudo systemctl disable wifi-watchdog<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отключает автозапуск</div>
+
+                <div class="note">
+                    <strong>✅ Результат:</strong>
+                    <p>После установки watchdog скрипта Wi-Fi будет автоматически переподключаться в течение 10-12 секунд после разрыва. Вы больше не будете замечать отключений!</p>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="router" class="section">
+                <h2>📡 Дополнительно: Настройки роутера</h2>
+                
+                <p>Можно попробовать изменить настройки роутера для уменьшения частоты переподключений.</p>
+
+                <h3>Доступ к настройкам роутера</h3>
+                <div class="command">http://192.168.3.1<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Обычный адрес веб-интерфейса роутера Huawei</div>
+
+                <div class="note">
+                    <strong>💡 Рекомендуемые изменения в настройках Wi-Fi:</strong>
+                </div>
+
+                <h3>1. Режим безопасности</h3>
+                <ul>
+                    <li>Измените с <strong>"WPA2/WPA3 Mixed"</strong> на <strong>"WPA2-PSK Only"</strong></li>
+                    <li>Шифрование: <strong>только AES</strong> (не TKIP, не AES+TKIP)</li>
+                    <li>Отключите <strong>WPA3</strong> если включён</li>
+                </ul>
+
+                <h3>2. Управление ключами</h3>
+                <ul>
+                    <li><strong>Group Key Update Interval</strong> - установите максимальное значение (3600 секунд или больше)</li>
+                    <li>Это самая вероятная причина! Роутер обновляет групповой ключ, а драйвер не справляется</li>
+                </ul>
+
+                <h3>3. Дополнительные настройки</h3>
+                <ul>
+                    <li>Отключите <strong>WPS</strong> (Wi-Fi Protected Setup)</li>
+                    <li>Отключите <strong>802.11w</strong> (Protected Management Frames) если есть</li>
+                    <li>Отключите <strong>Fast Roaming</strong> (802.11r/k/v)</li>
+                    <li>Отключите <strong>WMM</strong> (Wi-Fi Multimedia) как тест</li>
+                </ul>
+
+                <h3>4. Канал и частота</h3>
+                <ul>
+                    <li>Используйте <strong>только 2.4 GHz</strong> (не 5 GHz для Orange Pi Zero 3)</li>
+                    <li>Установите фиксированный канал: <strong>1, 6 или 11</strong></li>
+                    <li>Отключите <strong>802.11n 40MHz</strong>, используйте только <strong>20MHz</strong></li>
+                </ul>
+
+                <div class="example">
+                    <strong>📖 Оптимальная конфигурация Wi-Fi для Orange Pi:</strong>
+                    <pre>Режим: 802.11b/g/n mixed
+Частота: 2.4 GHz only
+Канал: 6 (фиксированный)
+Ширина канала: 20 MHz
+Безопасность: WPA2-PSK
+Шифрование: AES
+Group Key Update: 3600 секунд
+WPS: Выключен
+802.11w: Выключен
+Fast Roaming: Выключен</pre>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Важно:</strong>
+                    <p>После изменения настроек роутера необходимо переподключить все устройства заново, так как изменятся параметры безопасности.</p>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div id="alternative" class="section">
+                <h2>🔌 Альтернативные решения</h2>
+                
+                <h3>Решение 1: USB Wi-Fi адаптер (рекомендуется)</h3>
+                <p>Самое надёжное решение - использовать внешний USB Wi-Fi адаптер с лучшим драйвером.</p>
+
+                <div class="note">
+                    <strong>💡 Рекомендуемые чипы для Linux:</strong>
+                    <table style="margin-top: 10px;">
+                        <tr>
+                            <th>Чипсет</th>
+                            <th>Производитель</th>
+                            <th>Поддержка Linux</th>
+                        </tr>
+                        <tr>
+                            <td>RTL8188EU</td>
+                            <td>Realtek</td>
+                            <td>Отличная, из коробки</td>
+                        </tr>
+                        <tr>
+                            <td>RTL8192EU</td>
+                            <td>Realtek</td>
+                            <td>Отличная, из коробки</td>
+                        </tr>
+                        <tr>
+                            <td>MT7601U</td>
+                            <td>MediaTek</td>
+                            <td>Отличная, стабильная</td>
+                        </tr>
+                        <tr>
+                            <td>AR9271</td>
+                            <td>Atheros</td>
+                            <td>Отличная, открытая</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>Решение 2: Отключение Bluetooth</h3>
+                <p>Bluetooth и Wi-Fi используют общий чип и могут конфликтовать.</p>
+
+                <div class="command">sudo systemctl stop bluetooth<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Останавливает Bluetooth</div>
+
+                <div class="command">sudo systemctl disable bluetooth<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Отключает автозапуск Bluetooth</div>
+
+                <h3>Решение 3: Обновление прошивки</h3>
+                <div class="command">sudo apt update && sudo apt install --reinstall linux-firmware-image-edge-sunxi64<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Обновляет прошивку Wi-Fi модуля</div>
+
+                <h3>Решение 4: Изменение интервала проверки watchdog</h3>
+                <p>Если хотите более быструю реакцию на разрыв:</p>
+
+                <div class="command">sudo nano /usr/local/bin/wifi-watchdog.sh<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Редактируем скрипт</div>
+
+                <p>Измените строку <code>sleep 10</code> в конце на <code>sleep 5</code> для проверки каждые 5 секунд.</p>
+
+                <div class="command">sudo systemctl restart wifi-watchdog<button class="copy-btn" onclick="copyCommand(this)">Копировать</button></div>
+                <div class="description">Перезапускаем с новыми настройками</div>
+
+                <div class="warning">
+                    <strong>⚠️ Компромисс:</strong>
+                    <p>Более частая проверка = быстрее обнаружение разрыва, но больше нагрузка на систему и батарею (если питание от аккумулятора).</p>
+                </div>
+
+                <a href="#toc" class="back-to-top">⬆️ Вернуться к содержанию</a>
+            </div>
+
+            <div class="section">
+                <h2>📋 Итоговая таблица команд</h2>
+                
+                <table>
+                    <tr>
+                        <th>Задача</th>
+                        <th>Команда</th>
+                    </tr>
+                    <tr>
+                        <td>Проверить энергосбережение</td>
+                        <td><code>sudo iw dev wlan0 get power_save</code></td>
+                    </tr>
+                    <tr>
+                        <td>Проверить силу сигнала</td>
+                        <td><code>sudo iw dev wlan0 link</code></td>
+                    </tr>
+                    <tr>
+                        <td>Просмотр логов Wi-Fi</td>
+                        <td><code>sudo journalctl -u NetworkManager -f</code></td>
+                    </tr>
+                    <tr>
+                        <td>Установить статический IP</td>
+                        <td><code>sudo nmcli connection modify "ИМЯ" ipv4.method manual ipv4.addresses IP/24 ipv4.gateway GATEWAY</code></td>
+                    </tr>
+                    <tr>
+                        <td>Создать watchdog скрипт</td>
+                        <td><code>sudo nano /usr/local/bin/wifi-watchdog.sh</code></td>
+                    </tr>
+                    <tr>
+                        <td>Запустить watchdog</td>
+                        <td><code>sudo systemctl start wifi-watchdog</code></td>
+                    </tr>
+                    <tr>
+                        <td>Проверить статус watchdog</td>
+                        <td><code>sudo systemctl status wifi-watchdog</code></td>
+                    </tr>
+                    <tr>
+                        <td>Просмотр логов watchdog</td>
+                        <td><code>sudo journalctl -u wifi-watchdog -n 20</code></td>
+                    </tr>
+                    <tr>
+                        <td>Отключить Bluetooth</td>
+                        <td><code>sudo systemctl disable bluetooth</code></td>
+                    </tr>
+                    <tr>
+                        <td>Обновить прошивку Wi-Fi</td>
+                        <td><code>sudo apt install --reinstall linux-firmware-image-edge-sunxi64</code></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>✅ Итоговые рекомендации</h2>
+                
+                <div class="note">
+                    <strong>🎯 Порядок действий для решения проблемы:</strong>
+                    <ol>
+                        <li><strong>Установить watchdog скрипт</strong> - основное и самое эффективное решение</li>
+                        <li><strong>Настроить роутер</strong> - увеличить Group Key Update Interval до максимума</li>
+                        <li><strong>Отключить Bluetooth</strong> - если не используется</li>
+                        <li><strong>Купить USB Wi-Fi адаптер</strong> - если нужна максимальная стабильность</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Что делать, если watchdog не помогает:</strong>
+                    <ul>
+                        <li>Проверьте, что имя соединения в скрипте совпадает с реальным (<code>nmcli connection show</code>)</li>
+                        <li>Проверьте адрес роутера (должен быть 192.168.3.1 или другой ваш шлюз)</li>
+                        <li>Уменьшите интервал проверки с 10 до 5 секунд</li>
+                        <li>Проверьте логи: <code>sudo journalctl -u wifi-watchdog -n 50</code></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>📡 Orange Pi Zero 3 Wi-Fi Fix - решение проблемы с нестабильным Unisoc драйвером</p>
+            <p>Debian 11 (Bullseye) | 2025</p>
+        </footer>
+    </div>
+</body>
+</html>

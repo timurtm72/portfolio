@@ -1,0 +1,172 @@
+# Caddy конфигурация для портфолио
+# Документация: https://caddyserver.com/docs/caddyfile
+
+# ВАЖНО: Без домена используется HTTP (без SSL)
+# Если хотите HTTPS - купите домен (~$10/год) и раскомментируйте секцию с доменом ниже
+
+{
+    # Глобальные настройки
+    # Отключить автоматический HTTPS (т.к. нет домена)
+    auto_https off
+}
+
+# ============================================
+# ВАРИАНТ БЕЗ ДОМЕНА (IP адрес, HTTP без SSL)
+# ============================================
+http://103.106.3.98 {
+    # Security заголовки
+    header {
+        # Защита от XSS
+        X-Content-Type-Options nosniff
+        X-Frame-Options SAMEORIGIN
+        X-XSS-Protection "1; mode=block"
+
+        # Разрешения браузера
+        Permissions-Policy "geolocation=(), microphone=(), camera=()"
+
+        # Скрыть версию сервера
+        -Server
+    }
+
+    # Rate Limiting - защита от DDoS
+    rate_limit {
+        zone dynamic {
+            key {remote_host}
+            events 100  # 100 запросов
+            window 1m    # в минуту
+        }
+    }
+
+    # Блокировка ботов и сканеров (опционально)
+    @bots {
+        header User-Agent *bot*
+        header User-Agent *crawler*
+        header User-Agent *scanner*
+        header User-Agent *nikto*
+        header User-Agent *nmap*
+        header User-Agent *sqlmap*
+    }
+    handle @bots {
+        respond "Access Denied" 403
+    }
+
+    # Защита админских эндпоинтов
+    @admin_paths {
+        path /api/admin/*
+        path /api/auth/*
+    }
+
+    # IP whitelist для админки (раскомментируйте и укажите ваш IP)
+    # handle @admin_paths {
+    #     @allowed {
+    #         remote_ip 203.0.113.1  # Ваш реальный IP
+    #     }
+    #     handle @allowed {
+    #         reverse_proxy localhost:3000
+    #     }
+    #     respond "Forbidden" 403
+    # }
+
+    # Логирование подозрительных запросов
+    log {
+        output file /var/log/caddy/portfolio-access.log {
+            roll_size 100mb
+            roll_keep 5
+        }
+        format json
+    }
+
+    # Reverse proxy к frontend (localhost:3000)
+    reverse_proxy localhost:3000 {
+        # Передача реального IP клиента
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
+
+        # Health check
+        health_uri /
+        health_interval 30s
+        health_timeout 10s
+    }
+
+    # Кэширование статических файлов
+    @static {
+        path *.css *.js *.jpg *.jpeg *.png *.webp *.gif *.svg *.ico *.woff *.woff2 *.ttf
+    }
+    handle @static {
+        header Cache-Control "public, max-age=31536000, immutable"
+        reverse_proxy localhost:3000
+    }
+}
+
+# ============================================
+# ВАРИАНТ С ДОМЕНОМ (HTTPS с автоматическим SSL)
+# ============================================
+# Раскомментируйте эту секцию если купите домен
+#
+# {
+#     email ваш-email@example.com  # Для Let's Encrypt
+#     # Удалите строку: auto_https off
+# }
+#
+# portfolio.example.com {
+#     # Security заголовки
+#     header {
+#         X-Content-Type-Options nosniff
+#         X-Frame-Options SAMEORIGIN
+#         X-XSS-Protection "1; mode=block"
+#         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+#         Permissions-Policy "geolocation=(), microphone=(), camera=()"
+#         -Server
+#     }
+#
+#     # Rate Limiting
+#     rate_limit {
+#         zone dynamic {
+#             key {remote_host}
+#             events 100
+#             window 1m
+#         }
+#     }
+#
+#     # Блокировка ботов
+#     @bots {
+#         header User-Agent *bot*
+#         header User-Agent *crawler*
+#         header User-Agent *scanner*
+#     }
+#     handle @bots {
+#         respond "Access Denied" 403
+#     }
+#
+#     # Логирование
+#     log {
+#         output file /var/log/caddy/portfolio-access.log {
+#             roll_size 100mb
+#             roll_keep 5
+#         }
+#         format json
+#     }
+#
+#     # Reverse proxy к frontend
+#     reverse_proxy localhost:3000 {
+#         header_up X-Real-IP {remote_host}
+#         header_up X-Forwarded-For {remote_host}
+#         header_up X-Forwarded-Proto {scheme}
+#         header_up X-Forwarded-Host {host}
+#
+#         health_uri /
+#         health_interval 30s
+#         health_timeout 10s
+#     }
+#
+#     # Кэширование статики
+#     @static {
+#         path *.css *.js *.jpg *.jpeg *.png *.webp *.gif *.svg *.ico *.woff *.woff2 *.ttf
+#     }
+#     handle @static {
+#         header Cache-Control "public, max-age=31536000, immutable"
+#         reverse_proxy localhost:3000
+#     }
+# }

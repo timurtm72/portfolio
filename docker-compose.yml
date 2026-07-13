@@ -80,7 +80,7 @@ services:
     env_file:
       - ./frontend/.env
     ports:
-      - "127.0.0.1:3000:80"  # Доступен только для Caddy на localhost
+      - "100.114.213.9:3000:80"  # Доступен только для Caddy на localhost
     depends_on:
       backend:
         condition: service_healthy

@@ -76,8 +76,8 @@ http://103.106.3.98 {
         format json
     }
 
-    # Reverse proxy к frontend (localhost:3000)
-    reverse_proxy localhost:3000 {
+    # Reverse proxy to the frontend service in the shared Docker network
+    reverse_proxy frontend:80 {
         # Передача реального IP клиента
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
@@ -96,7 +96,7 @@ http://103.106.3.98 {
     }
     handle @static {
         header Cache-Control "public, max-age=31536000, immutable"
-        reverse_proxy localhost:3000
+        reverse_proxy frontend:80
     }
 }
 

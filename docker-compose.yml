@@ -79,8 +79,8 @@ services:
     env_file:
       - path: ./frontend/.env
         required: false
-    expose:
-      - "80"
+    ports:
+      - "3000:80"  # VPS connects through Tailscale to 100.114.213.9:3000
     depends_on:
       backend:
         condition: service_healthy

@@ -28,15 +28,6 @@ http://103.106.3.98 {
         -Server
     }
 
-    # Rate Limiting - защита от DDoS
-    rate_limit {
-        zone dynamic {
-            key {remote_host}
-            events 100  # 100 запросов
-            window 1m    # в минуту
-        }
-    }
-
     # Блокировка ботов и сканеров (опционально)
     @bots {
         header User-Agent *bot*
